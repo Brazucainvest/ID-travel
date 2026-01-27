@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ID Travel Flyselskapskontroll</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen py-8">
+    <div class="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
+        <h1 class="text-3xl font-bold mb-6 text-blue-900">ID Travel Flyselskapskontroll</h1>
+        
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded">
+            <h2 class="font-semibold text-lg mb-3">Velg reisedetaljer:</h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block font-medium mb-2">Hvem skal reise?</label>
+                    <select id="travelerType" class="w-full p-2 border rounded">
+                        <option value="ZSP">Ektefelle/Samboer/Partner/Barn 12-25 år (ZSP)</option>
+                        <option value="ZEP">Foreldre (ZEP)</option>
+                        <option value="ZEC">Barn 2-12 år (ZEC)</option>
+                        <option value="ZPA">Venn - voksen (ZPA)</option>
+                        <option value="ZPC">Venns barn (ZPC)</option>
+                    </select>
+                    <p id="description" class="text-sm text-gray-600 mt-1"></p>
+                </div>
+
+                <div>
+                    <label class="flex items-center space-x-2">
+                        <input type="checkbox" id="withEmployee" class="w-4 h-4">
+                        <span class="font-medium">Reiser sammen med deg (ansatt)</span>
+                    </label>
+                </div>
+
+                <div id="friendsSection" class="hidden">
+                    <label class="block font-medium mb-2">Antall venner som reiser:</label>
+                    <select id="numberOfFriends" class="w-full p-2 border rounded">
+                        <option value="1">1 venn</option>
+                        <option value="2">2 venner</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div id="warningBox" class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded hidden">
+            <p class="font-semibold text-red-800">⚠️ Viktig!</p>
+            <p class="text-red-700">Venner (ZPA/ZPC) kan IKKE reise alene. De må alltid reise sammen med deg på hele reisen.</p>
+        </div>
+
+        <div class="mb-4">
+            <button id="exportBtn" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                Eksporter til CSV
+            </button>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-6">
+            <div>
+                <h3 class="text-xl font-semibold mb-3 text-green-700 flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    Tillatte flyselskap (<span id="allowedCount">0</span>)
+                </h3>
+                <div class="bg-green-50 rounded p-4 max-h-96 overflow-y-auto">
+                    <ul id="allowedList" class="space-y-2"></ul>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-xl font-semibold mb-3 text-red-700 flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    Ikke tillatte flyselskap (<span id="notAllowedCount">0</span>)
+                </h3>
+                <div class="bg-red-50 rounded p-4 max-h-96 overflow-y-auto">
+                    <ul id="notAllowedList" class="space-y-2"></ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6 bg-gray-50 p-4 rounded">
+            <h3 class="font-semibold mb-2">Hurtigguide:</h3>
+            <ul class="text-sm space-y-1 text-gray-700">
+                <li>• <strong>ZSP</strong> (ektefelle/samboer/barn 12-25): Kan alltid reise alene</li>
+                <li>• <strong>ZEP</strong> (foreldre): Kan reise alene på de fleste flyselskap</li>
+                <li>• <strong>ZEC</strong> (barn 2-12): Kan reise alene (opptil 23 år på andre flyselskap)</li>
+                <li>• <strong>ZPA/ZPC</strong> (venner): Må ALLTID reise med deg</li>
+                <li>• Standard er 2 venner, noen selskap 1 venn, noen 0 venner</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Flyselskap som ikke tillater ZPA (venner)
+        const noZPA = [
+            'Air Europa', 'Finnair', 'El Al', 'ITA Airways', 'Southwest Airlines',
+            'Transavia Netherlands', 'French Bee', 'Air Caraïbes', 'Saudi Arabian Airlines',
+            'Flydubai', 'EVA Airways', 'Qatar', 'Arajet', 'Air France', 'Air Rarotonga',
+            'IndiGo', 'SriLankan', 'Delta', 'Emirates', 'Vueling'
+        ];
+
+        // Flyselskap som kun tillater 1 ZPA
+        const oneZPA = [
+            'Malta Airlines', 'Brussels Airlines', 'SWISS', 'Lufthansa',
+            'Alaska Airlines', 'Air Transat', 'Avianca'
+        ];
+
+        // Flyselskap som ikke tillater ZEP (foreldre alene)
+        const noZEP = ['LOT', 'Transavia Netherlands', 'Air Rarotonga', 'Emirates', 'Fiji Airways'];
+
+        // Alle flyselskap
+        const allAirlines = [...new Set([...noZPA, ...oneZPA, ...noZEP, 'Standard flyselskap (2 ZPA tillatt)'])].sort();
+
+        const descriptions = {
+            'ZSP': 'Ektefelle/Samboer/Registrert partner/Barn 12-25 år',
+            'ZEP': 'Foreldre',
+            'ZEC': 'Barn 2-12 år',
+            'ZPA': 'Venn (voksen)',
+            'ZPC': 'Venns barn'
+        };
+
+        function checkAirlineAllows(airline, travelerType, withEmployee, numFriends) {
+            if (withEmployee) {
+                if (travelerType === 'ZPA' || travelerType === 'ZPC') {
+                    if (noZPA.includes(airline)) return false;
+                    if (oneZPA.includes(airline) && numFriends > 1) return false;
+                    if (numFriends > 2) return false;
+                    return true;
+                }
+                return true;
+            }
+
+            switch (travelerType) {
+                case 'ZSP':
+                case 'ZEC':
+                    return true;
+                case 'ZEP':
+                    return !noZEP.includes(airline);
+                case 'ZPA':
+                case 'ZPC':
+                    return false;
+                default:
+                    return true;
+            }
+        }
+
+        function updateDisplay() {
+            const travelerType = document.getElementById('travelerType').value;
+            const withEmployee = document.getElementById('withEmployee').checked;
+            const numFriends = parseInt(document.getElementById('numberOfFriends').value);
+
+            // Update description
+            document.getElementById('description').textContent = descriptions[travelerType] || '';
+
+            // Show/hide friends section
+            const friendsSection = document.getElementById('friendsSection');
+            if (withEmployee && (travelerType === 'ZPA' || travelerType === 'ZPC')) {
+                friendsSection.classList.remove('hidden');
+            } else {
+                friendsSection.classList.add('hidden');
+            }
+
+            // Show/hide warning
+            const warningBox = document.getElementById('warningBox');
+            if ((travelerType === 'ZPA' || travelerType === 'ZPC') && !withEmployee) {
+                warningBox.classList.remove('hidden');
+            } else {
+                warningBox.classList.add('hidden');
+            }
+
+            // Filter airlines
+            const allowed = allAirlines.filter(airline => 
+                checkAirlineAllows(airline, travelerType, withEmployee, numFriends)
+            );
+            const notAllowed = allAirlines.filter(airline => 
+                !checkAirlineAllows(airline, travelerType, withEmployee, numFriends)
+            );
+
+            // Update counts
+            document.getElementById('allowedCount').textContent = allowed.length;
+            document.getElementById('notAllowedCount').textContent = notAllowed.length;
+
+            // Update lists
+            const allowedList = document.getElementById('allowedList');
+            const notAllowedList = document.getElementById('notAllowedList');
+
+            allowedList.innerHTML = allowed.length > 0 
+                ? allowed.map(airline => `
+                    <li class="flex items-start">
+                        <svg class="text-green-600 mr-2 flex-shrink-0 mt-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span>${airline}</span>
+                    </li>
+                `).join('')
+                : '<p class="text-gray-600 italic">Ingen flyselskap tillater denne kombinasjonen</p>';
+
+            notAllowedList.innerHTML = notAllowed.length > 0
+                ? notAllowed.map(airline => `
+                    <li class="flex items-start">
+                        <svg class="text-red-600 mr-2 flex-shrink-0 mt-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        <span>${airline}</span>
+                    </li>
+                `).join('')
+                : '<p class="text-gray-600 italic">Alle flyselskap tillater denne kombinasjonen</p>';
+        }
+
+        function exportToCSV() {
+            const travelerType = document.getElementById('travelerType').value;
+            const withEmployee = document.getElementById('withEmployee').checked;
+            const numFriends = parseInt(document.getElementById('numberOfFriends').value);
+
+            const rows = [
+                ['Flyselskap', 'Tillatt'],
+                ...allAirlines.map(airline => [
+                    airline,
+                    checkAirlineAllows(airline, travelerType, withEmployee, numFriends) ? 'Ja' : 'Nei'
+                ])
+            ];
+
+            const csv = rows.map(row => row.join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'flyselskap_regler.csv';
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Event listeners
+        document.getElementById('travelerType').addEventListener('change', updateDisplay);
+        document.getElementById('withEmployee').addEventListener('change', updateDisplay);
+        document.getElementById('numberOfFriends').addEventListener('change', updateDisplay);
+        document.getElementById('exportBtn').addEventListener('click', exportToCSV);
+
+        // Initial display
+        updateDisplay();
+    </script>
+</body>
+</html>
