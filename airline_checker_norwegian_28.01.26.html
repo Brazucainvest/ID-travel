@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ID Travel Flyselskapskontroll</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        .tab-button.active {
+            border-bottom-color: #2563eb;
+            color: #2563eb;
+            font-weight: 600;
+        }
+        .scenario-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .scenario-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen py-8">
+    <div class="max-w-6xl mx-auto p-6 bg-white rounded-lg shadow-lg">
+        <h1 class="text-4xl font-bold mb-2 text-blue-900">🛫 ID Travel Flyselskapskontroll</h1>
+        <p class="text-gray-600 mb-6">Norwegian ZED-avtaler - Se hvilke flyselskap som godkjenner din reise</p>
+
+        <!-- Tabs -->
+        <div class="border-b mb-6 flex space-x-1">
+            <button class="tab-button active" onclick="showTab('checker')">🔍 Sjekk flyselskap</button>
+            <button class="tab-button" onclick="showTab('guide')">📖 Hurtigguide</button>
+            <button class="tab-button" onclick="showTab('scenarios')">💡 Eksempler</button>
+            <button class="tab-button" onclick="showTab('faq')">❓ FAQ</button>
+        </div>
+
+        <!-- TAB 1: Checker -->
+        <div id="tab-checker">
+            <!-- Info-boks -->
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded">
+                <h2 class="font-semibold text-lg mb-2">ℹ️ Hva betyr kodene?</h2>
+                <div class="grid md:grid-cols-2 gap-3 text-sm">
+                    <div><strong>ZSP:</strong> Ektefelle/Samboer/Barn 12-25 <span class="text-green-600">🟢 Kan reise alene</span></div>
+                    <div><strong>ZEP:</strong> Foreldre <span class="text-green-600">🟢 Kan reise alene (de fleste)</span></div>
+                    <div><strong>ZEC:</strong> Barn 2-12 år <span class="text-green-600">🟢 Kan reise alene</span></div>
+                    <div><strong>ZPA:</strong> Venn (voksen) <span class="text-red-600">🔴 MÅ reise med deg</span></div>
+                    <div><strong>ZPC:</strong> Venns barn <span class="text-red-600">🔴 MÅ reise med deg</span></div>
+                </div>
+            </div>
+
+            <!-- Søkefelt -->
+            <div class="mb-6">
+                <label class="block font-medium mb-2">🔎 Søk etter flyselskap:</label>
+                <input 
+                    type="text" 
+                    id="airlineSearch" 
+                    placeholder="Skriv flyselskapsnavn (f.eks. SAS, Emirates, Lufthansa)..."
+                    class="w-full p-3 border rounded-lg"
+                >
+                <div id="searchResults" class="mt-2"></div>
+            </div>
+
+            <!-- Velg reisedetaljer -->
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded">
+                <h2 class="font-semibold text-lg mb-3">Velg hvem som reiser med deg:</h2>
+                
+                <div class="space-y-4">
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-white p-3 rounded border">
+                            <label class="block font-medium mb-2">👨‍👩‍👧‍👦 Familie (kan reise alene)</label>
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <label class="text-sm">Ektefelle/Samboer (ZSP)</label>
+                                    <input type="number" id="zsp_count" min="0" max="1" value="0" class="w-16 p-1 border rounded text-center">
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <label class="text-sm">Barn 12-25 år (ZSP)</label>
+                                    <input type="number" id="zsp_children_count" min="0" max="5" value="0" class="w-16 p-1 border rounded text-center">
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <label class="text-sm">Barn 2-12 år (ZEC)</label>
+                                    <input type="number" id="zec_count" min="0" max="5" value="0" class="w-16 p-1 border rounded text-center">
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <label class="text-sm">Foreldre (ZEP)</label>
+                                    <input type="number" id="zep_count" min="0" max="2" value="0" class="w-16 p-1 border rounded text-center">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-3 rounded border">
+                            <label class="block font-medium mb-2">👥 Venner (MÅ reise med deg)</label>
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <label class="text-sm">Voksne venner (ZPA)</label>
+                                    <input type="number" id="zpa_count" min="0" max="2" value="0" class="w-16 p-1 border rounded text-center">
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <label class="text-sm">Venners barn (ZPC)</label>
+                                    <input type="number" id="zpc_count" min="0" max="2" value="0" class="w-16 p-1 border rounded text-center">
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">💡 Tips: Venner teller kun mot ZPA-kvoten, ikke familie!</p>
+                        </div>
+                    </div>
+
+                    <div id="groupSummary" class="bg-yellow-50 border border-yellow-300 p-3 rounded hidden">
+                        <p class="font-semibold text-sm mb-1">📋 Din reisegruppe:</p>
+                        <p id="summaryText" class="text-sm"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="warningBox" class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded hidden">
+                <p class="font-semibold text-red-800">⚠️ Viktig!</p>
+                <p id="warningText" class="text-red-700"></p>
+            </div>
+
+            <div class="mb-4">
+                <button id="exportBtn" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                    📥 Eksporter til CSV
+                </button>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="text-xl font-semibold mb-3 text-green-700 flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        ✅ Tillatte flyselskap (<span id="allowedCount">0</span>)
+                    </h3>
+                    <div class="bg-green-50 rounded p-4 max-h-96 overflow-y-auto">
+                        <ul id="allowedList" class="space-y-2"></ul>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-semibold mb-3 text-red-700 flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        ❌ Ikke tillatte flyselskap (<span id="notAllowedCount">0</span>)
+                    </h3>
+                    <div class="bg-red-50 rounded p-4 max-h-96 overflow-y-auto">
+                        <ul id="notAllowedList" class="space-y-2"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: Guide -->
+        <div id="tab-guide" class="hidden">
+            <h2 class="text-2xl font-bold mb-4">📖 Hurtigguide til ID Travel</h2>
+            
+            <div class="space-y-4">
+                <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded">
+                    <h3 class="font-semibold text-lg mb-2">🟢 Kan reise alene (uten deg)</h3>
+                    <ul class="space-y-1 text-sm">
+                        <li>✅ <strong>ZSP</strong> - Ektefelle/Samboer/Barn 12-25 år → Kan alltid reise alene</li>
+                        <li>✅ <strong>ZEC</strong> - Barn 2-12 år → Kan reise alene (opptil 23 år på andre flyselskap)</li>
+                        <li>⚠️ <strong>ZEP</strong> - Foreldre → Kan reise alene på de fleste (ikke LOT, Transavia NL, Air Rarotonga, Emirates, Fiji)</li>
+                    </ul>
+                </div>
+
+                <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded">
+                    <h3 class="font-semibold text-lg mb-2">🔴 MÅ reise sammen med deg</h3>
+                    <ul class="space-y-1 text-sm">
+                        <li>❌ <strong>ZPA</strong> - Venner (voksne) → Kan ALDRI reise alene</li>
+                        <li>❌ <strong>ZPC</strong> - Venns barn → Kan ALDRI reise alene</li>
+                    </ul>
+                </div>
+
+                <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
+                    <h3 class="font-semibold text-lg mb-2">⚠️ Antall venner (ZPA) varierer</h3>
+                    <ul class="space-y-1 text-sm">
+                        <li>🟢 <strong>Standard:</strong> 2 venner tillatt (de fleste flyselskap)</li>
+                        <li>🟡 <strong>1 venn:</strong> Malta Airlines, Brussels Airlines, SWISS, Lufthansa, Alaska, Air Transat, Avianca</li>
+                        <li>🔴 <strong>0 venner:</strong> Air France, Delta, Emirates, Finnair, Qatar, SAS (+ 15 andre)</li>
+                    </ul>
+                </div>
+
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                    <h3 class="font-semibold text-lg mb-2">📋 Viktige regler</h3>
+                    <ul class="space-y-1 text-sm">
+                        <li>• Minimum 6 måneders ansettelse</li>
+                        <li>• Book opptil 90 dager før avreise</li>
+                        <li>• 1 bagasje (23kg) gratis + 1 håndbagasje</li>
+                        <li>• Sjekk alltid myIDTravel for oppdaterte regler</li>
+                        <li>• Prioritet: 1) Flyselskapets eget personale, 2) Allianse-partnere, 3) Andre (inkl. DY)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: Scenarios -->
+        <div id="tab-scenarios" class="hidden">
+            <h2 class="text-2xl font-bold mb-4">💡 Vanlige scenarioer</h2>
+            
+            <div class="grid md:grid-cols-2 gap-4">
+                <div class="scenario-card bg-white border-2 border-gray-200 p-4 rounded-lg">
+                    <h3 class="font-semibold text-lg mb-2">🏖️ Scenario 1: Kona skal alene til Spania</h3>
+                    <p class="text-sm text-gray-600 mb-2"><strong>Reisende:</strong> ZSP (ektefelle/samboer)</p>
+                    <p class="text-sm text-gray-600 mb-2"><strong>Reiser med deg:</strong> Nei</p>
+                    <p class="text-sm"><strong>Resultat:</strong> <span class="text-green-600">✅ Alle 85+ flyselskap fungerer!</span></p>
+                    <p class="text-xs text-gray-500 mt-2">ZSP kan alltid reise alene uten deg.</p>
+                </div>
+
+                <div class="scenario-card bg-white border-2 border-gray-200 p-4 rounded-lg">
+                    <h3 class="font-semibold text-lg mb-2">👨‍👩‍👦 Scenario 2: Du + 2 venner til USA</h3>
+                    <p class="text-sm text-gray-600 mb-2"><strong>Reisende:</strong> ZPA (venner)</p>
+                    <p class="text-sm text-gray-600 mb-2"><strong>Antall:</strong> 2 venner</p>
+                    <p class="text-sm"><strong>Resultat:</strong> <span class="text-yellow-600">⚠️ Ca. 60 flyselskap fungerer</span></p>
+                    <p class="text-xs text-gray-500 mt-2">Delta, United, American tillater IKKE 2 venner. Prøv British Airways, Icelandair.</p>
+                </div>
+
+                <div class="scenario-card bg-white border-2 border-gray-200 p-4 rounded-lg">
+                    <h3 class="font-semibold text-lg mb-2">👴 Scenario 3: Foreldre til Thailand alene</h3>
+                    <p class="text-sm text-gray-600 mb-2"><strong>Reisende:</strong> ZEP (foreldre)</p>
+                    <p class="text-sm text-gray-600 mb-2"><strong>Reiser med deg:</strong> Nei</p>
+                    <p class="text-sm"><strong>Resultat:</strong> <span class="text-green-600">✅ 80+ flyselskap fungerer</span></p>
+                    <p class="text-xs text-gray-500 mt-2">Unngå: Emirates, LOT, Transavia NL, Fiji Airways.</p>
+                </div>
+
+                <div class="scenario-card bg-white border-2 border-gray-200 p-4 rounded-lg">
+                    <h3 class="font-semibold text-lg mb-2">👫 Scenario 4: Du + 1 venn til Dubai</h3>
+                    <p class="text-sm text-gray-600 mb-2"><strong>Reisende:</strong> ZPA (venn)</p>
+                    <p class="text-sm text-gray-600 mb-2"><strong>Antall:</strong> 1 venn</p>
+                    <p class="text-sm"><strong>Resultat:</strong> <span class="text-yellow-600">⚠️ Unngå Emirates (0 ZPA)</span></p>
+                    <p class="text-xs text-gray-500 mt-2">Emirates tillater IKKE venner. Prøv Etihad, Qatar, eller Turkish Airlines.</p>
+                </div>
+
+                <div class="scenario-card bg-white border-2 border-gray-200 p-4 rounded-lg">
+                    <h3 class="font-semibold text-lg mb-2">🧒 Scenario 5: Barn (15 år) alene til London</h3>
+                    <p class="text-sm text-gray-600 mb-2"><strong>Reisende:</strong> ZSP (barn 12-25 år)</p>
+                    <p class="text-sm text-gray-600 mb-2"><strong>Reiser med deg:</strong> Nei</p>
+                    <p class="text-sm"><strong>Resultat:</strong> <span class="text-green-600">✅ Alle flyselskap fungerer!</span></p>
+                    <p class="text-xs text-gray-500 mt-2">Barn 12-25 regnes som ZSP og kan reise alene.</p>
+                </div>
+
+                <div class="scenario-card bg-white border-2 border-gray-200 p-4 rounded-lg">
+                    <h3 class="font-semibold text-lg mb-2">👫👫 Scenario 6: Deg + Partner + 1 venn</h3>
+                    <p class="text-sm text-gray-600 mb-2"><strong>Reisende:</strong> ZSP (partner) + ZPA (1 venn)</p>
+                    <p class="text-sm text-gray-600 mb-2"><strong>Alle reiser sammen:</strong> Ja</p>
+                    <p class="text-sm"><strong>Resultat:</strong> <span class="text-green-600">✅ 70+ flyselskap fungerer!</span></p>
+                    <p class="text-xs text-gray-500 mt-2">Partner teller ikke som ZPA. Du kan ha partner + 1 venn på de fleste selskap (unngå de 20 som har 0 ZPA).</p>
+                </div>
+
+                <div class="scenario-card bg-white border-2 border-gray-200 p-4 rounded-lg">
+                    <h3 class="font-semibold text-lg mb-2">❌ Scenario 7: Venn alene (IKKE MULIG)</h3>
+                    <p class="text-sm text-gray-600 mb-2"><strong>Reisende:</strong> ZPA (venn)</p>
+                    <p class="text-sm text-gray-600 mb-2"><strong>Reiser med deg:</strong> Nei</p>
+                    <p class="text-sm"><strong>Resultat:</strong> <span class="text-red-600">❌ INGEN flyselskap tillater dette!</span></p>
+                    <p class="text-xs text-gray-500 mt-2">Venner (ZPA/ZPC) MÅ ALLTID reise sammen med deg på hele reisen.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: FAQ -->
+        <div id="tab-faq" class="hidden">
+            <h2 class="text-2xl font-bold mb-4">❓ Ofte stilte spørsmål (FAQ)</h2>
+            
+            <div class="space-y-4">
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="font-semibold mb-2">❓ Kan min samboer reise alene?</h3>
+                    <p class="text-sm text-gray-700">Ja! Samboere (ZSP) kan alltid reise alene på alle flyselskap. De trenger kun billetten, ID og kopi av ditt ID-kort.</p>
+                </div>
+
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="font-semibold mb-2">❓ Kan venner reise alene?</h3>
+                    <p class="text-sm text-gray-700">Nei, aldri. Venner (ZPA/ZPC) må alltid reise sammen med deg på hele reisen.</p>
+                </div>
+
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="font-semibold mb-2">❓ Hvor mange venner kan jeg ta med?</h3>
+                    <p class="text-sm text-gray-700">Det varierer per flyselskap: Standard er 2 venner, noen tillater 1 venn, og ca. 20 flyselskap tillater 0 venner. Bruk verktøyet for å sjekke!</p>
+                </div>
+
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="font-semibold mb-2">❓ Hva er forskjellen på ZSP og ZPA?</h3>
+                    <p class="text-sm text-gray-700"><strong>ZSP</strong> = Familie (ektefelle/samboer/barn 12-25) - kan reise alene. <strong>ZPA</strong> = Venner - må reise med deg.</p>
+                </div>
+
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="font-semibold mb-2">❓ Kan mine foreldre reise alene?</h3>
+                    <p class="text-sm text-gray-700">Ja, på de fleste flyselskap! Unntakene er: LOT, Transavia Netherlands, Air Rarotonga, Emirates, og Fiji Airways.</p>
+                </div>
+
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="font-semibold mb-2">❓ Hvor langt i forveien kan jeg booke?</h3>
+                    <p class="text-sm text-gray-700">Opptil 90 dager før avreise. Du må ha jobbet minimum 6 måneder.</p>
+                </div>
+
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="font-semibold mb-2">❓ Hvor finner jeg mer informasjon?</h3>
+                    <p class="text-sm text-gray-700">Sjekk alltid <strong>myIDTravel</strong> → Travel Info for oppdaterte regler per flyselskap. Besøk også <strong>flyzed.info</strong> for generelle ZED-regler.</p>
+                </div>
+
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="font-semibold mb-2">❓ Hva skjer hvis jeg booker connecting flights?</h3>
+                    <p class="text-sm text-gray-700">Du får separate bookinger per flyselskap. Du må hente bagasje og sjekke inn på nytt. Hvis du mister forbindelsen, må du selv finne alternativ.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Flyselskap data
+        const noZPA = [
+            'Air Europa Lineas Aereas', 'Finnair', 'EL AL Israel Airlines', 'ITA Airways', 'Southwest Airlines',
+            'Transavia Netherlands', 'French Bee', 'Air Caraibes', 'Saudi Arabian Airlines',
+            'flydubai', 'EVA Airways', 'Qatar Airways', 'Arajet', 'Air France', 'Air Rarotonga',
+            'IndiGo', 'SriLankan Airlines', 'Delta Air Lines', 'Emirates', 'Vueling Airlines'
+        ];
+
+        const oneZPA = [
+            'KM Malta Airlines', 'Brussels Airlines', 'Swiss International Air Lines', 'Lufthansa',
+            'Alaska Airlines', 'Air Transat', 'Avianca'
+        ];
+
+        const noZEP = ['LOT Polish Airlines', 'Transavia Netherlands', 'Air Rarotonga', 'Emirates', 'Fiji Airways'];
+
+        const allNorwegianPartners = [
+            'Platoon Aviation', 'AEROGAL', 'BINTER CABO VERDE', 'Discover Airlines', 'ASL Airlines',
+            'IndiGo', 'Air Tindi', 'Central Mountain Air', 'Aegean Airlines', 'Air France',
+            'Alaska Airlines', 'Avianca', 'AeroWest', 'Finnair', 'ITA Airways',
+            'JetBlue', 'British Airways', 'French Bee', 'EVA Airways', 'Chair Airlines',
+            'Norwegian Air Sweden', 'Condor', 'Delta Air Lines', 'Arajet', 'Norwegian',
+            'Emirates', 'Air Dolomiti', 'Eurowings', 'Etihad Airways', 'Flair Airlines',
+            'Link Airways', 'Icelandair', 'Fiji Airways', 'flydubai', 'Jetstar Japan',
+            'Air Rarotonga', 'Transavia Netherlands', 'Jetstar', 'Private Wings', 'Air Astana',
+            'KM Malta Airlines', 'LATAM AIRLINES', 'Lufthansa', 'Loganair', 'LOT Polish Airlines',
+            'LACSA', 'Swiss International Air Lines', 'EL AL Israel Airlines', 'Breeze', 'Binter Canarias',
+            'Olympic Air', 'Austrian Airlines', 'Pegasus', 'Canary Fly', 'Qantas',
+            'Qatar Airways', 'Smartwings', 'Atlantic Airways', 'Royal Jordanian', 'Sata Internacional',
+            'Brussels Airlines', 'SATA Air Açores', 'Saudi Arabian Airlines', 'TACA', 'Transavia France',
+            'Air Transat', 'Air Caraibes', 'SriLankan Airlines', 'Air Europa Lineas Aereas', 'Volotea',
+            'Virgin Australia', 'Viva Aerobus', 'Lufthansa City Airlines', 'Cabo Verde Airlines', 'Vueling Airlines',
+            'Wideroe', 'Edelweiss Air', 'Southwest Airlines', 'Wasaya Airways', 'WestJet',
+            'Oman Air', 'TUIfly', 'SunExpress', 'NAS Aviation'
+        ];
+
+        const allAirlines = [...new Set([...allNorwegianPartners, ...noZPA, ...oneZPA, ...noZEP])].sort();
+
+        const descriptions = {
+            'ZSP': '🟢 Kan reise alene - Ektefelle/Samboer/Registrert partner/Barn 12-25 år',
+            'ZEP': '🟢 Kan reise alene (de fleste) - Foreldre',
+            'ZEC': '🟢 Kan reise alene - Barn 2-12 år',
+            'ZPA': '🔴 MÅ reise med deg - Venn (voksen)',
+            'ZPC': '🔴 MÅ reise med deg - Venns barn'
+        };
+
+        function checkAirlineAllowsGroup(airline) {
+            const zspCount = parseInt(document.getElementById('zsp_count').value) || 0;
+            const zspChildrenCount = parseInt(document.getElementById('zsp_children_count').value) || 0;
+            const zecCount = parseInt(document.getElementById('zec_count').value) || 0;
+            const zepCount = parseInt(document.getElementById('zep_count').value) || 0;
+            const zpaCount = parseInt(document.getElementById('zpa_count').value) || 0;
+            const zpcCount = parseInt(document.getElementById('zpc_count').value) || 0;
+
+            const totalZPA = zpaCount + zpcCount;
+
+            // Sjekk ZPA-begrensninger
+            if (totalZPA > 0) {
+                if (noZPA.includes(airline)) return false;
+                if (oneZPA.includes(airline) && totalZPA > 1) return false;
+                if (totalZPA > 2) return false;
+            }
+
+            // Sjekk ZEP-begrensninger
+            if (zepCount > 0 && noZEP.includes(airline)) {
+                return false;
+            }
+
+            return true;
+        }
+
+        function updateGroupSummary() {
+            const zspCount = parseInt(document.getElementById('zsp_count').value) || 0;
+            const zspChildrenCount = parseInt(document.getElementById('zsp_children_count').value) || 0;
+            const zecCount = parseInt(document.getElementById('zec_count').value) || 0;
+            const zepCount = parseInt(document.getElementById('zep_count').value) || 0;
+            const zpaCount = parseInt(document.getElementById('zpa_count').value) || 0;
+            const zpcCount = parseInt(document.getElementById('zpc_count').value) || 0;
+
+            const totalZPA = zpaCount + zpcCount;
+            const totalPeople = zspCount + zspChildrenCount + zecCount + zepCount + zpaCount + zpcCount;
+
+            const summaryDiv = document.getElementById('groupSummary');
+            const summaryText = document.getElementById('summaryText');
+            const warningBox = document.getElementById('warningBox');
+            const warningText = document.getElementById('warningText');
+
+            if (totalPeople === 0) {
+                summaryDiv.classList.add('hidden');
+                warningBox.classList.add('hidden');
+                return;
+            }
+
+            summaryDiv.classList.remove('hidden');
+
+            const parts = [];
+            if (zspCount > 0) parts.push(`${zspCount} ektefelle/samboer`);
+            if (zspChildrenCount > 0) parts.push(`${zspChildrenCount} barn (12-25 år)`);
+            if (zecCount > 0) parts.push(`${zecCount} barn (2-12 år)`);
+            if (zepCount > 0) parts.push(`${zepCount} forelder/foreldre`);
+            if (zpaCount > 0) parts.push(`${zpaCount} venn(er)`);
+            if (zpcCount > 0) parts.push(`${zpcCount} venners barn`);
+
+            summaryText.innerHTML = `Deg (ansatt) + ${parts.join(' + ')} = <strong>${totalPeople + 1} personer totalt</strong>`;
+
+            // Vis advarsler
+            if (totalZPA > 2) {
+                warningBox.classList.remove('hidden');
+                warningText.textContent = `Du har valgt ${totalZPA} venner/venners barn, men maksimum er 2 totalt (ZPA+ZPC). INGEN flyselskap tillater dette.`;
+            } else if (totalZPA > 0) {
+                warningBox.classList.remove('hidden');
+                if (totalZPA === 1) {
+                    warningText.textContent = `Du har ${totalZPA} venn. Ca. 75 flyselskap godkjenner dette (20 flyselskap tillater 0 venner).`;
+                } else {
+                    warningText.textContent = `Du har ${totalZPA} venner. Ca. 65 flyselskap godkjenner dette (20 tillater 0 venner, 7 tillater kun 1 venn).`;
+                }
+            } else {
+                warningBox.classList.add('hidden');
+            }
+        }
+
+        function updateDisplay() {
+            updateGroupSummary();
+
+            const allowed = allAirlines.filter(airline => checkAirlineAllowsGroup(airline));
+            const notAllowed = allAirlines.filter(airline => !checkAirlineAllowsGroup(airline));
+
+            document.getElementById('allowedCount').textContent = allowed.length;
+            document.getElementById('notAllowedCount').textContent = notAllowed.length;
+
+            const allowedList = document.getElementById('allowedList');
+            const notAllowedList = document.getElementById('notAllowedList');
+
+            allowedList.innerHTML = allowed.length > 0 
+                ? allowed.map(airline => `
+                    <li class="flex items-start">
+                        <svg class="text-green-600 mr-2 flex-shrink-0 mt-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span>${airline}</span>
+                    </li>
+                `).join('')
+                : '<p class="text-gray-600 italic">Ingen flyselskap tillater denne kombinasjonen</p>';
+
+            notAllowedList.innerHTML = notAllowed.length > 0
+                ? notAllowed.map(airline => `
+                    <li class="flex items-start">
+                        <svg class="text-red-600 mr-2 flex-shrink-0 mt-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        <span>${airline}</span>
+                    </li>
+                `).join('')
+                : '<p class="text-gray-600 italic">Alle flyselskap tillater denne kombinasjonen</p>';
+        }
+
+        function searchAirline() {
+            const query = document.getElementById('airlineSearch').value.toLowerCase();
+            const resultsDiv = document.getElementById('searchResults');
+            
+            if (!query || query.length < 2) {
+                resultsDiv.innerHTML = '';
+                return;
+            }
+
+            const matches = allAirlines.filter(airline => 
+                airline.toLowerCase().includes(query)
+            );
+
+            if (matches.length === 0) {
+                resultsDiv.innerHTML = '<p class="text-gray-500 text-sm">Ingen flyselskap funnet</p>';
+                return;
+            }
+
+            resultsDiv.innerHTML = `
+                <div class="bg-white border rounded-lg p-3 shadow-sm">
+                    <p class="text-sm font-semibold mb-2">Funnet ${matches.length} flyselskap:</p>
+                    <ul class="space-y-2">
+                        ${matches.slice(0, 10).map(airline => {
+                            const zpaStatus = noZPA.includes(airline) ? '🔴 0 venner' : 
+                                            oneZPA.includes(airline) ? '🟡 1 venn' : '🟢 2 venner';
+                            const zepStatus = noZEP.includes(airline) ? '❌ Foreldre kan ikke reise alene' : '✅ Foreldre OK';
+                            return `
+                                <li class="text-sm border-b pb-2">
+                                    <strong>${airline}</strong><br>
+                                    <span class="text-xs">${zpaStatus} | ${zepStatus}</span>
+                                </li>
+                            `;
+                        }).join('')}
+                    </ul>
+                    ${matches.length > 10 ? `<p class="text-xs text-gray-500 mt-2">... og ${matches.length - 10} flere</p>` : ''}
+                </div>
+            `;
+        }
+
+        function exportToCSV() {
+            const allowed = allAirlines.filter(airline => checkAirlineAllowsGroup(airline));
+            const notAllowed = allAirlines.filter(airline => !checkAirlineAllowsGroup(airline));
+
+            const rows = [
+                ['Flyselskap', 'Tillatt'],
+                ...allowed.map(airline => [airline, 'Ja']),
+                ...notAllowed.map(airline => [airline, 'Nei'])
+            ];
+
+            const csv = rows.map(row => row.join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'flyselskap_regler.csv';
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function showTab(tabName) {
+            document.getElementById('tab-checker').classList.add('hidden');
+            document.getElementById('tab-guide').classList.add('hidden');
+            document.getElementById('tab-scenarios').classList.add('hidden');
+            document.getElementById('tab-faq').classList.add('hidden');
+            
+            document.getElementById('tab-' + tabName).classList.remove('hidden');
+            
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        // Event listeners
+        document.getElementById('zsp_count').addEventListener('input', updateDisplay);
+        document.getElementById('zsp_children_count').addEventListener('input', updateDisplay);
+        document.getElementById('zec_count').addEventListener('input', updateDisplay);
+        document.getElementById('zep_count').addEventListener('input', updateDisplay);
+        document.getElementById('zpa_count').addEventListener('input', updateDisplay);
+        document.getElementById('zpc_count').addEventListener('input', updateDisplay);
+        document.getElementById('exportBtn').addEventListener('click', exportToCSV);
+        document.getElementById('airlineSearch').addEventListener('input', searchAirline);
+
+        // Initial display
+        updateDisplay();
+    </script>
+</body>
+</html>
