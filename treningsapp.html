@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treningsapp - Øvelser og Maskiner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .muscle-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+        .tab-active { border-bottom: 3px solid #2563eb; color: #2563eb; font-weight: 700; }
+        .exercise-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.12); }
+        .exercise-card { transition: all 0.2s ease; }
+        .set-row { background: #f9fafb; border-radius: 8px; padding: 8px 12px; margin-bottom: 6px; }
+        .progress-bar { height: 8px; border-radius: 4px; background: #e5e7eb; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #2563eb, #7c3aed); transition: width 0.4s ease; }
+        .day-btn { cursor: pointer; transition: all 0.15s; }
+        .day-btn.active { background: #2563eb; color: white; }
+        .day-btn:not(.active):hover { background: #eff6ff; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.3s ease; }
+        .timer-display { font-size: 3rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+<!-- Header -->
+<div class="bg-gradient-to-r from-blue-700 to-purple-700 text-white py-5 px-4 shadow-lg">
+    <div class="max-w-2xl mx-auto flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold">💪 Treningsapp</h1>
+            <p class="text-blue-200 text-sm" id="dateDisplay"></p>
+        </div>
+        <div class="text-right">
+            <div class="text-2xl font-bold" id="weeklyCount">0</div>
+            <div class="text-blue-200 text-xs">økter denne uke</div>
+        </div>
+    </div>
+</div>
+
+<!-- Nav Tabs -->
+<div class="bg-white border-b shadow-sm sticky top-0 z-10">
+    <div class="max-w-2xl mx-auto flex">
+        <button onclick="showTab('program')" id="tab-program" class="flex-1 py-3 text-sm font-medium text-gray-500 tab-active" >📋 Program</button>
+        <button onclick="showTab('log')" id="tab-log" class="flex-1 py-3 text-sm font-medium text-gray-500">📝 Logg</button>
+        <button onclick="showTab('timer')" id="tab-timer" class="flex-1 py-3 text-sm font-medium text-gray-500">⏱ Timer</button>
+        <button onclick="showTab('stats')" id="tab-stats" class="flex-1 py-3 text-sm font-medium text-gray-500">📊 Statistikk</button>
+    </div>
+</div>
+
+<div class="max-w-2xl mx-auto p-4">
+
+<!-- ========== TAB: PROGRAM ========== -->
+<div id="tab-program-content" class="fade-in">
+
+    <!-- Day Selector -->
+    <div class="bg-white rounded-xl shadow-sm p-4 mb-4">
+        <h2 class="font-bold text-gray-700 mb-3">Velg treningsdag</h2>
+        <div class="grid grid-cols-3 gap-2" id="daySelector">
+            <button class="day-btn active rounded-lg py-2 px-3 text-sm font-medium border" onclick="selectDay('A')">Dag A<br><span class="text-xs opacity-70">Bryst & Triceps</span></button>
+            <button class="day-btn rounded-lg py-2 px-3 text-sm font-medium border" onclick="selectDay('B')">Dag B<br><span class="text-xs opacity-70">Rygg & Biceps</span></button>
+            <button class="day-btn rounded-lg py-2 px-3 text-sm font-medium border" onclick="selectDay('C')">Dag C<br><span class="text-xs opacity-70">Bein & Skuldre</span></button>
+        </div>
+    </div>
+
+    <!-- Exercise List -->
+    <div id="exerciseList"></div>
+
+    <!-- Start Workout Button -->
+    <button onclick="startWorkout()" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl font-bold text-lg shadow-md hover:shadow-lg transition-all mt-2">
+        🚀 Start Trening
+    </button>
+</div>
+
+<!-- ========== TAB: LOG ========== -->
+<div id="tab-log-content" class="hidden fade-in">
+    <div class="bg-white rounded-xl shadow-sm p-4 mb-4">
+        <h2 class="font-bold text-gray-800 text-lg mb-1">📝 Treningslogg</h2>
+        <p class="text-gray-500 text-sm">Registrer settet ditt etter hver øvelse</p>
+    </div>
+    <div id="logExerciseList"></div>
+    <button onclick="saveSession()" class="w-full bg-green-600 text-white py-4 rounded-xl font-bold text-lg shadow-md hover:bg-green-700 transition-all mt-2">
+        ✅ Lagre Økt
+    </button>
+</div>
+
+<!-- ========== TAB: TIMER ========== -->
+<div id="tab-timer-content" class="hidden fade-in">
+    <div class="bg-white rounded-xl shadow-sm p-6 mb-4 text-center">
+        <h2 class="font-bold text-gray-700 text-lg mb-4">⏱ Hviletimer</h2>
+        <div class="timer-display text-blue-700 mb-2" id="timerDisplay">01:30</div>
+        <p class="text-gray-400 text-sm mb-6">Anbefalt hviletid: 60–120 sek</p>
+        <div class="flex gap-3 justify-center mb-4">
+            <button onclick="setTimer(60)" class="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg font-medium text-sm">60 sek</button>
+            <button onclick="setTimer(90)" class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-medium text-sm">90 sek</button>
+            <button onclick="setTimer(120)" class="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg font-medium text-sm">120 sek</button>
+            <button onclick="setTimer(180)" class="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg font-medium text-sm">3 min</button>
+        </div>
+        <div class="progress-bar mb-6">
+            <div class="progress-fill" id="timerProgress" style="width:100%"></div>
+        </div>
+        <div class="flex gap-3 justify-center">
+            <button onclick="startTimer()" id="timerStartBtn" class="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold text-lg hover:bg-blue-700 transition-all">▶ Start</button>
+            <button onclick="resetTimer()" class="bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-bold hover:bg-gray-300 transition-all">↺ Reset</button>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm p-4">
+        <h3 class="font-bold text-gray-700 mb-3">⏱ Økt-timer</h3>
+        <div class="text-4xl font-bold text-center text-purple-700 mb-3" id="sessionTimerDisplay">00:00</div>
+        <div class="flex gap-3 justify-center">
+            <button onclick="toggleSessionTimer()" id="sessionTimerBtn" class="bg-purple-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-purple-700 transition-all">▶ Start</button>
+            <button onclick="resetSessionTimer()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-bold hover:bg-gray-300 transition-all">↺ Reset</button>
+        </div>
+    </div>
+</div>
+
+<!-- ========== TAB: STATS ========== -->
+<div id="tab-stats-content" class="hidden fade-in">
+    <div class="bg-white rounded-xl shadow-sm p-4 mb-4">
+        <h2 class="font-bold text-gray-800 text-lg mb-3">📊 Din Statistikk</h2>
+        <div class="grid grid-cols-2 gap-3">
+            <div class="bg-blue-50 rounded-xl p-4 text-center">
+                <div class="text-3xl font-bold text-blue-700" id="totalSessions">0</div>
+                <div class="text-gray-500 text-sm mt-1">Totale økter</div>
+            </div>
+            <div class="bg-purple-50 rounded-xl p-4 text-center">
+                <div class="text-3xl font-bold text-purple-700" id="totalSets">0</div>
+                <div class="text-gray-500 text-sm mt-1">Totale sett</div>
+            </div>
+            <div class="bg-green-50 rounded-xl p-4 text-center">
+                <div class="text-3xl font-bold text-green-700" id="totalWeight">0</div>
+                <div class="text-gray-500 text-sm mt-1">Kg løftet totalt</div>
+            </div>
+            <div class="bg-orange-50 rounded-xl p-4 text-center">
+                <div class="text-3xl font-bold text-orange-600" id="currentStreak">0</div>
+                <div class="text-gray-500 text-sm mt-1">Dager streak 🔥</div>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm p-4 mb-4">
+        <h3 class="font-bold text-gray-700 mb-3">Siste loggede økter</h3>
+        <div id="sessionHistory"></div>
+    </div>
+    <button onclick="clearData()" class="w-full bg-red-100 text-red-600 py-3 rounded-xl font-medium hover:bg-red-200 transition-all">🗑 Slett all data</button>
+</div>
+
+</div><!-- end max-w -->
+
+<!-- Exercise Detail Modal -->
+<div id="modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-end justify-center">
+    <div class="bg-white rounded-t-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto p-6 shadow-2xl">
+        <div class="flex justify-between items-start mb-4">
+            <h2 class="text-xl font-bold text-gray-800" id="modalTitle"></h2>
+            <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 text-2xl font-light">✕</button>
+        </div>
+        <div id="modalContent"></div>
+    </div>
+</div>
+
+<script>
+// ==================== DATA ====================
+const workoutProgram = {
+    A: {
+        name: 'Dag A – Bryst & Triceps',
+        color: 'blue',
+        exercises: [
+            {
+                id: 'bench_press',
+                name: 'Benkpress',
+                emoji: '🏋️',
+                machine: 'Flat benk + stang (frivekter)',
+                muscles: ['Bryst', 'Triceps', 'Fremre skulder'],
+                sets: 4, reps: '8–10', rest: '90 sek',
+                weight: '60–80 kg',
+                tips: [
+                    'Hold ryggen flat mot benken',
+                    'Grep litt bredere enn skulderbredde',
+                    'Senk stangen til brystet kontrollert',
+                    'Press opp i en jevn bue'
+                ],
+                howTo: 'Legg deg på flat benk. Grip stangen med ca. 10 cm bredere grep enn skuldrene. Senk stangen ned til mellom brystet på 2 sekunder. Press opp eksplosivt.',
+                muscleColor: 'blue'
+            },
+            {
+                id: 'incline_db',
+                name: 'Skrå benkpress (manualer)',
+                emoji: '📐',
+                machine: 'Skrå benk (30–45°) + manualer',
+                muscles: ['Øvre bryst', 'Skulder'],
+                sets: 3, reps: '10–12', rest: '75 sek',
+                weight: '20–30 kg per hånd',
+                tips: [
+                    'Sett benken til 30–45 grader',
+                    'Hold manualer på skulderbredde',
+                    'Press opp og inn i toppen',
+                    'Kontrollert ned'
+                ],
+                howTo: 'Sett benken til 30–45 grader. Hold en manuell i hver hånd på skulderbredde. Press opp og samle hendene litt i toppen. Senk kontrollert.',
+                muscleColor: 'cyan'
+            },
+            {
+                id: 'cable_fly',
+                name: 'Kabel korslegg',
+                emoji: '🔄',
+                machine: 'Kabelmaskin (cross-over) – sett gripen høyt',
+                muscles: ['Bryst (midtre)', 'Form'],
+                sets: 3, reps: '12–15', rest: '60 sek',
+                weight: '10–15 kg per side',
+                tips: [
+                    'Stand midt mellom to kabler',
+                    'Lett bøy i albuene',
+                    'Klem brystet i midten',
+                    'Kontrollert tilbake'
+                ],
+                howTo: 'Still kabelen til øverste posisjon. Ta ett skritt fremover. Dra kablene nedover og samle hendene foran hoften med en "klem"-bevegelse.',
+                muscleColor: 'indigo'
+            },
+            {
+                id: 'tricep_pushdown',
+                name: 'Triceps pushdown',
+                emoji: '⬇️',
+                machine: 'Kabelmaskin – tau eller stang nede',
+                muscles: ['Triceps'],
+                sets: 3, reps: '12–15', rest: '60 sek',
+                weight: '20–35 kg',
+                tips: [
+                    'Albuer inntil kroppen – ikke beveg dem',
+                    'Press helt ned til full strekk',
+                    'Kontrollert opp til 90 grader',
+                    'Ikke sving med overkroppen'
+                ],
+                howTo: 'Still kabelen øverst. Grip tau eller stang. Hold albuene låst inntil kroppen. Press ned til armene er helt strake. Kontrollert tilbake.',
+                muscleColor: 'violet'
+            },
+            {
+                id: 'skull_crusher',
+                name: 'Skull Crushers',
+                emoji: '💀',
+                machine: 'Flat benk + EZ-stang eller manualer',
+                muscles: ['Triceps (lang hode)'],
+                sets: 3, reps: '10–12', rest: '75 sek',
+                weight: '20–30 kg (EZ-stang)',
+                tips: [
+                    'Legg deg på flat benk',
+                    'Grip EZ-stangen smalt',
+                    'Albuer peker opp – ikke ut',
+                    'Senk stangen til pannen'
+                ],
+                howTo: 'Grip EZ-stangen med smalt grep. Strekk armene opp loddrett. Bøy kun i albuene og senk stangen mot pannen på 2–3 sek. Press tilbake.',
+                muscleColor: 'purple'
+            },
+            {
+                id: 'dips',
+                name: 'Triceps dips',
+                emoji: '🤸',
+                machine: 'Dip-stativ / parallelle stenger',
+                muscles: ['Triceps', 'Nedre bryst'],
+                sets: 3, reps: '10–15', rest: '75 sek',
+                weight: 'Kroppsvekt (+ ekstra vekt)',
+                tips: [
+                    'Lene deg litt fremover for bryst',
+                    'Rett overkropp = mer triceps',
+                    'Senk til 90 grader i albuene',
+                    'Ikke lukk albuene inn for mye'
+                ],
+                howTo: 'Grip parallelle stenger. Senk kroppen sakte til albuene er 90 grader. Press opp til armene er nesten strake. Ikke hyperextend.',
+                muscleColor: 'fuchsia'
+            }
+        ]
+    },
+    B: {
+        name: 'Dag B – Rygg & Biceps',
+        color: 'green',
+        exercises: [
+            {
+                id: 'deadlift',
+                name: 'Markløft',
+                emoji: '🏋️',
+                machine: 'Stang + vekter (frivekter)',
+                muscles: ['Nedre rygg', 'Gluteus', 'Hamstrings', 'Hele rygg'],
+                sets: 4, reps: '5–8', rest: '120 sek',
+                weight: '80–120 kg',
+                tips: [
+                    'Rygg rett – aldri rund',
+                    'Stangen nært kroppen hele veien',
+                    'Push gulvet ned med bena',
+                    'Lås hoften i toppen'
+                ],
+                howTo: 'Stand med føttene i hoftebredde. Grip stangen utenfor bena. Ryggen er nøytral (ikke rund). Løft ved å presse bena ned, ikke trekk med ryggen. Lås hoften i toppen.',
+                muscleColor: 'green'
+            },
+            {
+                id: 'lat_pulldown',
+                name: 'Lat-pulldown',
+                emoji: '⬇️',
+                machine: 'Lat-pulldown maskin (kabelmaskin)',
+                muscles: ['Latissimus', 'Biceps', 'Skulder bak'],
+                sets: 4, reps: '10–12', rest: '90 sek',
+                weight: '50–70 kg',
+                tips: [
+                    'Vidt grep (utenfor skuldrene)',
+                    'Len deg litt bakover',
+                    'Trekk til øvre bryst – ikke nakken',
+                    'Klem skulderblada i bunn'
+                ],
+                howTo: 'Sett deg i lat-pulldown maskinen. Grip stangen bredt. Len litt bakover. Trekk stangen ned mot øvre bryst mens du holder brystet opp og ut.',
+                muscleColor: 'emerald'
+            },
+            {
+                id: 'seated_row',
+                name: 'Sittende kabelsøyle (low row)',
+                emoji: '🚣',
+                machine: 'Kabelsøyle / sittende roing maskin',
+                muscles: ['Midt-rygg', 'Rhomboids', 'Biceps'],
+                sets: 3, reps: '10–12', rest: '75 sek',
+                weight: '50–70 kg',
+                tips: [
+                    'Ryggen rett – ikke rund',
+                    'Trekk ellbogene forbi kroppen',
+                    'Klem skulderblada sammen i bunn',
+                    'Ikke sving med overkroppen'
+                ],
+                howTo: 'Sett deg ved maskinen med rett rygg. Grip håndtak. Trekk mot nedre mage mens du klemmer skulderblada. Kontrollert ut igjen – strekk ryggen.',
+                muscleColor: 'teal'
+            },
+            {
+                id: 'pullup',
+                name: 'Pull-ups / Nedtrekk',
+                emoji: '🔝',
+                machine: 'Pull-up stativ / gravitron (assistert)',
+                muscles: ['Latissimus', 'Biceps', 'Kjernemuskulatur'],
+                sets: 3, reps: '6–10', rest: '90 sek',
+                weight: 'Kroppsvekt / assistert',
+                tips: [
+                    'Grip litt bredere enn skulder',
+                    'Heng helt ut i bunnen',
+                    'Trekk brystet mot stangen',
+                    'Klem ryggen i toppen'
+                ],
+                howTo: 'Grip stangen bredere enn skuldrene. Heng fritt. Trekk deg opp til haka over stangen mens du klemmer skulderblada ned og inn. Senk kontrollert.',
+                muscleColor: 'cyan'
+            },
+            {
+                id: 'barbell_curl',
+                name: 'Biceps curl (stang)',
+                emoji: '💪',
+                machine: 'EZ-stang eller rett stang (frivekter)',
+                muscles: ['Biceps'],
+                sets: 3, reps: '10–12', rest: '60 sek',
+                weight: '20–35 kg (EZ-stang)',
+                tips: [
+                    'Albuer inntil kroppen – ikke beveg dem',
+                    'Klem biceps i toppen',
+                    'Senk sakte – 2–3 sekunder',
+                    'Ikke sving med ryggen'
+                ],
+                howTo: 'Grip EZ-stangen underhånds. Hold albuene låst ved siden av kroppen. Curl opp til skuldrene. Senk kontrollert på 2–3 sekunder.',
+                muscleColor: 'blue'
+            },
+            {
+                id: 'hammer_curl',
+                name: 'Hammer curl',
+                emoji: '🔨',
+                machine: 'Manualer (frivekter)',
+                muscles: ['Biceps (ytre)', 'Brachialis'],
+                sets: 3, reps: '10–12', rest: '60 sek',
+                weight: '12–20 kg per hånd',
+                tips: [
+                    'Nøytralt grep (tommelen opp)',
+                    'Albuer inntil kroppen',
+                    'Veksle arm for arm, eller begge',
+                    'Full bevegelse – topp til bunn'
+                ],
+                howTo: 'Hold manualer med tommelen opp (nøytralt grep). Curl opp med begge eller annenhver arm. Hold albuene stille. Senk kontrollert.',
+                muscleColor: 'indigo'
+            }
+        ]
+    },
+    C: {
+        name: 'Dag C – Bein & Skuldre',
+        color: 'orange',
+        exercises: [
+            {
+                id: 'squat',
+                name: 'Knebøy',
+                emoji: '🦵',
+                machine: 'Squat rack + stang (frivekter)',
+                muscles: ['Quadriceps', 'Gluteus', 'Hamstrings', 'Kjernemuskulatur'],
+                sets: 4, reps: '6–10', rest: '120 sek',
+                weight: '60–100 kg',
+                tips: [
+                    'Brystet opp, rygg nøytral',
+                    'Knærne følger tærne',
+                    'Gå ned til minimum parallelt',
+                    'Hælene i gulvet hele veien'
+                ],
+                howTo: 'Plasser stangen på øvre rygg (ikke nakken). Føttene i skulderbredde med tærne litt ut. Bøy knærne og hoften simultant. Gå ned til parallelt eller dypere. Pust ut opp.',
+                muscleColor: 'orange'
+            },
+            {
+                id: 'leg_press',
+                name: 'Beinpress',
+                emoji: '🏃',
+                machine: 'Beinpressmaskin',
+                muscles: ['Quadriceps', 'Gluteus', 'Hamstrings'],
+                sets: 3, reps: '10–15', rest: '90 sek',
+                weight: '80–150 kg',
+                tips: [
+                    'Ikke lås knærne i toppen',
+                    'Føttene i hoftebredde på platen',
+                    'Ryggen flat mot setet',
+                    'Gå ned til 90 grader'
+                ],
+                howTo: 'Sett deg i beinpressmaskinen. Plasser føttene i hoftebredde midt på platen. Press platen opp, lås av sikkerheten. Senk kontrollert til 90 grader, press tilbake.',
+                muscleColor: 'amber'
+            },
+            {
+                id: 'leg_curl',
+                name: 'Leg curl (liggende)',
+                emoji: '🦴',
+                machine: 'Leg curl maskin (liggende)',
+                muscles: ['Hamstrings'],
+                sets: 3, reps: '12–15', rest: '60 sek',
+                weight: '30–60 kg',
+                tips: [
+                    'Hoftene ned mot benken',
+                    'Full strekk i bunnen',
+                    'Klem hamstrings i toppen',
+                    'Ikke løft hoftene'
+                ],
+                howTo: 'Legg deg ansikt ned i maskinen. Legg puten bak anklene. Curl bena opp mot rumpa. Klem i toppen i 1 sekund. Senk kontrollert.',
+                muscleColor: 'yellow'
+            },
+            {
+                id: 'shoulder_press',
+                name: 'Skulderpress (maskinen)',
+                emoji: '⬆️',
+                machine: 'Skulderpress maskin ELLER manualer',
+                muscles: ['Skulder (deltoid)', 'Triceps'],
+                sets: 4, reps: '10–12', rest: '75 sek',
+                weight: '20–40 kg / 12–18 kg per hånd',
+                tips: [
+                    'Albuer litt foran kroppen',
+                    'Ikke overstrekk i toppen',
+                    'Ryggen støttet (ikke sving)',
+                    'Kontrollert ned til 90 grader'
+                ],
+                howTo: 'Sett deg i maskinen eller på benk. Hold vektene ved siden av hodet. Press rett opp. Ikke lås albuene helt. Senk kontrollert tilbake til startposisjon.',
+                muscleColor: 'red'
+            },
+            {
+                id: 'lateral_raise',
+                name: 'Sidehev (lateral raise)',
+                emoji: '🦅',
+                machine: 'Manualer (frivekter) eller kabelmaskin',
+                muscles: ['Skulder (side-deltoid)'],
+                sets: 3, reps: '12–15', rest: '60 sek',
+                weight: '8–15 kg per hånd',
+                tips: [
+                    'Lett bøy i albuene',
+                    'Løft til ca. 90 grader',
+                    'Tommel litt ned (kanne-grep)',
+                    'Senk sakte – 2–3 sek'
+                ],
+                howTo: 'Hold manualer ved siden av kroppen. Med lett bøy i albuene, løft armene ut til siden til de er parallelle med gulvet. Senk kontrollert på 2–3 sekunder.',
+                muscleColor: 'rose'
+            },
+            {
+                id: 'calf_raise',
+                name: 'Tåhev (calf raise)',
+                emoji: '🦶',
+                machine: 'Tåhev-maskin eller Smith maskin',
+                muscles: ['Legger (gastrocnemius)', 'Soleus'],
+                sets: 4, reps: '15–20', rest: '60 sek',
+                weight: '40–80 kg eller kroppsvekt',
+                tips: [
+                    'Full bevegelse – helt ned, helt opp',
+                    'Hold i toppen i 1–2 sek',
+                    'Langsom nedsenking (3 sek)',
+                    'Litt bøy i knærne treffer soleus'
+                ],
+                howTo: 'Stå med forparten av foten på kanten. Senk hælen helt ned. Press opp på tå så høyt du kan. Hold 1–2 sekunder. Senk sakte.',
+                muscleColor: 'pink'
+            }
+        ]
+    }
+};
+
+// ==================== STATE ====================
+let currentDay = 'A';
+let logData = {};
+let timerInterval = null;
+let timerSeconds = 90;
+let timerTotal = 90;
+let timerRunning = false;
+let sessionTimerInterval = null;
+let sessionTimerSeconds = 0;
+let sessionTimerRunning = false;
+
+// ==================== INIT ====================
+document.addEventListener('DOMContentLoaded', () => {
+    const now = new Date();
+    document.getElementById('dateDisplay').textContent =
+        now.toLocaleDateString('no-NO', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+    renderExercises();
+    renderLogExercises();
+    loadStats();
+    updateWeeklyCount();
+});
+
+// ==================== TABS ====================
+function showTab(name) {
+    ['program','log','timer','stats'].forEach(t => {
+        document.getElementById('tab-'+t+'-content').classList.add('hidden');
+        const btn = document.getElementById('tab-'+t);
+        btn.classList.remove('tab-active','text-blue-700');
+        btn.classList.add('text-gray-500');
+    });
+    const content = document.getElementById('tab-'+name+'-content');
+    content.classList.remove('hidden');
+    content.classList.add('fade-in');
+    const activeBtn = document.getElementById('tab-'+name);
+    activeBtn.classList.add('tab-active','text-blue-700');
+    activeBtn.classList.remove('text-gray-500');
+    if (name === 'stats') loadStats();
+}
+
+// ==================== DAY SELECT ====================
+function selectDay(day) {
+    currentDay = day;
+    document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    renderExercises();
+    renderLogExercises();
+    logData = {};
+}
+
+// ==================== RENDER EXERCISES ====================
+function renderExercises() {
+    const program = workoutProgram[currentDay];
+    const colorMap = { blue:'blue', green:'green', orange:'orange' };
+    const c = colorMap[program.color];
+    let html = `<div class="bg-${c}-50 border border-${c}-200 rounded-xl p-3 mb-4">
+        <div class="flex items-center gap-2">
+            <span class="text-2xl">${currentDay === 'A' ? '🏋️' : currentDay === 'B' ? '💪' : '🦵'}</span>
+            <div>
+                <div class="font-bold text-${c}-800">${program.name}</div>
+                <div class="text-${c}-600 text-sm">${program.exercises.length} øvelser</div>
+            </div>
+        </div>
+    </div>`;
+
+    program.exercises.forEach((ex, i) => {
+        html += `<div class="exercise-card bg-white rounded-xl shadow-sm mb-3 overflow-hidden" onclick="openModal('${ex.id}')">
+            <div class="p-4">
+                <div class="flex items-start justify-between">
+                    <div class="flex items-start gap-3">
+                        <span class="text-3xl">${ex.emoji}</span>
+                        <div>
+                            <div class="font-bold text-gray-800 text-base">${ex.name}</div>
+                            <div class="text-blue-600 text-xs font-medium mt-0.5">🔧 ${ex.machine}</div>
+                            <div class="flex flex-wrap gap-1 mt-2">
+                                ${ex.muscles.map(m => `<span class="muscle-badge bg-gray-100 text-gray-600">${m}</span>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-right ml-2 flex-shrink-0">
+                        <div class="text-lg font-bold text-gray-800">${ex.sets}×${ex.reps}</div>
+                        <div class="text-gray-400 text-xs">${ex.weight}</div>
+                        <div class="text-gray-300 text-xs mt-1">⏱ ${ex.rest}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-4 py-2 border-t border-gray-100">
+                <span class="text-xs text-gray-400">Trykk for detaljer og tips →</span>
+            </div>
+        </div>`;
+    });
+
+    document.getElementById('exerciseList').innerHTML = html;
+}
+
+// ==================== MODAL ====================
+function openModal(exId) {
+    const ex = workoutProgram[currentDay].exercises.find(e => e.id === exId);
+    if (!ex) return;
+    document.getElementById('modalTitle').textContent = ex.emoji + ' ' + ex.name;
+    document.getElementById('modalContent').innerHTML = `
+        <div class="bg-blue-50 rounded-xl p-4 mb-4">
+            <div class="text-sm font-bold text-blue-800 mb-1">🔧 Maskin / utstyr</div>
+            <div class="text-blue-700 font-medium">${ex.machine}</div>
+        </div>
+        <div class="grid grid-cols-3 gap-3 mb-4">
+            <div class="bg-gray-50 rounded-lg p-3 text-center">
+                <div class="text-xl font-bold text-gray-800">${ex.sets}</div>
+                <div class="text-gray-500 text-xs">Sett</div>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-3 text-center">
+                <div class="text-xl font-bold text-gray-800">${ex.reps}</div>
+                <div class="text-gray-500 text-xs">Reps</div>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-3 text-center">
+                <div class="text-xl font-bold text-gray-800">${ex.rest}</div>
+                <div class="text-gray-500 text-xs">Hvile</div>
+            </div>
+        </div>
+        <div class="mb-4">
+            <div class="font-bold text-gray-700 mb-2">💡 Slik gjør du det</div>
+            <p class="text-gray-600 text-sm leading-relaxed">${ex.howTo}</p>
+        </div>
+        <div class="mb-4">
+            <div class="font-bold text-gray-700 mb-2">✅ Tips for best resultat</div>
+            <ul class="space-y-2">
+                ${ex.tips.map(t => `<li class="flex items-start gap-2 text-sm text-gray-600"><span class="text-green-500 mt-0.5">•</span>${t}</li>`).join('')}
+            </ul>
+        </div>
+        <div class="mb-4">
+            <div class="font-bold text-gray-700 mb-2">🎯 Muskler</div>
+            <div class="flex flex-wrap gap-2">
+                ${ex.muscles.map(m => `<span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">${m}</span>`).join('')}
+            </div>
+        </div>
+        <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-3">
+            <div class="text-yellow-800 text-sm"><strong>💪 Anbefalt vekt:</strong> ${ex.weight}</div>
+        </div>
+        <button onclick="closeModal()" class="w-full mt-5 bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition-all">Lukk</button>
+    `;
+    document.getElementById('modal').classList.remove('hidden');
+}
+
+function closeModal() {
+    document.getElementById('modal').classList.add('hidden');
+}
+
+document.getElementById('modal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+
+// ==================== LOG ====================
+function renderLogExercises() {
+    const program = workoutProgram[currentDay];
+    let html = `<div class="bg-white rounded-xl shadow-sm p-4 mb-4">
+        <div class="font-bold text-gray-800 mb-1">${program.name}</div>
+        <div class="text-gray-400 text-sm">Fyll inn vekt og reps for hvert sett</div>
+    </div>`;
+
+    program.exercises.forEach(ex => {
+        if (!logData[ex.id]) {
+            logData[ex.id] = Array.from({length: ex.sets}, () => ({weight: '', reps: ''}));
+        }
+        html += `<div class="bg-white rounded-xl shadow-sm mb-3 p-4">
+            <div class="flex items-center gap-2 mb-3">
+                <span class="text-xl">${ex.emoji}</span>
+                <div>
+                    <div class="font-bold text-gray-800">${ex.name}</div>
+                    <div class="text-gray-400 text-xs">${ex.machine}</div>
+                </div>
+            </div>
+            <div class="grid grid-cols-4 gap-1 mb-2">
+                <div class="text-xs font-medium text-gray-500 text-center">Sett</div>
+                <div class="text-xs font-medium text-gray-500 text-center">Kg</div>
+                <div class="text-xs font-medium text-gray-500 text-center">Reps</div>
+                <div class="text-xs font-medium text-gray-500 text-center">✓</div>
+            </div>`;
+
+        for (let s = 0; s < ex.sets; s++) {
+            html += `<div class="set-row grid grid-cols-4 gap-1 items-center mb-1">
+                <div class="text-center text-sm font-bold text-gray-600">Sett ${s+1}</div>
+                <input type="number" placeholder="${ex.weight.split('–')[0] || '?'}"
+                    class="border border-gray-200 rounded-lg p-1 text-center text-sm w-full"
+                    onchange="updateLog('${ex.id}',${s},'weight',this.value)"
+                    value="${logData[ex.id][s].weight}">
+                <input type="number" placeholder="${ex.reps.split('–')[0] || '?'}"
+                    class="border border-gray-200 rounded-lg p-1 text-center text-sm w-full"
+                    onchange="updateLog('${ex.id}',${s},'reps',this.value)"
+                    value="${logData[ex.id][s].reps}">
+                <div class="text-center">
+                    <button onclick="toggleSetDone('${ex.id}',${s},this)"
+                        class="set-done-btn w-8 h-8 rounded-full border-2 border-gray-300 text-sm transition-all hover:border-green-400">
+                    </button>
+                </div>
+            </div>`;
+        }
+        html += `</div></div>`;
+    });
+
+    document.getElementById('logExerciseList').innerHTML = html;
+}
+
+function updateLog(exId, setIdx, field, value) {
+    if (!logData[exId]) return;
+    logData[exId][setIdx][field] = value;
+}
+
+function toggleSetDone(exId, setIdx, btn) {
+    btn.classList.toggle('bg-green-500');
+    btn.classList.toggle('border-green-500');
+    btn.classList.toggle('text-white');
+    btn.textContent = btn.classList.contains('bg-green-500') ? '✓' : '';
+}
+
+function startWorkout() {
+    showTab('log');
+    startTimer();
+    if (!sessionTimerRunning) toggleSessionTimer();
+}
+
+function saveSession() {
+    const sessions = JSON.parse(localStorage.getItem('workoutSessions') || '[]');
+    const session = {
+        date: new Date().toISOString(),
+        day: currentDay,
+        dayName: workoutProgram[currentDay].name,
+        log: JSON.parse(JSON.stringify(logData))
+    };
+    sessions.push(session);
+    localStorage.setItem('workoutSessions', JSON.stringify(sessions));
+
+    document.getElementById('logExerciseList').innerHTML = `
+        <div class="bg-green-50 border border-green-300 rounded-xl p-8 text-center mb-4">
+            <div class="text-5xl mb-3">🎉</div>
+            <div class="text-2xl font-bold text-green-700 mb-2">Økt lagret!</div>
+            <div class="text-green-600">Bra jobbet! Hvil og kom tilbake sterkere.</div>
+        </div>`;
+    updateWeeklyCount();
+    setTimeout(() => {
+        renderLogExercises();
+        showTab('stats');
+    }, 2500);
+}
+
+// ==================== TIMER ====================
+function setTimer(secs) {
+    resetTimer();
+    timerSeconds = secs;
+    timerTotal = secs;
+    updateTimerDisplay();
+}
+
+function startTimer() {
+    if (timerRunning) { clearInterval(timerInterval); timerRunning = false; document.getElementById('timerStartBtn').textContent = '▶ Start'; return; }
+    timerRunning = true;
+    document.getElementById('timerStartBtn').textContent = '⏸ Pause';
+    timerInterval = setInterval(() => {
+        timerSeconds--;
+        updateTimerDisplay();
+        if (timerSeconds <= 0) {
+            clearInterval(timerInterval);
+            timerRunning = false;
+            document.getElementById('timerStartBtn').textContent = '▶ Start';
+            document.getElementById('timerDisplay').textContent = '✅ GÅ!';
+            document.getElementById('timerProgress').style.width = '100%';
+            if ('vibrate' in navigator) navigator.vibrate([200,100,200]);
+        }
+    }, 1000);
+}
+
+function resetTimer() {
+    clearInterval(timerInterval);
+    timerRunning = false;
+    timerSeconds = timerTotal;
+    document.getElementById('timerStartBtn').textContent = '▶ Start';
+    updateTimerDisplay();
+}
+
+function updateTimerDisplay() {
+    const m = Math.floor(timerSeconds / 60).toString().padStart(2,'0');
+    const s = (timerSeconds % 60).toString().padStart(2,'0');
+    document.getElementById('timerDisplay').textContent = m + ':' + s;
+    const pct = Math.max(0, timerSeconds / timerTotal * 100);
+    document.getElementById('timerProgress').style.width = pct + '%';
+    document.getElementById('timerProgress').style.background =
+        pct > 50 ? 'linear-gradient(90deg,#2563eb,#7c3aed)' :
+        pct > 20 ? 'linear-gradient(90deg,#f59e0b,#ef4444)' : '#ef4444';
+}
+
+// ==================== SESSION TIMER ====================
+function toggleSessionTimer() {
+    if (sessionTimerRunning) {
+        clearInterval(sessionTimerInterval);
+        sessionTimerRunning = false;
+        document.getElementById('sessionTimerBtn').textContent = '▶ Start';
+    } else {
+        sessionTimerRunning = true;
+        document.getElementById('sessionTimerBtn').textContent = '⏸ Pause';
+        sessionTimerInterval = setInterval(() => {
+            sessionTimerSeconds++;
+            const m = Math.floor(sessionTimerSeconds / 60).toString().padStart(2,'0');
+            const s = (sessionTimerSeconds % 60).toString().padStart(2,'0');
+            document.getElementById('sessionTimerDisplay').textContent = m + ':' + s;
+        }, 1000);
+    }
+}
+
+function resetSessionTimer() {
+    clearInterval(sessionTimerInterval);
+    sessionTimerRunning = false;
+    sessionTimerSeconds = 0;
+    document.getElementById('sessionTimerDisplay').textContent = '00:00';
+    document.getElementById('sessionTimerBtn').textContent = '▶ Start';
+}
+
+// ==================== STATS ====================
+function loadStats() {
+    const sessions = JSON.parse(localStorage.getItem('workoutSessions') || '[]');
+    document.getElementById('totalSessions').textContent = sessions.length;
+
+    let totalSets = 0, totalKg = 0;
+    sessions.forEach(s => {
+        Object.values(s.log).forEach(sets => {
+            sets.forEach(set => {
+                if (set.weight && set.reps) {
+                    totalSets++;
+                    totalKg += (parseFloat(set.weight) || 0) * (parseInt(set.reps) || 0);
+                }
+            });
+        });
+    });
+
+    document.getElementById('totalSets').textContent = totalSets;
+    document.getElementById('totalWeight').textContent = Math.round(totalKg).toLocaleString('no-NO');
+    document.getElementById('currentStreak').textContent = calcStreak(sessions);
+
+    const histEl = document.getElementById('sessionHistory');
+    if (sessions.length === 0) {
+        histEl.innerHTML = '<p class="text-gray-400 text-center py-4">Ingen loggede økter enda</p>';
+        return;
+    }
+    const recent = [...sessions].reverse().slice(0, 5);
+    histEl.innerHTML = recent.map(s => {
+        const d = new Date(s.date);
+        return `<div class="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+            <div>
+                <div class="font-medium text-gray-800">${s.dayName}</div>
+                <div class="text-gray-400 text-xs">${d.toLocaleDateString('no-NO', {weekday:'short', day:'numeric', month:'short'})}</div>
+            </div>
+            <div class="text-green-600 font-bold text-sm">✓ Fullført</div>
+        </div>`;
+    }).join('');
+}
+
+function calcStreak(sessions) {
+    if (!sessions.length) return 0;
+    const dates = [...new Set(sessions.map(s => s.date.slice(0,10)))].sort().reverse();
+    let streak = 1, today = new Date().toISOString().slice(0,10);
+    if (dates[0] < today) { const diff = (new Date(today) - new Date(dates[0])) / 86400000; if (diff > 1) return 0; }
+    for (let i = 1; i < dates.length; i++) {
+        const diff = (new Date(dates[i-1]) - new Date(dates[i])) / 86400000;
+        if (diff === 1) streak++; else break;
+    }
+    return streak;
+}
+
+function updateWeeklyCount() {
+    const sessions = JSON.parse(localStorage.getItem('workoutSessions') || '[]');
+    const now = new Date(), dayOfWeek = now.getDay();
+    const monday = new Date(now); monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1)); monday.setHours(0,0,0,0);
+    const count = sessions.filter(s => new Date(s.date) >= monday).length;
+    document.getElementById('weeklyCount').textContent = count;
+}
+
+function clearData() {
+    if (confirm('Er du sikker på at du vil slette all treningsdata?')) {
+        localStorage.removeItem('workoutSessions');
+        loadStats();
+        updateWeeklyCount();
+    }
+}
+</script>
+</body>
+</html>
