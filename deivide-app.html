@@ -323,8 +323,8 @@ function RestTimer({onClose}){
   const pct=total>0?secs/total*100:0;
   const bar=pct>50?'#3b82f6':pct>20?'#f59e0b':'#ef4444';
   const mm=String(Math.floor(secs/60)).padStart(2,'0'),ss=String(secs%60).padStart(2,'0');
-  return<div className="fixed inset-0 z-50 flex items-end justify-center" style={{background:'rgba(0,0,0,0.75)'}}>
-    <div className="bg-slate-900 border border-slate-700 rounded-t-3xl w-full max-w-md p-6 su" style={{paddingBottom:'max(32px,env(safe-area-inset-bottom,32px))'}}>
+  return<div className="fixed inset-0 z-50 flex items-center justify-center px-4" style={{background:'rgba(0,0,0,0.75)'}}>
+    <div className="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-md p-6 su">
       <div className="flex justify-between items-center mb-4"><span className="font-bold text-white text-lg">⏱ Hviletimer</span><button onClick={onClose} className="text-slate-400 text-2xl">✕</button></div>
       <div className={`text-6xl font-black text-center mb-2 ${secs===0?'text-green-400':'text-blue-400'}`} style={{fontVariantNumeric:'tabular-nums'}}>{secs===0?'✅ GÅ!':`${mm}:${ss}`}</div>
       <div className="h-2 bg-slate-800 rounded-full mb-5 overflow-hidden"><div className="h-full rounded-full transition-all duration-1000" style={{width:`${pct}%`,background:bar}}/></div>
@@ -850,8 +850,8 @@ function FoodScreen(){
       const combined={name:basket.length===1?basket[0].name:`Måltid (${basket.length} matvarer)`,desc:basket.map(b=>b.name).join(', '),protein:basketTotals.p,carbs:basketTotals.c,fat:basketTotals.fat,kcal:basketTotals.k};
       addMeal(combined,modal);setBasket([]);setQuery('');setSelFood(null);
     };
-    return<div className="fixed inset-0 z-50 flex items-end justify-center" style={{background:'rgba(0,0,0,0.85)'}}>
-      <div className="bg-slate-900 border border-slate-700 rounded-t-3xl w-full max-w-md flex flex-col su" style={{maxHeight:'92vh'}}>
+    return<div className="fixed inset-0 z-50 flex items-center justify-center px-4" style={{background:'rgba(0,0,0,0.85)'}}>
+      <div className="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-md flex flex-col su" style={{maxHeight:'88vh'}}>
         {/* Header */}
         <div className="flex justify-between items-center p-5 pb-3 flex-shrink-0">
           <div className="text-white font-bold">{mealLabels[modal]}</div>
