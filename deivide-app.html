@@ -148,6 +148,40 @@ const SHOPPING_LIST=[
   {cat:'💧 Drikke',items:['Vann (nok til 500ml ved oppvåkning)','Kaffe','Sukkerfri brus (ved behov)','Elektrolytt-tabletter (hvis du svetter mye)']},
   {cat:'🫙 Tilskudd',items:['Whey protein','Kreatin monohydrat','Vitamin D (vinterstid)']},
 ];
+const RECIPES=[
+  {id:'R1',name:'Kylling-bowl 5 min',emoji:'🍗',time:'5 min',protein:52,kcal:580,
+   desc:'Den ultimate meal prep-bowlen',
+   ing:['200g kylling (kokt/grillet)','100g ris (kokt)','Salat + agurk','2 ss salsa / dressing'],
+   how:'Varm kylling + ris 1-2 min i micro. Legg salat i bunn av bollen. Legg alt på toppen. Ferdig.'},
+  {id:'R2',name:'Skyr-bowl frokost',emoji:'🥣',time:'3 min',protein:38,kcal:420,
+   desc:'Rask og mettende frokost',
+   ing:['300g skyr','40g havregryn','Bær (ferske eller frosne)','Kanel'],
+   how:'Bland skyr og havregryn i en bolle. Legg bær på toppen. Strø kanel over. Spis.'},
+  {id:'R3',name:'Tunfisk knekkebrød',emoji:'🥫',time:'2 min',protein:35,kcal:300,
+   desc:'Raskeste proteinmåltid som finnes',
+   ing:['1 boks tunfisk (185g)','3-4 knekkebrød','3 ss cottage cheese / kesam','Agurk'],
+   how:'Legg cottage cheese på knekkebrød. Fordel tunfisk over. Skjær agurk ved siden av.'},
+  {id:'R4',name:'Egg-wrap lunsj',emoji:'🥚',time:'8 min',protein:40,kcal:440,
+   desc:'Enkel lunsj – bruk eventuelt knekkebrød',
+   ing:['4 egg','1 grovt wrap eller 3 knekkebrød','Kalkunpålegg','Salat + tomat'],
+   how:'Stek 4 egg i panne (3-4 min). Legg på wrap med kalkunpålegg og grønnsaker. Rull og spis.'},
+  {id:'R5',name:'Laks + poteter',emoji:'🐟',time:'20 min',protein:42,kcal:620,
+   desc:'Klassisk middag – enkel og god',
+   ing:['150-200g laks','200g poteter','Brokkoli eller salat','Sitronsaft + pepper'],
+   how:'Stek laks 3-4 min per side på middels varme. Kok poteter 12-15 min. Server med grønt og sitron.'},
+  {id:'R6',name:'Taco-bowl',emoji:'🌮',time:'15 min',protein:45,kcal:590,
+   desc:'Familievennlig – ingen rømme/ost',
+   ing:['200g karbonadedeig / kyllingkjøttdeig','100g ris','Salat, tomat, agurk','Salsa (ikke rømme)'],
+   how:'Brun kjøtt i panne med taco-krydder (5-7 min). Server over ris med salat og salsa. Dropp ost/rømme.'},
+  {id:'R7',name:'Wok 10 min',emoji:'🥢',time:'10 min',protein:40,kcal:530,
+   desc:'Lag dobbelt porsjoner – god meal prep',
+   ing:['200g kylling i strimler','250g frosne wokgrønnsaker','100g ris (kokt)','Soyasaus + hvitløkspulver'],
+   how:'Stek kylling 3 min på høy varme. Tilsett frosne grønnsaker, stek 4 min til. Tilsett soya. Server over ris.'},
+  {id:'R8',name:'Cottage cheese kveld',emoji:'🌙',time:'1 min',protein:26,kcal:210,
+   desc:'Bytt baguetten med dette – samme metthet',
+   ing:['250g cottage cheese','1 eple eller pære','Kanel','Evt. 1 knekkebrød'],
+   how:'Skjær frukt i biter. Bland med cottage cheese i en bolle. Strø kanel over. Spis sakte.'},
+];
 
 // ─── STORAGE ──────────────────────────────────────────────────
 const ld=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}};
@@ -483,6 +517,65 @@ function WorkoutScreen({initialId}){
       {subTab==='rekorder'&&<div className="px-4"><StrengthHistory/></div>}
     </div>
   );
+}
+
+// ─── WATER TRACKER ────────────────────────────────────────────
+function WaterTracker(){
+  const today=todayStr();
+  const[water,setWater]=useState(()=>ld('fc_water',{}));
+  const count=water[today]||0;
+  const goal=8;
+  const upd=n=>{const v=Math.max(0,Math.min(n,goal+2));const w={...water,[today]:v};setWater(w);sv('fc_water',w);};
+  const pct=Math.min(count/goal*100,100);
+  return<div className="bg-slate-800 rounded-2xl p-4">
+    <div className="flex justify-between items-center mb-3">
+      <div>
+        <div className="text-white font-bold text-sm">💧 Vann i dag</div>
+        <div className="text-slate-400 text-xs">Mål: {goal} glass (~2L)</div>
+      </div>
+      <div className="text-right">
+        <div className={`text-2xl font-black ${count>=goal?'text-blue-400':'text-white'}`}>{count}/{goal}</div>
+        {count>=goal&&<div className="text-blue-400 text-xs font-bold">✅ Mål nådd!</div>}
+      </div>
+    </div>
+    <div className="h-2 bg-slate-700 rounded-full mb-4 overflow-hidden">
+      <div className="h-full rounded-full transition-all duration-300" style={{width:`${pct}%`,background:'linear-gradient(90deg,#3b82f6,#60a5fa)'}}/>
+    </div>
+    <div className="flex gap-2">
+      {Array.from({length:goal},(_, i)=>(
+        <button key={i} onClick={()=>upd(count<=i?i+1:i)}
+          className={`flex-1 h-8 rounded-lg transition-all ${i<count?'bg-blue-500':'bg-slate-700'}`}>
+          {i<count&&<span className="text-white text-xs">💧</span>}
+        </button>
+      ))}
+    </div>
+    <div className="flex gap-2 mt-3">
+      <button onClick={()=>upd(count-1)} className="flex-1 bg-slate-700 text-slate-300 py-2 rounded-xl font-bold text-lg">－</button>
+      <button onClick={()=>upd(count+1)} className="flex-1 bg-blue-600 text-white py-2 rounded-xl font-bold text-lg">＋ Glass</button>
+    </div>
+  </div>;
+}
+
+// ─── ENERGY LOG ───────────────────────────────────────────────
+function EnergyLog(){
+  const today=todayStr();
+  const[energy,setEnergy]=useState(()=>ld('fc_energy',{}));
+  const level=energy[today]||0;
+  const levels=[{v:1,e:'😴',l:'Utmattet'},{v:2,e:'😐',l:'Trøtt'},{v:3,e:'🙂',l:'OK'},{v:4,e:'💪',l:'Bra'},{v:5,e:'🔥',l:'Topp'}];
+  const set=v=>{const n={...energy,[today]:v};setEnergy(n);sv('fc_energy',n);};
+  return<div className="bg-slate-800 rounded-2xl p-4">
+    <div className="text-white font-bold text-sm mb-1">⚡ Energi i dag</div>
+    <div className="text-slate-400 text-xs mb-3">Logg dette daglig – se mønsteret etter 2 uker</div>
+    <div className="flex gap-2">
+      {levels.map(l=>(
+        <button key={l.v} onClick={()=>set(l.v)}
+          className={`flex-1 flex flex-col items-center py-2 rounded-xl transition-all ${level===l.v?'bg-yellow-500 bg-opacity-20 border border-yellow-500':'bg-slate-700 border border-transparent'}`}>
+          <span className="text-2xl">{l.e}</span>
+          <span className={`text-xs mt-0.5 font-bold ${level===l.v?'text-yellow-400':'text-slate-500'}`}>{l.l}</span>
+        </button>
+      ))}
+    </div>
+  </div>;
 }
 
 // ─── NUTRITION GUIDE ──────────────────────────────────────────
@@ -1009,6 +1102,10 @@ function TodayScreen({startDate,onGoWorkout,onGoFood}){
     return sessions.filter(s=>new Date(s.date)>=start&&new Date(s.date)<end);
   })();
   const todaySteps=parseInt(thisWeek.steps)||0;
+  const[stepEdit,setStepEdit]=useState(false);
+  const[stepInput,setStepInput]=useState('');
+  const saveSteps=v=>{if(!v)return;const n={...prog,[weekKey]:{...thisWeek,steps:v}};sv('fc_progress',n);setStepEdit(false);setStepInput('');};
+
   const dayName=new Date().toLocaleDateString('no-NO',{weekday:'long',day:'numeric',month:'long'});
   const run=getRunning(week);
   const runTip={1:run?.mon,3:run?.wed,6:run?.sat}[dow];
@@ -1016,10 +1113,24 @@ function TodayScreen({startDate,onGoWorkout,onGoFood}){
     <div className="px-4 pt-12 pb-5" style={{background:'linear-gradient(180deg,#1e3a5f 0%,#0f172a 100%)'}}>
       <div className="flex justify-between items-start mb-4">
         <div><div className="text-slate-400 text-xs capitalize">{dayName}</div><h1 className="text-xl font-black text-white">Hei, {ME.name} 👋</h1></div>
+        <div className="flex flex-col items-end gap-1.5">
         {week&&<div className="bg-white bg-opacity-10 rounded-xl px-3 py-1.5 text-right">
           <div className="text-white font-black text-sm">Uke {week}/12</div>
           <div className="text-slate-400 text-xs">{phase?.name}</div>
         </div>}
+        {(()=>{
+          let streak=0;
+          if(startDate&&week){for(let w=week;w>=1;w--){
+            const s=new Date(startDate);s.setDate(s.getDate()+(w-1)*7);
+            const e=new Date(s);e.setDate(e.getDate()+7);
+            if(sessions.filter(x=>new Date(x.date)>=s&&new Date(x.date)<e).length>=3)streak++;else break;
+          }}
+          return streak>=2?<div className="bg-orange-900 bg-opacity-50 border border-orange-700 border-opacity-50 rounded-xl px-3 py-1.5 text-center">
+            <div className="text-orange-400 font-black text-sm">{streak}🔥</div>
+            <div className="text-orange-300 text-xs">uker streak</div>
+          </div>:null;
+        })()}
+      </div>
       </div>
       {phase&&<div className="rounded-2xl p-3 mb-4 flex items-center gap-3" style={{background:phase.color+'22',border:`1px solid ${phase.color}44`}}>
         <span className="text-2xl">{phase.emoji}</span>
@@ -1030,8 +1141,17 @@ function TodayScreen({startDate,onGoWorkout,onGoFood}){
         <Ring value={totalP} max={ME.targetProtein} color="#22c55e" size={84} label={`${totalP}g`} sub="protein"/>
         <Ring value={totalK} max={kcalTarget} color="#3b82f6" size={84} label={`${totalK}`} sub="kcal"/>
         <Ring value={weekSessions.length} max={3} color="#a855f7" size={84} label={`${weekSessions.length}/3`} sub="økter"/>
-        <Ring value={todaySteps} max={ME.stepGoal} color="#f59e0b" size={84} label={todaySteps>0?`${Math.round(todaySteps/1000*10)/10}k`:'—'} sub="steg"/>
+        <button onClick={()=>setStepEdit(true)} className="flex flex-col items-center">
+          <Ring value={todaySteps} max={ME.stepGoal} color="#f59e0b" size={84} label={todaySteps>0?`${Math.round(todaySteps/1000*10)/10}k`:'+'} sub="steg"/>
+        </button>
       </div>
+      {stepEdit&&<div className="bg-slate-800 rounded-2xl p-4 flex gap-2 items-center su">
+        <span className="text-2xl">👟</span>
+        <input autoFocus type="number" inputMode="numeric" placeholder="Antall steg" value={stepInput} onChange={e=>setStepInput(e.target.value)}
+          className="flex-1 bg-slate-700 border border-slate-600 text-white rounded-xl p-2.5 text-sm font-bold"/>
+        <button onClick={()=>saveSteps(stepInput)} className="bg-amber-500 text-white px-4 py-2.5 rounded-xl font-bold text-sm">Lagre</button>
+        <button onClick={()=>setStepEdit(false)} className="text-slate-500 text-xl px-1">✕</button>
+      </div>}
     </div>
     <div className="px-4 space-y-3">
       {/* Today's training */}
@@ -1078,6 +1198,10 @@ function TodayScreen({startDate,onGoWorkout,onGoFood}){
       </div>
       {/* Weekly rapport */}
       {week&&<WeeklyRapport week={week} startDate={startDate}/>}
+      {/* Water tracker */}
+      <WaterTracker/>
+      {/* Energy log */}
+      <EnergyLog/>
       {/* Photo reminder for even weeks */}
       {week&&week%2===0&&<div className="bg-purple-900 bg-opacity-30 border border-purple-700 border-opacity-40 rounded-2xl p-4 su">
         <div className="text-purple-400 font-bold text-sm mb-1">📸 Fremgangsbilde – Uke {week}</div>
@@ -1096,6 +1220,42 @@ function TodayScreen({startDate,onGoWorkout,onGoFood}){
         </div>
       </div>
     </div>
+  </div>;
+}
+
+// ─── RECIPES TAB ──────────────────────────────────────────────
+function RecipesTab(){
+  const[open,setOpen]=useState(null);
+  return<div className="space-y-3">
+    <div className="bg-slate-800 rounded-2xl p-4">
+      <div className="text-white font-black mb-1">🍳 Enkle oppskrifter</div>
+      <div className="text-slate-400 text-sm">Alle under 20 min · høy protein · lav innsats</div>
+    </div>
+    {RECIPES.map(r=>(
+      <div key={r.id} className="bg-slate-800 rounded-2xl overflow-hidden">
+        <button className="w-full px-4 py-4 flex items-center gap-3 text-left" onClick={()=>setOpen(open===r.id?null:r.id)}>
+          <div className="w-12 h-12 rounded-2xl bg-slate-700 flex items-center justify-center text-2xl flex-shrink-0">{r.emoji}</div>
+          <div className="flex-1 min-w-0">
+            <div className="text-white font-black truncate">{r.name}</div>
+            <div className="text-slate-400 text-xs">{r.desc}</div>
+            <div className="flex gap-3 mt-1">
+              <span className="text-green-400 text-xs font-bold">💪 {r.protein}g protein</span>
+              <span className="text-blue-400 text-xs">{r.kcal} kcal</span>
+              <span className="text-slate-500 text-xs">⏱ {r.time}</span>
+            </div>
+          </div>
+          <div className="text-slate-500 text-lg flex-shrink-0">{open===r.id?'▲':'▼'}</div>
+        </button>
+        {open===r.id&&<div className="px-4 pb-4 border-t border-slate-700 su">
+          <div className="text-slate-400 text-xs font-bold uppercase tracking-wide mt-3 mb-2">Ingredienser</div>
+          <div className="space-y-1 mb-4">
+            {r.ing.map((i,idx)=><div key={idx} className="flex items-center gap-2 text-slate-300 text-sm"><span className="text-slate-600">•</span>{i}</div>)}
+          </div>
+          <div className="text-slate-400 text-xs font-bold uppercase tracking-wide mb-2">Fremgangsmåte</div>
+          <div className="bg-slate-700 rounded-xl p-3 text-slate-300 text-sm">{r.how}</div>
+        </div>}
+      </div>
+    ))}
   </div>;
 }
 
@@ -1157,7 +1317,7 @@ function PlanScreen({startDate}){
       <p className="text-slate-400 text-sm">12 ukers Fight Club{week?` · Uke ${week}`:''}</p>
     </div>
     <div className="flex px-4 gap-2 mb-4 overflow-x-auto pb-1">
-      {[['uke','Uke'],['løp','🏃 Løp'],['mat','🥗 Mat'],['supp','💊 Tilskudd']].map(([k,l])=>(
+      {[['uke','Uke'],['løp','🏃 Løp'],['mat','🥗 Mat'],['oppskrifter','🍳 Oppskrifter'],['supp','💊 Tilskudd']].map(([k,l])=>(
         <button key={k} onClick={()=>setTab(k)} className={`flex-shrink-0 px-4 py-2 rounded-xl text-sm font-bold ${tab===k?'bg-white text-slate-900':'bg-slate-800 text-slate-400'}`}>{l}</button>
       ))}
     </div>
@@ -1267,6 +1427,7 @@ function PlanScreen({startDate}){
         </div>
         <ShoppingList/>
       </>}
+      {tab==='oppskrifter'&&<RecipesTab/>}
       {tab==='supp'&&<>
         <div className="bg-slate-800 rounded-2xl p-3 mb-1"><div className="text-slate-300 font-bold mb-1">✅ Anbefalt</div><div className="text-slate-500 text-xs">Dropp fat burners, testoboosters, BCAA og kompliserte pre-workout. Pre-workout sent på dagen ødelegger søvn.</div></div>
         {SUPPLEMENTS.map((s,i)=>(
