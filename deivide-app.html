@@ -1290,6 +1290,7 @@ function TodayScreen({startDate,onGoWorkout,onGoFood}){
   const totalP=todayFood.reduce((a,f)=>a+(f.protein||0),0);
   const totalK=todayFood.reduce((a,f)=>a+(f.kcal||0),0);
   const dow=new Date().getDay();
+  const hour=new Date().getHours();
   const todayPlan=WEEK_SCHEDULE[dow];
   const isTrain=todayPlan?.type==='workout';
   const kcalTarget=isTrain?ME.kcalTrain:ME.kcalRest;
@@ -1308,72 +1309,198 @@ function TodayScreen({startDate,onGoWorkout,onGoFood}){
   const[stepEdit,setStepEdit]=useState(false);
   const[stepInput,setStepInput]=useState('');
   const saveSteps=v=>{if(!v)return;const n={...prog,[weekKey]:{...thisWeek,steps:v}};sv('fc_progress',n);setStepEdit(false);setStepInput('');};
-
   const dayName=new Date().toLocaleDateString('no-NO',{weekday:'long',day:'numeric',month:'long'});
   const run=getRunning(week);
   const runTip={1:run?.mon,3:run?.wed,6:run?.sat}[dow];
+
+  // Streak
+  let streak=0;
+  if(startDate&&week){for(let w=week;w>=1;w--){
+    const s=new Date(startDate);s.setDate(s.getDate()+(w-1)*7);
+    const e=new Date(s);e.setDate(e.getDate()+7);
+    if(sessions.filter(x=>new Date(x.date)>=s&&new Date(x.date)<e).length>=3)streak++;else break;
+  }}
+
+  // Water + energy
+  const waterToday=ld('fc_water',{})[todayStr()]||0;
+  const energyToday=ld('fc_energy',{})[todayStr()]||0;
+  const todayWorkedOut=weekSessions.some(s=>s.date.slice(0,10)===todayStr());
+
+  // Latest weight across all weeks
+  let latestWeight=null;
+  for(let w=week||12;w>=1;w--){const d=prog[`w${w}`];if(d?.weights?.length){latestWeight=+(d.weights.reduce((a,b)=>a+b,0)/d.weights.length).toFixed(1);break;}}
+  const weightLost=latestWeight?+(ME.startWeight-latestWeight).toFixed(1):0;
+  const weightToGo=latestWeight?+Math.max(latestWeight-ME.goalWeight,0).toFixed(1):+(ME.startWeight-ME.goalWeight).toFixed(1);
+  const weightPct=latestWeight?Math.min(Math.max(weightLost/(ME.startWeight-ME.goalWeight)*100,0),100):0;
+
+  // Program progress
+  const programPct=week?Math.min((week-1)/12*100,100):0;
+  const weeksLeft=week?Math.max(12-week,0):12;
+
+  // Daily score (0–100)
+  const scoreItems=[
+    {l:'Protein',done:totalP>=ME.targetProtein,p:totalP/ME.targetProtein,pts:30},
+    {l:'Steg',done:todaySteps>=ME.stepGoal,p:todaySteps/ME.stepGoal,pts:20},
+    {l:'Vann',done:waterToday>=8,p:waterToday/8,pts:15},
+    {l:'Trening',done:!isTrain||todayWorkedOut,p:todayWorkedOut||!isTrain?1:0,pts:isTrain?25:0},
+    {l:'Energi',done:energyToday>0,p:energyToday>0?1:0,pts:10},
+  ];
+  const maxPts=scoreItems.reduce((a,s)=>a+s.pts,0);
+  const earnedPts=scoreItems.reduce((a,s)=>a+(s.done?s.pts:Math.min(s.p,1)*s.pts),0);
+  const score=Math.round(earnedPts/maxPts*100);
+  const scoreLabel=score>=90?'Perfekt dag! 🔥':score>=70?'Solid dag 💪':score>=50?'Halvveis 🙂':score>=25?'Kom i gang 📈':'Start dagen ☀️';
+  const scoreColor=score>=70?'#22c55e':score>=40?'#f59e0b':'#ef4444';
+
+  // Smart reminders (context-aware)
+  const daysSinceLast=sessions.length?Math.floor((Date.now()-new Date([...sessions].reverse()[0]?.date||Date.now()))/86400000):99;
+  const reminders=[];
+  if(isTrain&&!todayWorkedOut) reminders.push({icon:'🏋️',text:todayPlan.label+' — trykk for å starte',color:'text-blue-300',bold:true});
+  if(daysSinceLast>=4&&!todayWorkedOut) reminders.push({icon:'⚠️',text:`${daysSinceLast} dager siden siste økt — kom tilbake!`,color:'text-yellow-400',bold:true});
+  if(todayWorkedOut) reminders.push({icon:'✅',text:'Økt fullført i dag — bra jobbet!',color:'text-green-400',bold:false});
+  if(todayFood.length===0&&hour>=8) reminders.push({icon:'🥗',text:'Ikke logget mat enda — start med frokost',color:'text-slate-300',bold:false});
+  if(totalP<ME.targetProtein*0.5&&hour>12&&todayFood.length>0) reminders.push({icon:'💪',text:`Protein lav: ${totalP}g — mangler ${ME.targetProtein-totalP}g til`,color:'text-yellow-400',bold:false});
+  if(!weights.length) reminders.push({icon:'⚖️',text:'Ikke logget vekt denne uka — vei deg i morgen tidlig',color:'text-slate-400',bold:false});
+  if(waterToday<4&&hour>10) reminders.push({icon:'💧',text:`Drikk mer vann (${waterToday}/8 glass i dag)`,color:'text-blue-300',bold:false});
+  if(dow===1) reminders.push({icon:'📏',text:'Mandag: mål midje rundt navlen (morgen)',color:'text-purple-400',bold:false});
+  if(week&&week%2===0) reminders.push({icon:'📸',text:`Uke ${week}: ta fremgangsbilde (front, side, bak)`,color:'text-pink-400',bold:false});
+  if(totalP>=ME.targetProtein) reminders.push({icon:'🎯',text:'Proteinmål nådd i dag!',color:'text-green-400',bold:false});
+
   return<div className="min-h-screen safe" style={{background:'#0f172a'}}>
-    <div className="px-4 pt-12 pb-5" style={{background:'linear-gradient(180deg,#1e3a5f 0%,#0f172a 100%)'}}>
-      <div className="flex justify-between items-start mb-4">
-        <div><div className="text-slate-400 text-xs capitalize">{dayName}</div><h1 className="text-xl font-black text-white">Hei, {ME.name} 👋</h1></div>
-        <div className="flex flex-col items-end gap-1.5">
-        {week&&<div className="bg-white bg-opacity-10 rounded-xl px-3 py-1.5 text-right">
-          <div className="text-white font-black text-sm">Uke {week}/12</div>
-          <div className="text-slate-400 text-xs">{phase?.name}</div>
-        </div>}
-        {(()=>{
-          let streak=0;
-          if(startDate&&week){for(let w=week;w>=1;w--){
-            const s=new Date(startDate);s.setDate(s.getDate()+(w-1)*7);
-            const e=new Date(s);e.setDate(e.getDate()+7);
-            if(sessions.filter(x=>new Date(x.date)>=s&&new Date(x.date)<e).length>=3)streak++;else break;
-          }}
-          return streak>=2?<div className="bg-orange-900 bg-opacity-50 border border-orange-700 border-opacity-50 rounded-xl px-3 py-1.5 text-center">
+    {/* Header */}
+    <div className="px-4 pt-12 pb-4" style={{background:'linear-gradient(180deg,#1e3a5f 0%,#0f172a 100%)'}}>
+      <div className="flex justify-between items-start mb-3">
+        <div>
+          <div className="text-slate-400 text-xs capitalize">{dayName}</div>
+          <h1 className="text-xl font-black text-white">Hei, {ME.name} 👋</h1>
+        </div>
+        <div className="flex gap-2 items-start">
+          {week&&<div className="bg-white bg-opacity-10 rounded-xl px-3 py-1.5 text-right">
+            <div className="text-white font-black text-sm">Uke {week}/12</div>
+            <div className="text-slate-400 text-xs">{phase?.name}</div>
+          </div>}
+          {streak>=2&&<div className="bg-orange-900 bg-opacity-50 border border-orange-700 border-opacity-50 rounded-xl px-2.5 py-1.5 text-center">
             <div className="text-orange-400 font-black text-sm">{streak}🔥</div>
-            <div className="text-orange-300 text-xs">uker streak</div>
-          </div>:null;
-        })()}
+            <div className="text-orange-300 text-xs">streak</div>
+          </div>}
+        </div>
       </div>
+
+      {/* Daily Score */}
+      <div className="bg-white bg-opacity-5 rounded-2xl p-4 mb-3">
+        <div className="flex items-center justify-between mb-2">
+          <div>
+            <div className="text-white font-black text-3xl">{score}<span className="text-base text-slate-400 font-normal">%</span></div>
+            <div className="font-bold text-sm mt-0.5" style={{color:scoreColor}}>{scoreLabel}</div>
+          </div>
+          <div className="grid grid-cols-3 gap-x-3 gap-y-1">
+            {scoreItems.filter(s=>s.pts>0).map(s=>(
+              <div key={s.l} className={`text-xs text-right ${s.done?'text-green-400':'text-slate-500'}`}>
+                {s.done?'✓':Math.round(Math.min(s.p,1)*100)+'%'} {s.l}
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+          <div className="h-full rounded-full transition-all duration-700" style={{width:`${score}%`,background:`linear-gradient(90deg,${scoreColor},${scoreColor}bb)`}}/>
+        </div>
       </div>
-      {phase&&<div className="rounded-2xl p-3 mb-4 flex items-center gap-3" style={{background:phase.color+'22',border:`1px solid ${phase.color}44`}}>
-        <span className="text-2xl">{phase.emoji}</span>
-        <div><div className="text-white font-bold text-sm">{phase.name} · {phase.rpe}</div><div className="text-slate-300 text-xs">{phase.tip}</div></div>
-      </div>}
+
       {/* Rings */}
       <div className="flex justify-around py-1">
-        <Ring value={totalP} max={ME.targetProtein} color="#22c55e" size={84} label={`${totalP}g`} sub="protein"/>
-        <Ring value={totalK} max={kcalTarget} color="#3b82f6" size={84} label={`${totalK}`} sub="kcal"/>
-        <Ring value={weekSessions.length} max={3} color="#a855f7" size={84} label={`${weekSessions.length}/3`} sub="økter"/>
+        <Ring value={totalP} max={ME.targetProtein} color="#22c55e" size={80} label={`${totalP}g`} sub="protein"/>
+        <Ring value={totalK} max={kcalTarget} color="#3b82f6" size={80} label={`${totalK}`} sub="kcal"/>
+        <Ring value={weekSessions.length} max={3} color="#a855f7" size={80} label={`${weekSessions.length}/3`} sub="økter"/>
         <button onClick={()=>setStepEdit(true)} className="flex flex-col items-center">
-          <Ring value={todaySteps} max={ME.stepGoal} color="#f59e0b" size={84} label={todaySteps>0?`${Math.round(todaySteps/1000*10)/10}k`:'+'} sub="steg"/>
+          <Ring value={todaySteps} max={ME.stepGoal} color="#f59e0b" size={80} label={todaySteps>0?`${Math.round(todaySteps/1000*10)/10}k`:'+'} sub="steg"/>
         </button>
       </div>
-      {stepEdit&&<div className="bg-slate-800 rounded-2xl p-4 flex gap-2 items-center su">
-        <span className="text-2xl">👟</span>
-        <input autoFocus type="number" inputMode="numeric" placeholder="Antall steg" value={stepInput} onChange={e=>setStepInput(e.target.value)}
+      {stepEdit&&<div className="bg-slate-800 rounded-2xl p-3 flex gap-2 items-center su mt-2">
+        <span className="text-xl">👟</span>
+        <input type="number" inputMode="numeric" placeholder="Antall steg" value={stepInput} onChange={e=>setStepInput(e.target.value)}
           className="flex-1 bg-slate-700 border border-slate-600 text-white rounded-xl p-2.5 text-sm font-bold"/>
         <button onClick={()=>saveSteps(stepInput)} className="bg-amber-500 text-white px-4 py-2.5 rounded-xl font-bold text-sm">Lagre</button>
         <button onClick={()=>setStepEdit(false)} className="text-slate-500 text-xl px-1">✕</button>
       </div>}
     </div>
+
     <div className="px-4 space-y-3">
-      {/* Today's training */}
-      {todayPlan&&<div className={`rounded-2xl p-4 su ${isTrain?'cursor-pointer active:scale-98':''}`}
+
+      {/* Progress cards: program + weight */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="bg-slate-800 rounded-2xl p-3">
+          <div className="text-slate-400 text-xs mb-1">🗓 Program</div>
+          <div className="text-white font-black text-lg">{week?`Uke ${week}/12`:'—'}</div>
+          <div className="h-1.5 bg-slate-700 rounded-full mt-2 mb-1 overflow-hidden">
+            <div className="h-full rounded-full" style={{width:`${programPct}%`,background:'linear-gradient(90deg,#a855f7,#ec4899)'}}/>
+          </div>
+          <div className="text-slate-500 text-xs">{weeksLeft} uker igjen</div>
+        </div>
+        <div className="bg-slate-800 rounded-2xl p-3">
+          <div className="text-slate-400 text-xs mb-1">⚖️ Mål-fremgang</div>
+          <div className="text-white font-black text-lg">{latestWeight?`${latestWeight} kg`:'—'}</div>
+          <div className="h-1.5 bg-slate-700 rounded-full mt-2 mb-1 overflow-hidden">
+            <div className="h-full rounded-full" style={{width:`${weightPct}%`,background:'linear-gradient(90deg,#22c55e,#84cc16)'}}/>
+          </div>
+          <div className="text-slate-500 text-xs">{weightToGo>0?`${weightToGo} kg til mål (${ME.goalWeight} kg)`:'🎯 Mål nådd!'}</div>
+        </div>
+      </div>
+
+      {/* Body stats mini */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="bg-slate-800 rounded-2xl p-3 text-center">
+          <div className="text-slate-400 text-xs mb-1">⚖️ Vekt</div>
+          <div className="text-white font-black">{avgWeight?`${avgWeight}kg`:'—'}</div>
+          <div className="text-slate-500 text-xs">start {ME.startWeight}</div>
+        </div>
+        <div className="bg-slate-800 rounded-2xl p-3 text-center">
+          <div className="text-slate-400 text-xs mb-1">📏 Midje</div>
+          <div className="text-white font-black">{thisWeek.waist?`${thisWeek.waist}cm`:'—'}</div>
+        </div>
+        <div className="bg-slate-800 rounded-2xl p-3 text-center">
+          <div className="text-slate-400 text-xs mb-1">🦾 Arm</div>
+          <div className="text-white font-black">{thisWeek.arm?`${thisWeek.arm}cm`:'—'}</div>
+        </div>
+      </div>
+
+      {/* Phase banner */}
+      {phase&&<div className="rounded-2xl p-3 flex items-center gap-3" style={{background:phase.color+'22',border:`1px solid ${phase.color}44`}}>
+        <span className="text-xl">{phase.emoji}</span>
+        <div><div className="text-white font-bold text-sm">{phase.name} · {phase.rpe}</div><div className="text-slate-300 text-xs">{phase.tip}</div></div>
+      </div>}
+
+      {/* Today's plan */}
+      {todayPlan&&<div className={`rounded-2xl p-4 ${isTrain?'cursor-pointer':''}`}
         style={{background:isTrain?'linear-gradient(135deg,#1e40af22,#7c3aed22)':'#1e293b',border:`1px solid ${isTrain?'#3b82f644':'#33415544'}`}}
         onClick={()=>isTrain&&todayPlan.id&&onGoWorkout(todayPlan.id)}>
         <div className="flex items-center justify-between">
-          <div><div className="text-slate-400 text-xs font-medium uppercase tracking-wide">I dag</div>
+          <div>
+            <div className="text-slate-400 text-xs font-medium uppercase tracking-wide">I dag</div>
             <div className="text-white font-bold mt-0.5">{todayPlan.label}</div>
             <div className="text-slate-400 text-sm">{todayPlan.sub}</div>
           </div>
           {isTrain&&<div className="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold text-sm">Start →</div>}
         </div>
       </div>}
+
       {/* Running tip */}
       {week&&runTip&&<div className="bg-teal-900 bg-opacity-40 border border-teal-700 border-opacity-40 rounded-2xl p-3">
         <div className="text-teal-400 text-xs font-bold mb-0.5">🏃 Løp i dag (uke {week})</div>
         <div className="text-white text-sm">{runTip}</div>
       </div>}
+
+      {/* Smart reminders */}
+      {reminders.length>0&&<div className="bg-slate-800 rounded-2xl p-4">
+        <div className="text-slate-300 text-sm font-bold mb-2">📌 Viktig nå</div>
+        <div className="space-y-2">
+          {reminders.map((r,i)=>(
+            <div key={i} className={`flex items-start gap-2 text-sm ${r.color}`}>
+              <span className="flex-shrink-0">{r.icon}</span>
+              <span className={r.bold?'font-bold':''}>{r.text}</span>
+            </div>
+          ))}
+        </div>
+      </div>}
+
       {/* Food quick action */}
       <button onClick={onGoFood} className="w-full bg-slate-800 rounded-2xl p-4 flex items-center justify-between">
         <div className="text-left">
@@ -1383,45 +1510,14 @@ function TodayScreen({startDate,onGoWorkout,onGoFood}){
         </div>
         <div className="text-slate-400 text-sm">+ Logg mat →</div>
       </button>
-      {/* Weight & measurements */}
-      <div className="grid grid-cols-3 gap-3">
-        <div className="bg-slate-800 rounded-2xl p-3 text-center">
-          <div className="text-slate-400 text-xs mb-1">⚖️ Vekt</div>
-          <div className="text-white font-black text-lg">{avgWeight?`${avgWeight}kg`:'—'}</div>
-          <div className="text-slate-500 text-xs">start {ME.startWeight}</div>
-        </div>
-        <div className="bg-slate-800 rounded-2xl p-3 text-center">
-          <div className="text-slate-400 text-xs mb-1">📏 Midje</div>
-          <div className="text-white font-black text-lg">{thisWeek.waist?`${thisWeek.waist}cm`:'—'}</div>
-        </div>
-        <div className="bg-slate-800 rounded-2xl p-3 text-center">
-          <div className="text-slate-400 text-xs mb-1">🦾 Arm</div>
-          <div className="text-white font-black text-lg">{thisWeek.arm?`${thisWeek.arm}cm`:'—'}</div>
-        </div>
-      </div>
+
+      {/* Water + Energy */}
+      <WaterTracker/>
+      <EnergyLog/>
+
       {/* Weekly rapport */}
       {week&&<WeeklyRapport week={week} startDate={startDate}/>}
-      {/* Water tracker */}
-      <WaterTracker/>
-      {/* Energy log */}
-      <EnergyLog/>
-      {/* Photo reminder for even weeks */}
-      {week&&week%2===0&&<div className="bg-purple-900 bg-opacity-30 border border-purple-700 border-opacity-40 rounded-2xl p-4 su">
-        <div className="text-purple-400 font-bold text-sm mb-1">📸 Fremgangsbilde – Uke {week}</div>
-        <div className="text-slate-300 text-sm">Ta bilde front + side + bak i samme lys som forrige gang. Dette er beviset på at det funker.</div>
-      </div>}
-      {/* Daily reminders */}
-      <div className="bg-slate-800 rounded-2xl p-4">
-        <div className="text-slate-300 text-sm font-bold mb-2">📌 Huskeliste i dag</div>
-        <div className="space-y-1.5 text-slate-400 text-sm">
-          <div className={`flex items-center gap-2 ${totalP>=ME.targetProtein?'text-green-400':''}`}>{totalP>=ME.targetProtein?'✅':'○'} 130-150g protein</div>
-          <div className={`flex items-center gap-2 ${todaySteps>=ME.stepGoal?'text-green-400':''}`}>{todaySteps>=ME.stepGoal?'✅':'○'} 8000-10000 steg</div>
-          <div>💊 3-5g kreatin (hver dag)</div>
-          <div>💧 500ml vann når du stod opp</div>
-          <div>😴 Sikt på 7+ timer i natt</div>
-          {new Date().getDay()===1&&<div className="text-purple-400">📏 Mandag: mål midje rundt navlen</div>}
-        </div>
-      </div>
+
     </div>
   </div>;
 }
