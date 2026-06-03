@@ -340,11 +340,15 @@ function RestTimer({onClose}){
 }
 
 // ─── ACTIVE WORKOUT ───────────────────────────────────────────
-function ActiveWorkout({workout,onBack,onDone}){
+function ActiveWorkout({workout,onBack,onDone,retroMode=false,editSession=null}){
   const[idx,setIdx]=useState(0);
-  const[log,setLog]=useState(()=>{const o={};workout.exercises.forEach(e=>{o[e.id]=Array.from({length:e.sets},()=>({w:'',r:'',done:false}));});return o;});
+  const[log,setLog]=useState(()=>{
+    if(editSession)return JSON.parse(JSON.stringify(editSession.log));
+    const o={};workout.exercises.forEach(e=>{o[e.id]=Array.from({length:e.sets},()=>({w:'',r:'',done:false}));});return o;
+  });
   const[timer,setTimer]=useState(false);
   const[finish,setFinish]=useState(false);
+  const[retroDate,setRetroDate]=useState(()=>editSession?.date?.slice(0,10)||todayStr());
   const ex=workout.exercises[idx];
   const sets=log[ex.id];
   const done=sets.filter(s=>s.done).length;
@@ -372,8 +376,12 @@ function ActiveWorkout({workout,onBack,onDone}){
       });
     });
     sv('fc_prs',prs);
-    sess.push({id:Date.now(),date:new Date().toISOString(),workoutId:workout.id,workoutTitle:workout.title,log:JSON.parse(JSON.stringify(log))});
-    sv('fc_sessions',sess);
+    if(editSession){
+      sv('fc_sessions',sess.map(s=>s.id===editSession.id?{...s,date:retroDate+'T12:00:00.000Z',log:JSON.parse(JSON.stringify(log))}:s));
+    } else {
+      sess.push({id:Date.now(),date:retroMode?retroDate+'T12:00:00.000Z':new Date().toISOString(),workoutId:workout.id,workoutTitle:workout.title,log:JSON.parse(JSON.stringify(log))});
+      sv('fc_sessions',sess);
+    }
     onDone();
   };
   return<div className="min-h-screen flex flex-col" style={{background:'#0f172a'}}>
@@ -384,6 +392,10 @@ function ActiveWorkout({workout,onBack,onDone}){
         <button onClick={()=>setFinish(true)} className="bg-white bg-opacity-20 rounded-xl px-3 py-1.5 text-sm font-medium">Fullfør</button>
       </div>
       <div className="h-1.5 bg-white bg-opacity-20 rounded-full overflow-hidden"><div className="h-full bg-white rounded-full transition-all duration-500" style={{width:`${prog}%`}}/></div>
+      {(retroMode||editSession)&&<div className="flex items-center gap-2 mt-2 bg-white bg-opacity-10 rounded-xl px-3 py-2">
+        <span className="text-white text-xs opacity-80">📅 Dato for økt:</span>
+        <input type="date" value={retroDate} onChange={e=>setRetroDate(e.target.value)} className="flex-1 bg-transparent text-white text-sm font-bold focus:outline-none min-w-0"/>
+      </div>}
     </div>
     <ExImg url={ex.img} name={ex.name}/>
     <div className="px-4 pt-4 pb-2 su" key={ex.id}>
@@ -517,9 +529,11 @@ function WorkoutScreen({initialId}){
   const[view,setView]=useState(initialId?'detail':null);
   const[sel,setSel]=useState(initialId?(WORKOUTS.find(w=>w.id===initialId)||null):null);
   const[subTab,setSubTab]=useState('okter');
+  const[retroMode,setRetroMode]=useState(false);
+  const[editSess,setEditSess]=useState(null);
   const sessions=ld('fc_sessions',[]);
   const lastFor=id=>{const s=[...sessions].reverse().find(s=>s.workoutId===id);return s?new Date(s.date).toLocaleDateString('no-NO',{day:'numeric',month:'short'}):null;};
-  if(view==='active'&&sel)return<ActiveWorkout workout={sel} onBack={()=>setView('detail')} onDone={()=>{setView(null);setSubTab('rekorder');}}/>;
+  if(view==='active'&&sel)return<ActiveWorkout workout={sel} onBack={()=>setView('detail')} onDone={()=>{setRetroMode(false);setEditSess(null);setView(null);setSubTab('rekorder');}} retroMode={retroMode} editSession={editSess}/>;
   if(view==='detail'&&sel)return(
     <div className="min-h-screen safe" style={{background:'#0f172a'}}>
       <div className="text-white px-4 pt-12 pb-8 relative" style={{background:`linear-gradient(135deg,${sel.from},${sel.to})`}}>
@@ -549,8 +563,9 @@ function WorkoutScreen({initialId}){
           </div>;
         })}
       </div>
-      <div className="px-4 pb-6">
-        <button onClick={()=>setView('active')} className="w-full text-white py-4 rounded-2xl font-black text-lg" style={{background:`linear-gradient(135deg,${sel.from},${sel.to})`}}>🚀 Start økt</button>
+      <div className="px-4 pb-6 space-y-2">
+        <button onClick={()=>{setRetroMode(false);setEditSess(null);setView('active');}} className="w-full text-white py-4 rounded-2xl font-black text-lg" style={{background:`linear-gradient(135deg,${sel.from},${sel.to})`}}>🚀 Start økt</button>
+        <button onClick={()=>{setRetroMode(true);setEditSess(null);setView('active');}} className="w-full bg-slate-700 text-slate-300 py-3 rounded-2xl font-bold text-sm">📝 Etter-registrer økt</button>
       </div>
     </div>
   );
@@ -581,7 +596,23 @@ function WorkoutScreen({initialId}){
           </button>
         ))}
       </div>}
-      {subTab==='rekorder'&&<div className="px-4"><StrengthHistory/></div>}
+      {subTab==='rekorder'&&<div className="px-4 space-y-4">
+        <StrengthHistory/>
+        <div className="space-y-2 pb-4">
+          <div className="text-slate-400 text-xs font-bold uppercase tracking-wide px-1">Tidligere økter</div>
+          {[...sessions].reverse().slice(0,30).map(s=>{
+            const wk=WORKOUTS.find(w=>w.id===s.workoutId);
+            return<div key={s.id} className="bg-slate-800 rounded-2xl flex items-center gap-3 px-4 py-3">
+              <div className="flex-1 min-w-0">
+                <div className="text-white text-sm font-bold truncate">{s.workoutTitle||s.workoutId}</div>
+                <div className="text-slate-400 text-xs">{new Date(s.date).toLocaleDateString('no-NO',{weekday:'short',day:'numeric',month:'short',year:'numeric'})}</div>
+              </div>
+              {wk&&<button onClick={()=>{setSel(wk);setEditSess(s);setRetroMode(false);setView('active');}} className="bg-slate-700 text-blue-400 text-xs px-3 py-2 rounded-xl font-bold flex-shrink-0">✏️ Rediger</button>}
+            </div>;
+          })}
+          {sessions.length===0&&<div className="text-slate-500 text-sm text-center py-6">Ingen økter logget enda</div>}
+        </div>
+      </div>}
     </div>
   );
 }
