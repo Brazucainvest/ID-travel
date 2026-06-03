@@ -468,11 +468,107 @@ function WorkoutScreen({initialId}){
   );
 }
 
+// ─── NUTRITION GUIDE ──────────────────────────────────────────
+function NutritionGuide(){
+  const[open,setOpen]=useState(null);
+  const macros=[
+    {id:'protein',icon:'🥩',name:'Protein',color:'#22c55e',tagline:'Bygger og bevarer muskler',goal:'140g per dag',
+      why:'Uten nok protein vil kroppen bryte ned muskler for energi. Du trenger 140g/dag for å bevare musklene dine mens du cutter. Det er det viktigste du gjør med maten.',
+      foods:['🥚 4 egg = 28g','🍗 200g kylling = 50g','🐟 150g laks = 37g','🥛 300g skyr = 35g','🧀 250g cottage cheese = 25g'],
+      tip:'1g protein = 4 kalorier. Protein metter godt og lagres nesten aldri som fett.'},
+    {id:'karbs',icon:'🍚',name:'Karbohydrater',color:'#3b82f6',tagline:'Drivstoff til trening og hjernen',goal:'~200g treningsdag / ~150g hviledag',
+      why:'Karbs er ikke fienden. De gir energi til tunge løft og løping. Uten karbs blir du slapp og treningene blir elendige. Spis mer på treningsdager, litt mindre på hviledager.',
+      foods:['🍚 100g ris (kokt) = 25g','🌾 60g havregryn = 40g','🍌 1 banan = 25g','🥔 150g potet = 26g','🍞 1 knekkebrød = 7g'],
+      tip:'Vær redd for sukker, ikke karbs. Baguette/søtsaker = tomme karbs. Ris/havre = bra karbs.'},
+    {id:'fett',icon:'🥑',name:'Fett',color:'#f59e0b',tagline:'Hormoner, hjerne og testosteron',goal:'~60-70g per dag',
+      why:'Fett er viktig for testosteron – spesielt på 40+. Ikke kutt fett til null. Bare unngå fritert mat og prosessert fett (chips, hurtigmat).',
+      foods:['🥚 1 egg = 5g fett','🐟 150g laks = 12g','🥜 30g nøtter = 15g','🥑 ½ avokado = 12g','🫒 1 ss olivenolje = 14g'],
+      tip:'1g fett = 9 kalorier – mer enn dobbelt av protein/karbs. Ikke unngå, men vær bevisst.'},
+  ];
+  return<div className="space-y-4">
+    <div className="bg-slate-800 rounded-2xl p-4">
+      <div className="text-white font-black mb-1">📚 Kostguide – enkelt forklart</div>
+      <div className="text-slate-400 text-sm">Alt du trenger å vite om mat for å nå målet ditt. Trykk på hver boks for mer info.</div>
+    </div>
+    {macros.map(m=>(
+      <div key={m.id} className="bg-slate-800 rounded-2xl overflow-hidden">
+        <button className="w-full px-4 py-4 flex items-center gap-3 text-left" onClick={()=>setOpen(open===m.id?null:m.id)}>
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0" style={{background:m.color+'22',border:`1px solid ${m.color}44`}}>{m.icon}</div>
+          <div className="flex-1">
+            <div className="text-white font-black">{m.name}</div>
+            <div className="text-slate-400 text-sm">{m.tagline}</div>
+            <div className="text-xs font-bold mt-0.5" style={{color:m.color}}>Ditt mål: {m.goal}</div>
+          </div>
+          <div className="text-slate-500 text-lg">{open===m.id?'▲':'▼'}</div>
+        </button>
+        {open===m.id&&<div className="px-4 pb-4 border-t border-slate-700 su">
+          <div className="text-slate-300 text-sm mt-3 mb-3">{m.why}</div>
+          <div className="text-slate-400 text-xs font-bold uppercase tracking-wide mb-2">Eksempler</div>
+          <div className="flex flex-wrap gap-2 mb-3">
+            {m.foods.map((f,i)=><div key={i} className="bg-slate-700 rounded-xl px-3 py-1.5 text-slate-300 text-sm">{f}</div>)}
+          </div>
+          <div className="bg-slate-700 rounded-xl p-3 text-sm" style={{borderLeft:`3px solid ${m.color}`}}>
+            <span className="text-slate-300">💡 {m.tip}</span>
+          </div>
+        </div>}
+      </div>
+    ))}
+    <div className="bg-slate-800 rounded-2xl p-4">
+      <div className="text-white font-black mb-3">🍽 Den perfekte tallerkenen</div>
+      {[{pct:40,color:'#22c55e',label:'Grønnsaker',desc:'Brokkoli, salat, agurk, paprika'},
+        {pct:30,color:'#3b82f6',label:'Protein',desc:'Kylling, fisk, egg'},
+        {pct:30,color:'#f59e0b',label:'Karbs',desc:'Ris, potet, grovt brød'}].map(item=>(
+        <div key={item.label} className="mb-3 last:mb-0">
+          <div className="flex justify-between text-sm mb-1"><span className="text-white font-medium">{item.label}</span><span style={{color:item.color}} className="font-bold">{item.pct}%</span></div>
+          <div className="h-2.5 bg-slate-700 rounded-full overflow-hidden mb-0.5"><div className="h-full rounded-full" style={{width:`${item.pct}%`,background:item.color}}/></div>
+          <div className="text-slate-500 text-xs">{item.desc}</div>
+        </div>
+      ))}
+    </div>
+    <div className="bg-slate-800 rounded-2xl overflow-hidden">
+      <div className="px-4 py-3 border-b border-slate-700">
+        <div className="text-white font-black">📅 Eksempel – én full dag</div>
+        <div className="text-slate-400 text-xs">~140g protein · ~2100 kcal (treningsdag)</div>
+      </div>
+      {[{time:'🌅 Frokost',meal:'4 egg + 2 knekkebrød + bær',p:35,kcal:380},
+        {time:'☀️ Lunsj',meal:'200g kylling + ris + salat',p:50,kcal:520},
+        {time:'🍌 Mellom',meal:'1 banan + 1 scoop whey',p:27,kcal:235},
+        {time:'🍽 Middag',meal:'150g laks + potet + grønnsaker',p:37,kcal:600},
+        {time:'🌙 Kveld',meal:'250g cottage cheese + eple',p:25,kcal:220},
+      ].map((m,i)=>(
+        <div key={i} className="flex items-center justify-between px-4 py-3 border-b border-slate-700 last:border-0">
+          <div className="flex-1"><div className="text-slate-400 text-xs">{m.time}</div><div className="text-white text-sm font-medium">{m.meal}</div></div>
+          <div className="text-right ml-3 flex-shrink-0"><div className="text-green-400 text-xs font-bold">{m.p}g prot</div><div className="text-slate-500 text-xs">{m.kcal} kcal</div></div>
+        </div>
+      ))}
+      <div className="px-4 py-3 bg-green-900 bg-opacity-20 flex justify-between text-sm font-bold">
+        <span className="text-slate-300">Totalt</span>
+        <div className="flex gap-4"><span className="text-green-400">174g protein ✅</span><span className="text-blue-400">1955 kcal</span></div>
+      </div>
+    </div>
+    <div className="bg-red-900 bg-opacity-20 border border-red-700 border-opacity-30 rounded-2xl p-4">
+      <div className="text-red-400 font-black mb-2">🚫 Unngå (ikke forby, men minimer)</div>
+      <div className="space-y-1.5 text-sm text-slate-300">
+        <div>• Baguette / hvitt brød sent på kvelden</div>
+        <div>• Brus og juice (50-70g sukker uten å kjenne det)</div>
+        <div>• Chips, sjokolade, potetgull – kaloribomber uten protein</div>
+        <div>• Alkohol – stopper fettforbrenning i 24-48t</div>
+      </div>
+    </div>
+    <div className="bg-blue-900 bg-opacity-30 border border-blue-700 border-opacity-40 rounded-2xl p-4 mb-4">
+      <div className="text-blue-400 font-black mb-1">🧠 Én regel å huske</div>
+      <div className="text-white text-sm">Hvert måltid: finn en proteinkilde. Resten ordner seg.</div>
+      <div className="text-slate-400 text-xs mt-2">Egg til frokost. Kylling til lunsj. Fisk til middag. Cottage cheese om kvelden. = 140g protein ferdig.</div>
+    </div>
+  </div>;
+}
+
 // ─── FOOD SCREEN ──────────────────────────────────────────────
 function FoodScreen(){
   const[log,setLog]=useState(()=>ld('fc_food_log',{}));
   const[modal,setModal]=useState(null);
   const[custom,setCustom]=useState({name:'',protein:'',kcal:''});
+  const[foodTab,setFoodTab]=useState('logger');
   const today=todayStr();
   const todayLog=log[today]||[];
   const totalP=todayLog.reduce((a,f)=>a+(f.protein||0),0);
@@ -520,7 +616,13 @@ function FoodScreen(){
         </div>
       </div>
     </div>
-    <div className="px-4 space-y-3">
+    <div className="flex px-4 gap-2 my-3">
+      {[['logger','📋 Logger'],['guide','📚 Kostguide']].map(([k,l])=>(
+        <button key={k} onClick={()=>setFoodTab(k)} className={`px-4 py-2 rounded-xl text-sm font-bold ${foodTab===k?'bg-white text-slate-900':'bg-slate-800 text-slate-400'}`}>{l}</button>
+      ))}
+    </div>
+    {foodTab==='guide'&&<div className="px-4"><NutritionGuide/></div>}
+    {foodTab==='logger'&&<div className="px-4 space-y-3">
       {Object.keys(mealLabels).map(type=>{
         const entries=todayLog.filter(e=>e.mealType===type);
         return<div key={type} className="bg-slate-800 rounded-2xl overflow-hidden">
@@ -546,7 +648,7 @@ function FoodScreen(){
         <div className="text-green-400 font-bold">Proteinmål nådd!</div>
         <div className="text-slate-400 text-sm">Bra jobbet – muskelmasse bevares under cut</div>
       </div>}
-    </div>
+    </div>}
     {modal&&<div className="fixed inset-0 z-50 flex items-end justify-center" style={{background:'rgba(0,0,0,0.8)'}}>
       <div className="bg-slate-900 border border-slate-700 rounded-t-3xl w-full max-w-md max-h-[88vh] overflow-y-auto p-5 su">
         <div className="flex justify-between items-center mb-4"><div className="text-white font-bold">{mealLabels[modal]}</div><button onClick={()=>setModal(null)} className="text-slate-400 text-2xl">✕</button></div>
