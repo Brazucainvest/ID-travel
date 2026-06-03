@@ -2,7 +2,7 @@
 <html lang="no">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,viewport-fit=cover"/>
   <title>Deivide – 12 ukers Fight Club</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -17,8 +17,9 @@
     @keyframes pop{0%{transform:scale(0.9)}60%{transform:scale(1.05)}100%{transform:scale(1)}}
     .su{animation:slideUp .2s ease}
     .pop{animation:pop .25s ease}
-    .safe{padding-bottom:80px}
-    .bnav{position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(15,23,42,0.97);backdrop-filter:blur(14px);border-top:1px solid rgba(255,255,255,0.07)}
+    .safe{padding-bottom:calc(80px + env(safe-area-inset-bottom,0px))}
+    .bnav{position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(15,23,42,0.97);backdrop-filter:blur(14px);border-top:1px solid rgba(255,255,255,0.07);padding-bottom:env(safe-area-inset-bottom,0px)}
+    input,textarea,select{font-size:16px}
     .ring-bg{stroke:#1e293b}.ring-fg{stroke-linecap:round;transition:stroke-dashoffset .5s ease}
     textarea{resize:none}
   </style>
@@ -323,7 +324,7 @@ function RestTimer({onClose}){
   const bar=pct>50?'#3b82f6':pct>20?'#f59e0b':'#ef4444';
   const mm=String(Math.floor(secs/60)).padStart(2,'0'),ss=String(secs%60).padStart(2,'0');
   return<div className="fixed inset-0 z-50 flex items-end justify-center" style={{background:'rgba(0,0,0,0.75)'}}>
-    <div className="bg-slate-900 border border-slate-700 rounded-t-3xl w-full max-w-md p-6 pb-8 su">
+    <div className="bg-slate-900 border border-slate-700 rounded-t-3xl w-full max-w-md p-6 su" style={{paddingBottom:'max(32px,env(safe-area-inset-bottom,32px))'}}>
       <div className="flex justify-between items-center mb-4"><span className="font-bold text-white text-lg">⏱ Hviletimer</span><button onClick={onClose} className="text-slate-400 text-2xl">✕</button></div>
       <div className={`text-6xl font-black text-center mb-2 ${secs===0?'text-green-400':'text-blue-400'}`} style={{fontVariantNumeric:'tabular-nums'}}>{secs===0?'✅ GÅ!':`${mm}:${ss}`}</div>
       <div className="h-2 bg-slate-800 rounded-full mb-5 overflow-hidden"><div className="h-full rounded-full transition-all duration-1000" style={{width:`${pct}%`,background:bar}}/></div>
@@ -880,7 +881,7 @@ function FoodScreen(){
         {/* Content */}
         <div className="overflow-y-auto flex-1 px-5 pb-2">
           {modalTab==='søk'&&<div className="space-y-3">
-            <input autoFocus placeholder="Søk etter matvare... (f.eks. pølse, laks, ris)" value={query} onChange={e=>{setQuery(e.target.value);setSelFood(null);setSelG('');}}
+            <input placeholder="Søk etter matvare... (f.eks. pølse, laks, ris)" value={query} onChange={e=>{setQuery(e.target.value);setSelFood(null);setSelG('');}}
               className="w-full bg-slate-800 border border-slate-600 text-white rounded-xl p-3 text-sm"/>
             {!selFood&&<div className="space-y-1.5 max-h-52 overflow-y-auto">
               {(query.length>0?filteredFoods:FOOD_DB.slice(0,20)).map(f=>(
@@ -944,7 +945,7 @@ function FoodScreen(){
           </div>}
         </div>
         {/* Sticky action buttons when food is selected */}
-        {modalTab==='søk'&&selFood&&selG&&<div className="px-5 pt-3 pb-5 border-t border-slate-700 flex-shrink-0 flex gap-2" style={{background:'#0f172a'}}>
+        {modalTab==='søk'&&selFood&&selG&&<div className="px-5 pt-3 border-t border-slate-700 flex-shrink-0 flex gap-2" style={{background:'#0f172a',paddingBottom:'max(20px,env(safe-area-inset-bottom,20px))'}}>
           <button onClick={addFoodItem} className="flex-1 bg-blue-600 text-white py-3.5 rounded-2xl font-bold text-sm">+ Legg i kurv</button>
           <button onClick={()=>{const g=parseFloat(selG);addMeal({name:`${selFood.name} (${g}g)`,desc:`${selFood.cat} · ${g}g`,protein:Math.round(selFood.per100.p*g/100),carbs:Math.round(selFood.per100.c*g/100),fat:Math.round(selFood.per100.f*g/100),kcal:Math.round(selFood.per100.k*g/100)},modal);setSelFood(null);setSelG('');setBasket([]);}} className="flex-1 bg-green-600 text-white py-3.5 rounded-2xl font-bold text-sm">✅ Legg til</button>
         </div>}
