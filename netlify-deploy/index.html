@@ -878,11 +878,11 @@ function FoodScreen(){
           <button onClick={addBasket} className="w-full bg-green-600 text-white py-2 rounded-xl font-bold text-sm">✅ Legg til som måltid</button>
         </div>}
         {/* Content */}
-        <div className="overflow-y-auto flex-1 px-5 pb-6">
+        <div className="overflow-y-auto flex-1 px-5 pb-2">
           {modalTab==='søk'&&<div className="space-y-3">
             <input autoFocus placeholder="Søk etter matvare... (f.eks. pølse, laks, ris)" value={query} onChange={e=>{setQuery(e.target.value);setSelFood(null);setSelG('');}}
               className="w-full bg-slate-800 border border-slate-600 text-white rounded-xl p-3 text-sm"/>
-            {!selFood&&<div className="space-y-1.5 max-h-64 overflow-y-auto">
+            {!selFood&&<div className="space-y-1.5 max-h-52 overflow-y-auto">
               {(query.length>0?filteredFoods:FOOD_DB.slice(0,20)).map(f=>(
                 <button key={f.id} onClick={()=>{setSelFood(f);setSelG(String(f.portions[0].g));}} className="w-full flex items-center gap-3 bg-slate-800 rounded-xl p-3 text-left hover:bg-slate-700 transition-all">
                   <span className="text-xl flex-shrink-0">{f.emoji}</span>
@@ -890,9 +890,9 @@ function FoodScreen(){
                     <div className="text-white text-sm font-semibold truncate">{f.name}</div>
                     <div className="text-slate-500 text-xs">{f.cat}</div>
                   </div>
-                  <div className="text-right flex-shrink-0 text-xs text-slate-500">
+                  <div className="text-right flex-shrink-0 text-xs">
                     <div className="text-green-400 font-bold">{f.per100.p}g P</div>
-                    <div>per 100g</div>
+                    <div className="text-slate-500">per 100g</div>
                   </div>
                 </button>
               ))}
@@ -901,32 +901,27 @@ function FoodScreen(){
             </div>}
             {selFood&&<div className="bg-slate-800 rounded-2xl p-4 su">
               <div className="flex items-center gap-3 mb-3">
-                <span className="text-3xl">{selFood.emoji}</span>
-                <div>
-                  <div className="text-white font-black">{selFood.name}</div>
+                <span className="text-2xl">{selFood.emoji}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="text-white font-black text-sm">{selFood.name}</div>
                   <div className="text-slate-400 text-xs">Per 100g: {selFood.per100.p}g P · {selFood.per100.c}g K · {selFood.per100.f}g F · {selFood.per100.k} kcal</div>
                 </div>
-                <button onClick={()=>{setSelFood(null);setSelG('');}} className="ml-auto text-slate-500 text-xl">✕</button>
+                <button onClick={()=>{setSelFood(null);setSelG('');}} className="text-slate-500 text-xl flex-shrink-0">✕</button>
               </div>
-              <div className="text-slate-400 text-xs font-bold mb-2">Hurtigporsjoner:</div>
-              <div className="flex flex-wrap gap-2 mb-3">
+              <div className="flex flex-wrap gap-1.5 mb-3">
                 {selFood.portions.map(p=>(
                   <button key={p.g} onClick={()=>setSelG(String(p.g))} className={`px-3 py-1.5 rounded-xl text-xs font-bold ${String(selG)===String(p.g)?'bg-blue-600 text-white':'bg-slate-700 text-slate-300'}`}>{p.l}</button>
                 ))}
               </div>
-              <div className="flex gap-2 mb-3">
+              <div className="flex gap-2 mb-3 items-center">
                 <input type="number" inputMode="numeric" placeholder="Gram" value={selG} onChange={e=>setSelG(e.target.value)} className="flex-1 bg-slate-700 border border-slate-600 text-white rounded-xl p-2.5 text-sm font-bold text-center"/>
-                <span className="text-slate-400 self-center text-sm">gram</span>
+                <span className="text-slate-400 text-sm">gram</span>
               </div>
-              {preview&&parseFloat(selG)>0&&<div className="grid grid-cols-4 gap-2 mb-3">
+              {preview&&parseFloat(selG)>0&&<div className="flex gap-2">
                 {[{l:'Protein',v:preview.p+'g',c:'text-green-400'},{l:'Karbs',v:preview.c+'g',c:'text-blue-400'},{l:'Fett',v:preview.fat+'g',c:'text-yellow-400'},{l:'Kcal',v:preview.k,c:'text-white'}].map(x=>(
-                  <div key={x.l} className="bg-slate-700 rounded-xl p-2 text-center"><div className={`font-black text-sm ${x.c}`}>{x.v}</div><div className="text-slate-500 text-xs">{x.l}</div></div>
+                  <div key={x.l} className="flex-1 bg-slate-700 rounded-xl p-2 text-center"><div className={`font-black text-sm ${x.c}`}>{x.v}</div><div className="text-slate-500 text-xs">{x.l}</div></div>
                 ))}
               </div>}
-              <div className="flex gap-2">
-                <button onClick={addFoodItem} disabled={!selG} className="flex-1 bg-blue-600 text-white py-2.5 rounded-xl font-bold text-sm disabled:opacity-40">+ Legg i kurv</button>
-                <button onClick={()=>{if(!selFood||!selG)return;const g=parseFloat(selG);addMeal({name:`${selFood.name} (${g}g)`,desc:`${selFood.cat} · ${g}g`,protein:Math.round(selFood.per100.p*g/100),carbs:Math.round(selFood.per100.c*g/100),fat:Math.round(selFood.per100.f*g/100),kcal:Math.round(selFood.per100.k*g/100)},modal);setSelFood(null);setSelG('');setBasket([]);}} disabled={!selG} className="flex-1 bg-green-600 text-white py-2.5 rounded-xl font-bold text-sm disabled:opacity-40">✅ Legg til direkte</button>
-              </div>
             </div>}
           </div>}
           {modalTab==='hurtig'&&<div className="space-y-2">
@@ -948,6 +943,11 @@ function FoodScreen(){
             <button onClick={()=>{if(custom.name)addMeal({name:custom.name,desc:'Manuell',protein:parseFloat(custom.protein)||0,carbs:parseFloat(custom.carbs)||0,fat:parseFloat(custom.fat)||0,kcal:parseFloat(custom.kcal)||0},modal);}} className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">+ Legg til</button>
           </div>}
         </div>
+        {/* Sticky action buttons when food is selected */}
+        {modalTab==='søk'&&selFood&&selG&&<div className="px-5 pt-3 pb-5 border-t border-slate-700 flex-shrink-0 flex gap-2" style={{background:'#0f172a'}}>
+          <button onClick={addFoodItem} className="flex-1 bg-blue-600 text-white py-3.5 rounded-2xl font-bold text-sm">+ Legg i kurv</button>
+          <button onClick={()=>{const g=parseFloat(selG);addMeal({name:`${selFood.name} (${g}g)`,desc:`${selFood.cat} · ${g}g`,protein:Math.round(selFood.per100.p*g/100),carbs:Math.round(selFood.per100.c*g/100),fat:Math.round(selFood.per100.f*g/100),kcal:Math.round(selFood.per100.k*g/100)},modal);setSelFood(null);setSelG('');setBasket([]);}} className="flex-1 bg-green-600 text-white py-3.5 rounded-2xl font-bold text-sm">✅ Legg til</button>
+        </div>}
       </div>
     </div>;
   })()}
