@@ -10,37 +10,32 @@
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
     *{-webkit-tap-highlight-color:transparent;box-sizing:border-box}
-    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f172a;margin:0;color:#1e293b}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f172a;margin:0}
     ::-webkit-scrollbar{display:none}
     input[type=number]::-webkit-inner-spin-button{opacity:1}
-    @keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-    .su{animation:slideUp .22s ease}
-    .fi{animation:fadeIn .2s ease}
-    .safe-bottom{padding-bottom:80px}
-    .bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(15,23,42,0.97);backdrop-filter:blur(12px);border-top:1px solid rgba(255,255,255,0.08)}
-    .ring-bg{stroke:#1e293b}
-    .ring-fg{stroke-linecap:round;transition:stroke-dashoffset 0.5s ease}
+    @keyframes slideUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes pop{0%{transform:scale(0.9)}60%{transform:scale(1.05)}100%{transform:scale(1)}}
+    .su{animation:slideUp .2s ease}
+    .pop{animation:pop .25s ease}
+    .safe{padding-bottom:80px}
+    .bnav{position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(15,23,42,0.97);backdrop-filter:blur(14px);border-top:1px solid rgba(255,255,255,0.07)}
+    .ring-bg{stroke:#1e293b}.ring-fg{stroke-linecap:round;transition:stroke-dashoffset .5s ease}
+    textarea{resize:none}
   </style>
 </head>
-<body class="bg-slate-900">
-<div id="root"></div>
+<body><div id="root"></div>
 <script type="text/babel">
-const{useState,useEffect,useRef,useCallback,useMemo}=React;
+const{useState,useEffect,useRef,useMemo}=React;
 
-// ═══════════════════════════════════════════════════════════════
-// DATA
-// ═══════════════════════════════════════════════════════════════
-
+// ─── CONSTANTS ────────────────────────────────────────────────
 const ME={name:'Deivide',age:40,height:171,startWeight:70.2,goalWeight:67,
-  targetProtein:140,kcalTrain:2150,kcalRest:1950};
+  targetProtein:140,kcalTrain:2150,kcalRest:1950,stepGoal:10000};
 
 const PHASES=[
   {range:[1,4],name:'Fase 1 – Teknikk',emoji:'🎯',color:'#3b82f6',rpe:'RPE 6-7',tip:'Lær øvelsene riktig. Bygg vanen. Ikke maks.'},
   {range:[5,8],name:'Fase 2 – Muskelbygging',emoji:'💪',color:'#8b5cf6',rpe:'RPE 7-8',tip:'Øk vekt eller reps litt hver uke. Log alt.'},
   {range:[9,12],name:'Fase 3 – Definisjon',emoji:'🔥',color:'#ef4444',rpe:'RPE 7-8',tip:'Hold styrken. Øk steg og løp litt. Juster kalorier.'},
 ];
-
 const WEEK_SCHEDULE={
   1:{type:'workout',id:'A',label:'Økt A – Push 🏋️',sub:'Bryst, skuldre, triceps'},
   2:{type:'bonus',label:'Kettlebell hjemme 🏠',sub:'15-20 min med 10kg KB eller 30 min gange'},
@@ -50,16 +45,14 @@ const WEEK_SCHEDULE={
   6:{type:'workout',id:'C',label:'Økt C – Bein 🦵',sub:'Bein + ekstra bryst/armer + løp ute'},
   0:{type:'rest',label:'Fri + meal prep 🥗',sub:'Gåtur. Meal prep 30-45 min.'},
 };
-
 const RUNNING=[
-  {w:[1,2],mon:'10-15 min rolig',wed:'6-8×1min rask / 1min rolig',sat:'20-25 min rolig'},
-  {w:[3,4],mon:'15-20 min rolig',wed:'6×2min rask / 1min rolig',sat:'25-30 min rolig'},
-  {w:[5,6],mon:'15-20 min rolig',wed:'8×1min rask / 1min rolig',sat:'30-35 min rolig'},
-  {w:[7,8],mon:'20 min rolig',wed:'6-8×2min rask / 1min rolig',sat:'35 min rolig'},
-  {w:[9,10],mon:'20 min rolig/gange',wed:'8×1min rask / 1min rolig',sat:'35-40 min rolig'},
-  {w:[11,12],mon:'20 min rolig',wed:'6×2min rask / 1min rolig',sat:'40 min rolig'},
+  {w:[1,2],mon:'10-15 min rolig',wed:'6-8×1min rask/1min rolig',sat:'20-25 min rolig'},
+  {w:[3,4],mon:'15-20 min rolig',wed:'6×2min rask/1min rolig',sat:'25-30 min rolig'},
+  {w:[5,6],mon:'15-20 min rolig',wed:'8×1min rask/1min rolig',sat:'30-35 min rolig'},
+  {w:[7,8],mon:'20 min rolig',wed:'6-8×2min rask/1min rolig',sat:'35 min rolig'},
+  {w:[9,10],mon:'20 min rolig/gange',wed:'8×1min rask/1min rolig',sat:'35-40 min rolig'},
+  {w:[11,12],mon:'20 min rolig',wed:'6×2min rask/1min rolig',sat:'40 min rolig'},
 ];
-
 const WORKOUTS=[
   {id:'A',title:'Økt A – Push',sub:'Bryst / skuldre / triceps',from:'#1d4ed8',to:'#7c3aed',emoji:'🏋️',exercises:[
     {id:'A1',name:'Skråbenk med hantler',en:'Incline Dumbbell Press',sets:4,reps:'8-10',focus:'Øvre bryst',eq:'Skråbenk + hantler',tip:'Skulderblad bak/ned. Press litt inn mot midten.',img:'https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-incline-bench-press.jpg'},
@@ -83,28 +76,28 @@ const WORKOUTS=[
     {id:'C1',name:'Beinpress',en:'Leg Press Machine',sets:4,reps:'10',focus:'Bein',eq:'Leg press maskin',tip:'Føtter skulderbredde. Ikke lås knær hardt.',img:'https://liftmanual.com/wp-content/uploads/2023/04/sled-45-leg-press.jpg'},
     {id:'C2',name:'Rumensk markløft',en:'Romanian Deadlift',sets:3,reps:'8-10',focus:'Bakside lår',eq:'Hantler eller stang',tip:'Hofte bak. Rett rygg. Kjenn bakside lår.',img:'https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-romanian-deadlift.jpg'},
     {id:'C3',name:'Bulgarsk utfall',en:'Bulgarian Split Squat',sets:3,reps:'8',repsNote:'per side',focus:'Bein atletisk',eq:'Benk + kroppsvekt/hantler',tip:'Kontrollert ned. Start uten ekstra vekt.',img:'https://liftmanual.com/wp-content/uploads/2023/04/bulgarian-split-squat.jpg'},
-    {id:'C4',name:'Brystpress / Push-ups',en:'Chest Press / Push Up',sets:3,reps:'10-12',focus:'Ekstra bryst',eq:'Maskin eller gulv',tip:'Ekstra brystvolum. Stopp 1-2 reps før helt tom.',img:'https://liftmanual.com/wp-content/uploads/2026/05/push-up-m.jpg'},
-    {id:'C5',name:'Overhead triceps extension',en:'Overhead Triceps Extension',sets:3,reps:'10-12',focus:'Triceps',eq:'Kabel + tau',tip:'Albuer peker frem. Strekk triceps langt.',img:'https://liftmanual.com/wp-content/uploads/2026/05/dumbbell-seated-single-arm-overhead-triceps-extension.jpg'},
+    {id:'C4',name:'Brystpress / Push-ups',en:'Chest Press / Push Up',sets:3,reps:'10-12',focus:'Ekstra bryst',eq:'Maskin eller gulv',tip:'Stopp 1-2 reps før helt tom.',img:'https://liftmanual.com/wp-content/uploads/2026/05/push-up-m.jpg'},
+    {id:'C5',name:'Overhead triceps extension',en:'Overhead Triceps Ext.',sets:3,reps:'10-12',focus:'Triceps',eq:'Kabel + tau',tip:'Albuer peker frem. Strekk triceps langt.',img:'https://liftmanual.com/wp-content/uploads/2026/05/dumbbell-seated-single-arm-overhead-triceps-extension.jpg'},
     {id:'C6',name:'Biceps curl lett',en:'Dumbbell Biceps Curl',sets:3,reps:'12-15',focus:'Biceps pump',eq:'Kabel eller hantler',tip:'Pump og kontroll. Ikke maks.',img:'https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-biceps-curl.jpg'},
     {id:'C7',name:'Planke / Sideplanke',en:'Plank / Side Plank',sets:3,reps:'hold',repsNote:'3 sett',focus:'Core',eq:'Matte',tip:'Hold ribbein ned og rumpa stram.',img:'https://liftmanual.com/wp-content/uploads/2023/04/lateral-side-plank.jpg'},
   ]},
+  {id:'KB',title:'Kettlebell hjemme',sub:'10kg – bonus, ikke stress',from:'#0f766e',to:'#0e7490',emoji:'🏠',exercises:[
+    {id:'KB1',name:'Goblet squat',en:'KB Goblet Squat',sets:3,reps:'12',focus:'Bein / teknikk',eq:'10kg kettlebell',tip:'Hold kula foran brystet. Rolig ned.',img:'https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-goblet-squat.jpg'},
+    {id:'KB2',name:'KB Rumensk markløft',en:'KB Romanian Deadlift',sets:3,reps:'12',focus:'Bakside lår',eq:'10kg kettlebell',tip:'Hofte bak, rett rygg.',img:'https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-romanian-deadlift.jpg'},
+    {id:'KB3',name:'Enarms roing',en:'KB One Arm Row',sets:3,reps:'10',repsNote:'per side',focus:'Rygg',eq:'10kg kettlebell + stol',tip:'Støtt deg på benk/stol.',img:'https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-one-arm-bent-over-row.jpg'},
+    {id:'KB4',name:'Floor press',en:'KB Floor Press',sets:3,reps:'10',repsNote:'per side',focus:'Bryst',eq:'10kg kettlebell',tip:'Ligg på gulv, press kontrollert.',img:'https://liftmanual.com/wp-content/uploads/2023/04/lever-chest-press.jpg'},
+    {id:'KB5',name:'Kettlebell swing',en:'KB Swing',sets:6,reps:'15',focus:'Kondisjon + helkropp',eq:'10kg kettlebell',tip:'Hoftebevegelse, ikke knebøy. Teknikk først.',img:'https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-lateral-raise.jpg'},
+    {id:'KB6',name:'Dead bug',en:'Dead Bug',sets:3,reps:'10',repsNote:'per side',focus:'Core',eq:'Matte',tip:'Rygg mot gulv hele veien.',img:'https://liftmanual.com/wp-content/uploads/2023/04/lateral-side-plank.jpg'},
+  ]},
 ];
-
-const KB_WORKOUT={id:'KB',title:'Kettlebell hjemme',sub:'10kg – bonus, ikke stress',from:'#0f766e',to:'#0e7490',emoji:'🏠',exercises:[
-  {id:'KB1',name:'Goblet squat',en:'Kettlebell Goblet Squat',sets:3,reps:'12',focus:'Bein / teknikk',eq:'10kg kettlebell',tip:'Hold kula foran brystet. Rolig ned.',img:'https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-goblet-squat.jpg'},
-  {id:'KB2',name:'KB Rumensk markløft',en:'Kettlebell Romanian Deadlift',sets:3,reps:'12',focus:'Bakside lår',eq:'10kg kettlebell',tip:'Hofte bak, rett rygg, kjenn bakside lår.',img:'https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-romanian-deadlift.jpg'},
-  {id:'KB3',name:'Enarms roing',en:'Kettlebell One Arm Row',sets:3,reps:'10',repsNote:'per side',focus:'Rygg',eq:'10kg kettlebell + stol',tip:'Støtt deg på benk/stol.',img:'https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-one-arm-bent-over-row.jpg'},
-  {id:'KB4',name:'Floor press',en:'Kettlebell Floor Press',sets:3,reps:'10',repsNote:'per side',focus:'Bryst',eq:'10kg kettlebell',tip:'Ligg på gulv, press kontrollert.',img:'https://liftmanual.com/wp-content/uploads/2023/04/lever-chest-press.jpg'},
-  {id:'KB5',name:'Kettlebell swing',en:'Kettlebell Swing',sets:6,reps:'15',focus:'Kondisjon + helkropp',eq:'10kg kettlebell',tip:'Kun hoftebevegelse, ikke knebøy. Teknikk først.',img:'https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-lateral-raise.jpg'},
-  {id:'KB6',name:'Dead bug',en:'Dead Bug',sets:3,reps:'10',repsNote:'per side',focus:'Core',eq:'Matte',tip:'Core med kontroll. Rygg mot gulv.',img:'https://liftmanual.com/wp-content/uploads/2023/04/lateral-side-plank.jpg'},
-]};
+const ALL_EXERCISES=WORKOUTS.flatMap(w=>w.exercises);
 
 const MEALS={
   frokost:[
     {name:'Skyr-bowl',desc:'300g skyr + bær + 40g havregryn + kanel',protein:35,kcal:400},
     {name:'Egg-frokost',desc:'3 egg + 1-2 knekkebrød + frukt',protein:30,kcal:350},
     {name:'Protein-havre',desc:'60g havregryn + melk + 1 scoop whey + bær',protein:42,kcal:450},
-    {name:'Cottage cheese',desc:'250g cottage cheese + eple/bær + kanel + knekkebrød',protein:32,kcal:340},
+    {name:'Cottage cheese',desc:'250g cottage cheese + eple/bær + knekkebrød',protein:32,kcal:340},
   ],
   lunsj:[
     {name:'Kylling-bowl',desc:'Kylling + ris/potet + salat + dressing',protein:42,kcal:520},
@@ -132,233 +125,71 @@ const MEALS={
     {name:'Egg/knekkebrød',desc:'2-3 egg på knekkebrød – ikke baguette!',protein:24,kcal:240},
   ],
 };
-
 const SUPPLEMENTS=[
-  {name:'Kreatin monohydrat',dose:'3-5g/dag',when:'Når som helst – ta det daglig',note:'Gir litt vannvekt i musklene. Bra for styrke.',color:'blue'},
+  {name:'Kreatin monohydrat',dose:'3-5g/dag',when:'Daglig – når som helst',note:'Gir litt vannvekt i musklene. Bra for styrke.',color:'blue'},
   {name:'Whey protein',dose:'1 scoop (20-30g)',when:'Når proteininntak er lavt',note:'Praktisk supplement, ikke magisk.',color:'purple'},
   {name:'Vitamin D',dose:'Etter etikett',when:'Særlig vinterstid',note:'Vanlig mangel i Norden.',color:'yellow'},
   {name:'Omega-3',dose:'Etter etikett',when:'Hvis du sjelden spiser fet fisk',note:'Ikke nødvendig med laks 2-3x/uke.',color:'green'},
 ];
 
-// ═══════════════════════════════════════════════════════════════
-// STORAGE UTILS
-// ═══════════════════════════════════════════════════════════════
+// ─── STORAGE ──────────────────────────────────────────────────
+const ld=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}};
+const sv=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+const todayStr=()=>new Date().toISOString().slice(0,10);
+const getWeekNum=s=>{if(!s)return null;const d=Math.floor((Date.now()-new Date(s).getTime())/604800000)+1;return Math.min(Math.max(d,1),12)};
+const getPhase=w=>{if(!w)return null;return PHASES.find(p=>w>=p.range[0]&&w<=p.range[1])};
+const getRunning=w=>{if(!w)return null;return RUNNING.find(r=>w>=r.w[0]&&w<=r.w[1])};
 
-const load=(k,def)=>{try{return JSON.parse(localStorage.getItem(k))??def}catch{return def}};
-const save=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
-
-function getWeekNum(startDate){
-  if(!startDate)return null;
-  const diff=Date.now()-new Date(startDate).getTime();
-  const w=Math.floor(diff/604800000)+1;
-  return Math.min(Math.max(w,1),12);
+// ─── UTILITY COMPONENTS ───────────────────────────────────────
+function Ring({value,max,color,size=84,stroke=8,label,sub}){
+  const r=(size-stroke*2)/2,c=2*Math.PI*r,pct=Math.min(value/max,1),off=c-pct*c;
+  return<div className="flex flex-col items-center">
+    <svg width={size} height={size} style={{transform:'rotate(-90deg)'}}>
+      <circle className="ring-bg" cx={size/2} cy={size/2} r={r} fill="none" strokeWidth={stroke}/>
+      <circle className="ring-fg" cx={size/2} cy={size/2} r={r} fill="none" strokeWidth={stroke} stroke={color} strokeDasharray={c} strokeDashoffset={off}/>
+    </svg>
+    <div className="text-center -mt-0.5">
+      <div className="text-white font-black text-sm">{label}</div>
+      {sub&&<div className="text-slate-400 text-xs">{sub}</div>}
+    </div>
+  </div>;
 }
 
-function getPhase(week){
-  if(!week)return null;
-  return PHASES.find(p=>week>=p.range[0]&&week<=p.range[1]);
+function ExImg({url,name}){
+  const[err,setErr]=useState(false);
+  return<div className="w-full overflow-hidden flex items-center justify-center" style={{height:220,background:'linear-gradient(135deg,#1e3a5f,#0f172a)'}}>
+    {!err?<img src={url} alt={name} onError={()=>setErr(true)} className="w-full h-full object-cover"/>
+    :<div className="text-center"><div className="text-5xl mb-2">🏋️</div><div className="text-slate-400 text-sm">{name}</div></div>}
+  </div>;
 }
 
-function getRunningForWeek(week){
-  if(!week)return null;
-  return RUNNING.find(r=>week>=r.w[0]&&week<=r.w[1]);
-}
-
-function todayStr(){return new Date().toISOString().slice(0,10)}
-
-// ═══════════════════════════════════════════════════════════════
-// SETUP SCREEN
-// ═══════════════════════════════════════════════════════════════
-
+// ─── SETUP ────────────────────────────────────────────────────
 function SetupScreen({onDone}){
-  const [date,setDate]=useState(todayStr());
-  return(
-    <div className="min-h-screen flex flex-col items-center justify-center p-6" style={{background:'linear-gradient(135deg,#0f172a,#1e3a5f)'}}>
-      <div className="w-full max-w-sm text-center su">
-        <div className="text-6xl mb-4">🥊</div>
-        <h1 className="text-3xl font-black text-white mb-1">Fight Club</h1>
-        <p className="text-blue-300 mb-8">12 ukers plan for Deivide</p>
-        <div className="bg-white bg-opacity-10 rounded-2xl p-5 mb-6 text-left">
-          <div className="text-white font-bold mb-1">📅 Startdato for planen</div>
-          <div className="text-blue-200 text-sm mb-3">Sett datoen du begynte (eller begynner) uke 1.</div>
-          <input type="date" value={date} onChange={e=>setDate(e.target.value)}
-            className="w-full bg-white bg-opacity-10 text-white border border-white border-opacity-20 rounded-xl p-3 text-center text-lg font-bold"/>
-        </div>
-        <div className="bg-white bg-opacity-5 rounded-2xl p-4 mb-6 text-left text-sm text-blue-200 space-y-1">
-          <div>🎯 Mål: 66,5–68,5 kg • synlig mage</div>
-          <div>💪 3 gymøkter/uke: Man / Ons / Lør</div>
-          <div>🥗 130–150g protein per dag</div>
-          <div>😴 7+ timer søvn – kritisk for resultater</div>
-        </div>
-        <button onClick={()=>{save('fc_start',date);onDone(date);}}
-          className="w-full py-4 rounded-2xl font-black text-lg text-white"
-          style={{background:'linear-gradient(135deg,#2563eb,#7c3aed)'}}>
-          Start planen 🚀
-        </button>
+  const[date,setDate]=useState(todayStr());
+  return<div className="min-h-screen flex flex-col items-center justify-center p-6" style={{background:'linear-gradient(135deg,#0f172a,#1e3a5f)'}}>
+    <div className="w-full max-w-sm text-center su">
+      <div className="text-6xl mb-4">🥊</div>
+      <h1 className="text-3xl font-black text-white mb-1">Fight Club</h1>
+      <p className="text-blue-300 mb-8">12 ukers plan for Deivide</p>
+      <div className="bg-white bg-opacity-10 rounded-2xl p-5 mb-5 text-left">
+        <div className="text-white font-bold mb-1">📅 Startdato for planen</div>
+        <div className="text-blue-200 text-sm mb-3">Sett datoen du begynte (eller begynner) uke 1.</div>
+        <input type="date" value={date} onChange={e=>setDate(e.target.value)} className="w-full bg-white bg-opacity-10 text-white border border-white border-opacity-20 rounded-xl p-3 text-center text-lg font-bold"/>
       </div>
+      <div className="bg-white bg-opacity-5 rounded-2xl p-4 mb-6 text-left text-sm text-blue-200 space-y-1">
+        <div>🎯 Mål: 66,5–68,5 kg · synlig mage og definerte muskler</div>
+        <div>💪 3 gymøkter/uke: Man / Ons / Lør</div>
+        <div>🥗 130–150g protein per dag</div>
+        <div>😴 7+ timer søvn – kritisk for resultater</div>
+      </div>
+      <button onClick={()=>{sv('fc_start',date);onDone(date);}} className="w-full py-4 rounded-2xl font-black text-lg text-white" style={{background:'linear-gradient(135deg,#2563eb,#7c3aed)'}}>
+        Start planen 🚀
+      </button>
     </div>
-  );
+  </div>;
 }
 
-// ═══════════════════════════════════════════════════════════════
-// RING COMPONENT
-// ═══════════════════════════════════════════════════════════════
-
-function Ring({value,max,color,size=80,stroke=8,label,sub}){
-  const r=(size-stroke*2)/2,c=2*Math.PI*r,pct=Math.min(value/max,1);
-  const offset=c-(pct*c);
-  return(
-    <div className="flex flex-col items-center">
-      <svg width={size} height={size} style={{transform:'rotate(-90deg)'}}>
-        <circle className="ring-bg" cx={size/2} cy={size/2} r={r} fill="none" strokeWidth={stroke}/>
-        <circle className="ring-fg" cx={size/2} cy={size/2} r={r} fill="none" strokeWidth={stroke}
-          stroke={color} strokeDasharray={c} strokeDashoffset={offset}/>
-      </svg>
-      <div className="text-center -mt-1">
-        <div className="text-white font-black text-sm">{label}</div>
-        {sub&&<div className="text-slate-400 text-xs">{sub}</div>}
-      </div>
-    </div>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════
-// TODAY SCREEN
-// ═══════════════════════════════════════════════════════════════
-
-function TodayScreen({startDate,onGoWorkout,onGoFood}){
-  const week=getWeekNum(startDate);
-  const phase=getPhase(week);
-  const sessions=load('fc_sessions',[]);
-  const foodLog=load('fc_food_log',{});
-  const todayFood=foodLog[todayStr()]||[];
-  const todayProtein=todayFood.reduce((a,f)=>a+(f.protein||0),0);
-  const todayKcal=todayFood.reduce((a,f)=>a+(f.kcal||0),0);
-  const dow=new Date().getDay();
-  const todayPlan=WEEK_SCHEDULE[dow];
-  const isTraining=todayPlan?.type==='workout';
-  const kcalTarget=isTraining?ME.kcalTrain:ME.kcalRest;
-
-  const progress=load('fc_progress',{});
-  const weekKey=`w${week}`;
-  const thisWeek=progress[weekKey]||{};
-  const weights=thisWeek.weights||[];
-  const avgWeight=weights.length?Math.round((weights.reduce((a,b)=>a+b,0)/weights.length)*10)/10:null;
-
-  const weekSessions=sessions.filter(s=>{
-    if(!startDate||!week)return false;
-    const start=new Date(startDate);
-    start.setDate(start.getDate()+(week-1)*7);
-    const end=new Date(start); end.setDate(end.getDate()+7);
-    return new Date(s.date)>=start&&new Date(s.date)<end;
-  });
-
-  const dayName=new Date().toLocaleDateString('no-NO',{weekday:'long',day:'numeric',month:'long'});
-
-  return(
-    <div className="min-h-screen safe-bottom" style={{background:'#0f172a'}}>
-      {/* Header */}
-      <div className="px-4 pt-12 pb-4" style={{background:'linear-gradient(180deg,#1e3a5f 0%,#0f172a 100%)'}}>
-        <div className="flex justify-between items-start mb-4">
-          <div>
-            <div className="text-slate-400 text-xs capitalize">{dayName}</div>
-            <h1 className="text-xl font-black text-white">Hei, {ME.name} 👋</h1>
-          </div>
-          {week&&<div className="bg-white bg-opacity-10 rounded-xl px-3 py-1.5 text-right">
-            <div className="text-white font-black text-sm">Uke {week}/12</div>
-            <div className="text-slate-400 text-xs">{phase?.name}</div>
-          </div>}
-        </div>
-        {/* Phase banner */}
-        {phase&&<div className="rounded-2xl p-3 mb-4 flex items-center gap-3" style={{background:phase.color+'22',border:`1px solid ${phase.color}44`}}>
-          <span className="text-2xl">{phase.emoji}</span>
-          <div>
-            <div className="text-white font-bold text-sm">{phase.name} · {phase.rpe}</div>
-            <div className="text-slate-300 text-xs">{phase.tip}</div>
-          </div>
-        </div>}
-        {/* Rings */}
-        <div className="flex justify-around py-2">
-          <Ring value={todayProtein} max={ME.targetProtein} color="#22c55e" size={88} label={`${todayProtein}g`} sub="protein"/>
-          <Ring value={todayKcal} max={kcalTarget} color="#3b82f6" size={88} label={`${todayKcal}`} sub="kcal"/>
-          <Ring value={weekSessions.length} max={3} color="#a855f7" size={88} label={`${weekSessions.length}/3`} sub="økter"/>
-        </div>
-      </div>
-
-      <div className="px-4 space-y-3">
-        {/* Today's plan */}
-        {todayPlan&&<div className={`rounded-2xl p-4 su ${isTraining?'cursor-pointer':''}`}
-          style={{background:isTraining?'linear-gradient(135deg,#1e40af22,#7c3aed22)':'#1e293b',border:`1px solid ${isTraining?'#3b82f6':'#334155'}44`}}
-          onClick={()=>isTraining&&todayPlan.id&&onGoWorkout(todayPlan.id)}>
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-slate-400 text-xs font-medium uppercase tracking-wide">I dag</div>
-              <div className="text-white font-bold mt-0.5">{todayPlan.label}</div>
-              <div className="text-slate-400 text-sm">{todayPlan.sub}</div>
-            </div>
-            {isTraining&&<div className="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold text-sm">Start →</div>}
-          </div>
-        </div>}
-
-        {/* Running tip for today */}
-        {week&&isTraining&&(()=>{
-          const run=getRunningForWeek(week);
-          if(!run)return null;
-          const dayMap={1:run.mon,3:run.wed,6:run.sat};
-          const tip=dayMap[dow];
-          if(!tip)return null;
-          return<div className="bg-teal-900 bg-opacity-40 border border-teal-700 border-opacity-40 rounded-2xl p-3">
-            <div className="text-teal-400 text-xs font-bold mb-0.5">🏃 Løp denne dagen (uke {week})</div>
-            <div className="text-white text-sm">{tip}</div>
-          </div>;
-        })()}
-
-        {/* Nutrition quick action */}
-        <button onClick={onGoFood}
-          className="w-full bg-slate-800 rounded-2xl p-4 flex items-center justify-between">
-          <div className="text-left">
-            <div className="text-slate-400 text-xs">Protein i dag</div>
-            <div className="text-white font-bold">{todayProtein}g / {ME.targetProtein}g</div>
-            <div className="h-1.5 bg-slate-700 rounded-full mt-2 w-40 overflow-hidden">
-              <div className="h-full bg-green-500 rounded-full" style={{width:`${Math.min(todayProtein/ME.targetProtein*100,100)}%`}}/>
-            </div>
-          </div>
-          <div className="text-slate-400 text-sm">+ Logg mat →</div>
-        </button>
-
-        {/* Weight & waist */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="bg-slate-800 rounded-2xl p-4">
-            <div className="text-slate-400 text-xs mb-1">⚖️ Vekt (snitt)</div>
-            <div className="text-white font-black text-xl">{avgWeight?`${avgWeight} kg`:'— kg'}</div>
-            <div className="text-slate-500 text-xs">Start: {ME.startWeight} kg</div>
-          </div>
-          <div className="bg-slate-800 rounded-2xl p-4">
-            <div className="text-slate-400 text-xs mb-1">📏 Midje</div>
-            <div className="text-white font-black text-xl">{thisWeek.waist?`${thisWeek.waist} cm`:'— cm'}</div>
-            <div className="text-slate-500 text-xs">Mål: mål ned</div>
-          </div>
-        </div>
-
-        {/* Quick reminders */}
-        <div className="bg-slate-800 rounded-2xl p-4">
-          <div className="text-slate-300 text-sm font-bold mb-2">📌 Husk i dag</div>
-          <div className="space-y-1.5 text-slate-400 text-sm">
-            <div>💊 3-5g kreatin (hver dag)</div>
-            <div>💧 500ml vann når du står opp</div>
-            <div>🚶 8000-10000 steg</div>
-            <div>😴 Sikt på 7+ timer i natt</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════
-// REST TIMER
-// ═══════════════════════════════════════════════════════════════
-
+// ─── REST TIMER ───────────────────────────────────────────────
 function RestTimer({onClose}){
   const[secs,setSecs]=useState(90);
   const[total,setTotal]=useState(90);
@@ -368,70 +199,33 @@ function RestTimer({onClose}){
     if(on){ref.current=setInterval(()=>setSecs(s=>{
       if(s<=1){clearInterval(ref.current);setOn(false);if('vibrate'in navigator)navigator.vibrate([200,100,200]);return 0;}
       return s-1;
-    }),1000);}
-    else clearInterval(ref.current);
+    }),1000);}else clearInterval(ref.current);
     return()=>clearInterval(ref.current);
   },[on]);
   const preset=t=>{clearInterval(ref.current);setSecs(t);setTotal(t);setOn(true);};
   const pct=total>0?secs/total*100:0;
   const bar=pct>50?'#3b82f6':pct>20?'#f59e0b':'#ef4444';
-  const m=String(Math.floor(secs/60)).padStart(2,'0'),s2=String(secs%60).padStart(2,'0');
-  return(
-    <div className="fixed inset-0 z-50 flex items-end justify-center" style={{background:'rgba(0,0,0,0.7)'}}>
-      <div className="bg-slate-900 border border-slate-700 rounded-t-3xl w-full max-w-md p-6 pb-8 su">
-        <div className="flex justify-between items-center mb-4">
-          <span className="font-bold text-white text-lg">⏱ Hviletimer</span>
-          <button onClick={onClose} className="text-slate-400 text-2xl">✕</button>
-        </div>
-        <div className={`text-6xl font-black text-center mb-2 ${secs===0?'text-green-400':'text-blue-400'}`} style={{fontVariantNumeric:'tabular-nums'}}>
-          {secs===0?'✅ GÅ!':`${m}:${s2}`}
-        </div>
-        <div className="h-2 bg-slate-800 rounded-full mb-5 overflow-hidden">
-          <div className="h-full rounded-full transition-all duration-1000" style={{width:`${pct}%`,background:bar}}/>
-        </div>
-        <div className="flex gap-2 justify-center mb-4">
-          {[60,90,120,180].map(t=>(
-            <button key={t} onClick={()=>preset(t)}
-              className={`px-3 py-2 rounded-xl text-sm font-bold border-2 transition-all ${total===t?'border-blue-500 bg-blue-500 bg-opacity-20 text-blue-400':'border-slate-700 text-slate-400'}`}>
-              {t===60?'1min':t===90?'90s':t===120?'2min':'3min'}
-            </button>
-          ))}
-        </div>
-        <div className="flex gap-3">
-          <button onClick={()=>{clearInterval(ref.current);setOn(o=>!o);}}
-            className="flex-1 bg-blue-600 text-white py-3 rounded-2xl font-bold">
-            {on?'⏸ Pause':'▶ Start'}
-          </button>
-          <button onClick={()=>{clearInterval(ref.current);setSecs(total);setOn(true);}}
-            className="bg-slate-700 text-white px-5 py-3 rounded-2xl font-bold">↺</button>
-        </div>
+  const mm=String(Math.floor(secs/60)).padStart(2,'0'),ss=String(secs%60).padStart(2,'0');
+  return<div className="fixed inset-0 z-50 flex items-end justify-center" style={{background:'rgba(0,0,0,0.75)'}}>
+    <div className="bg-slate-900 border border-slate-700 rounded-t-3xl w-full max-w-md p-6 pb-8 su">
+      <div className="flex justify-between items-center mb-4"><span className="font-bold text-white text-lg">⏱ Hviletimer</span><button onClick={onClose} className="text-slate-400 text-2xl">✕</button></div>
+      <div className={`text-6xl font-black text-center mb-2 ${secs===0?'text-green-400':'text-blue-400'}`} style={{fontVariantNumeric:'tabular-nums'}}>{secs===0?'✅ GÅ!':`${mm}:${ss}`}</div>
+      <div className="h-2 bg-slate-800 rounded-full mb-5 overflow-hidden"><div className="h-full rounded-full transition-all duration-1000" style={{width:`${pct}%`,background:bar}}/></div>
+      <div className="flex gap-2 justify-center mb-4">
+        {[60,90,120,180].map(t=><button key={t} onClick={()=>preset(t)} className={`px-3 py-2 rounded-xl text-sm font-bold border-2 ${total===t?'border-blue-500 bg-blue-500 bg-opacity-20 text-blue-400':'border-slate-700 text-slate-400'}`}>{t===60?'1min':t===90?'90s':t===120?'2min':'3min'}</button>)}
+      </div>
+      <div className="flex gap-3">
+        <button onClick={()=>{clearInterval(ref.current);setOn(o=>!o);}} className="flex-1 bg-blue-600 text-white py-3 rounded-2xl font-bold">{on?'⏸ Pause':'▶ Start'}</button>
+        <button onClick={()=>{clearInterval(ref.current);setSecs(total);setOn(true);}} className="bg-slate-700 text-white px-5 py-3 rounded-2xl font-bold">↺</button>
       </div>
     </div>
-  );
+  </div>;
 }
 
-// ═══════════════════════════════════════════════════════════════
-// ACTIVE WORKOUT
-// ═══════════════════════════════════════════════════════════════
-
-function ExImg({url,name}){
-  const[err,setErr]=useState(false);
-  return(
-    <div className="w-full flex items-center justify-center overflow-hidden" style={{height:220,background:'linear-gradient(135deg,#1e3a5f,#0f172a)'}}>
-      {!err
-        ?<img src={url} alt={name} onError={()=>setErr(true)} className="w-full h-full object-cover"/>
-        :<div className="text-center p-8"><div className="text-5xl mb-2">🏋️</div><div className="text-slate-400 text-sm">{name}</div></div>}
-    </div>
-  );
-}
-
+// ─── ACTIVE WORKOUT ───────────────────────────────────────────
 function ActiveWorkout({workout,onBack,onDone}){
   const[idx,setIdx]=useState(0);
-  const[log,setLog]=useState(()=>{
-    const o={};
-    workout.exercises.forEach(e=>{o[e.id]=Array.from({length:e.sets},()=>({w:'',r:'',done:false}));});
-    return o;
-  });
+  const[log,setLog]=useState(()=>{const o={};workout.exercises.forEach(e=>{o[e.id]=Array.from({length:e.sets},()=>({w:'',r:'',done:false}));});return o;});
   const[timer,setTimer]=useState(false);
   const[finish,setFinish]=useState(false);
   const ex=workout.exercises[idx];
@@ -441,204 +235,243 @@ function ActiveWorkout({workout,onBack,onDone}){
   const prog=(idx/total*100)+(done/ex.sets/total*100);
   const upd=(i,f,v)=>setLog(p=>({...p,[ex.id]:p[ex.id].map((s,j)=>j===i?{...s,[f]:v}:s)}));
   const toggle=i=>setLog(p=>{
-    const upd=p[ex.id].map((s,j)=>j===i?{...s,done:!s.done}:s);
+    const u=p[ex.id].map((s,j)=>j===i?{...s,done:!s.done}:s);
     if(!p[ex.id][i].done)setTimeout(()=>setTimer(true),300);
-    return{...p,[ex.id]:upd};
+    return{...p,[ex.id]:u};
   });
-  const save2=()=>{
-    const sess=load('fc_sessions',[]);
+  const saveSession=()=>{
+    const sess=ld('fc_sessions',[]);
+    // Update PRs
+    const prs=ld('fc_prs',{});
+    Object.entries(log).forEach(([exId,sets])=>{
+      sets.forEach(s=>{
+        if(s.done&&s.w&&s.r){
+          const vol=(parseFloat(s.w)||0)*(parseInt(s.r)||0);
+          const prev=prs[exId];
+          if(!prev||vol>prev.vol||parseFloat(s.w)>parseFloat(prev.w)){
+            prs[exId]={w:s.w,r:s.r,vol,date:new Date().toISOString().slice(0,10)};
+          }
+        }
+      });
+    });
+    sv('fc_prs',prs);
     sess.push({id:Date.now(),date:new Date().toISOString(),workoutId:workout.id,workoutTitle:workout.title,log:JSON.parse(JSON.stringify(log))});
-    save('fc_sessions',sess);
+    sv('fc_sessions',sess);
     onDone();
   };
-  return(
-    <div className="min-h-screen flex flex-col" style={{background:'#0f172a'}}>
-      <div className="text-white px-4 pt-4 pb-3" style={{background:`linear-gradient(135deg,${workout.from},${workout.to})`}}>
-        <div className="flex items-center justify-between mb-2">
-          <button onClick={()=>{if(confirm('Avbryte?'))onBack();}} className="bg-white bg-opacity-20 rounded-xl px-3 py-1.5 text-sm font-medium">← Avbryt</button>
-          <div className="text-sm font-semibold opacity-90">{idx+1}/{total} øvelser</div>
-          <button onClick={()=>setFinish(true)} className="bg-white bg-opacity-20 rounded-xl px-3 py-1.5 text-sm font-medium">Fullfør</button>
-        </div>
-        <div className="h-1.5 bg-white bg-opacity-20 rounded-full overflow-hidden">
-          <div className="h-full bg-white rounded-full transition-all duration-500" style={{width:`${prog}%`}}/>
-        </div>
+  return<div className="min-h-screen flex flex-col" style={{background:'#0f172a'}}>
+    <div className="text-white px-4 pt-4 pb-3" style={{background:`linear-gradient(135deg,${workout.from},${workout.to})`}}>
+      <div className="flex items-center justify-between mb-2">
+        <button onClick={()=>{if(confirm('Avbryte?'))onBack();}} className="bg-white bg-opacity-20 rounded-xl px-3 py-1.5 text-sm font-medium">← Avbryt</button>
+        <div className="text-sm font-semibold opacity-90">{idx+1}/{total} øvelser</div>
+        <button onClick={()=>setFinish(true)} className="bg-white bg-opacity-20 rounded-xl px-3 py-1.5 text-sm font-medium">Fullfør</button>
       </div>
-      <ExImg url={ex.img} name={ex.name}/>
-      <div className="px-4 pt-4 pb-2 su" key={ex.id}>
-        <div className="flex justify-between items-start mb-1">
-          <div className="flex-1 pr-2">
-            <h2 className="text-white font-black text-xl leading-tight">{ex.name}</h2>
-            <p className="text-slate-500 text-xs">{ex.en}</p>
-          </div>
-          <div className="text-right flex-shrink-0">
-            <div className="text-white font-black text-2xl">{ex.sets}×{ex.reps}</div>
-            {ex.repsNote&&<div className="text-slate-400 text-xs">{ex.repsNote}</div>}
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-2 mt-2">
-          <span className="bg-blue-900 bg-opacity-60 text-blue-300 text-xs font-bold px-3 py-1 rounded-full">🎯 {ex.focus}</span>
-          <span className="bg-slate-800 text-slate-300 text-xs px-3 py-1 rounded-full">🔧 {ex.eq}</span>
-        </div>
-        <div className="bg-slate-800 bg-opacity-60 rounded-xl p-3 mt-2">
-          <span className="text-slate-400 text-xs">💡 {ex.tip}</span>
-        </div>
-      </div>
-      <div className="px-4 flex-1 overflow-y-auto pb-4">
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-slate-400 text-sm font-bold">Sett ({done}/{ex.sets})</span>
-          <button onClick={()=>setTimer(true)} className="text-xs bg-slate-800 text-blue-400 font-bold px-3 py-1.5 rounded-full">⏱ Hvile</button>
-        </div>
-        <div className="grid grid-cols-12 gap-2 mb-2 px-1">
-          {['Sett','Kg','Reps','✓'].map((h,i)=><div key={i} className={`text-slate-500 text-xs text-center ${i===0?'col-span-2':i<3?'col-span-4':'col-span-2'}`}>{h}</div>)}
-        </div>
-        {sets.map((s,i)=>(
-          <div key={i} className={`grid grid-cols-12 gap-2 mb-2 items-center px-1 py-2.5 rounded-xl ${s.done?'bg-green-900 bg-opacity-30':'bg-slate-800 bg-opacity-60'}`}>
-            <div className={`col-span-2 text-center text-sm font-black ${s.done?'text-green-400':'text-slate-400'}`}>{i+1}</div>
-            <input type="number" inputMode="decimal" placeholder="kg" value={s.w} onChange={e=>upd(i,'w',e.target.value)}
-              className={`col-span-4 rounded-xl py-2 text-center text-sm font-bold w-full focus:outline-none ${s.done?'bg-green-900 bg-opacity-40 text-green-300 border border-green-700':'bg-slate-700 text-white border border-slate-600'}`}/>
-            <input type={ex.reps==='hold'?'text':'number'} inputMode="numeric" placeholder={ex.reps==='hold'?'sek':'reps'} value={s.r} onChange={e=>upd(i,'r',e.target.value)}
-              className={`col-span-4 rounded-xl py-2 text-center text-sm font-bold w-full focus:outline-none ${s.done?'bg-green-900 bg-opacity-40 text-green-300 border border-green-700':'bg-slate-700 text-white border border-slate-600'}`}/>
-            <div className="col-span-2 flex justify-center">
-              <button onClick={()=>toggle(i)} className={`w-9 h-9 rounded-full border-2 font-bold text-sm transition-all ${s.done?'bg-green-500 border-green-500 text-white':'border-slate-600 text-slate-600 hover:border-green-500'}`}>
-                {s.done?'✓':''}
-              </button>
-            </div>
-          </div>
-        ))}
-        <div className="flex gap-3 mt-4">
-          {idx>0&&<button onClick={()=>setIdx(i=>i-1)} className="flex-1 bg-slate-800 border border-slate-700 text-slate-300 py-3.5 rounded-2xl font-bold text-sm">← Forrige</button>}
-          {idx<total-1
-            ?<button onClick={()=>setIdx(i=>i+1)} className="flex-1 text-white py-3.5 rounded-2xl font-bold text-sm" style={{background:`linear-gradient(135deg,${workout.from},${workout.to})`}}>Neste →</button>
-            :<button onClick={()=>setFinish(true)} className="flex-1 bg-green-600 text-white py-3.5 rounded-2xl font-bold text-sm">🏆 Fullfør</button>}
-        </div>
-      </div>
-      {timer&&<RestTimer onClose={()=>setTimer(false)}/>}
-      {finish&&(
-        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{background:'rgba(0,0,0,0.8)'}}>
-          <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 mx-4 w-full max-w-sm text-center su">
-            <div className="text-5xl mb-3">🏆</div>
-            <h3 className="text-xl font-black text-white mb-1">Økt fullført!</h3>
-            <p className="text-slate-400 text-sm mb-5">Bra jobbet, {ME.name}! Lagre og se historikken.</p>
-            <button onClick={save2} className="w-full bg-green-600 text-white py-3.5 rounded-2xl font-black text-lg mb-3">✅ Lagre økt</button>
-            <button onClick={()=>setFinish(false)} className="w-full bg-slate-800 text-slate-300 py-3 rounded-2xl font-semibold">Fortsett trening</button>
-          </div>
-        </div>
-      )}
+      <div className="h-1.5 bg-white bg-opacity-20 rounded-full overflow-hidden"><div className="h-full bg-white rounded-full transition-all duration-500" style={{width:`${prog}%`}}/></div>
     </div>
-  );
+    <ExImg url={ex.img} name={ex.name}/>
+    <div className="px-4 pt-4 pb-2 su" key={ex.id}>
+      <div className="flex justify-between items-start mb-1">
+        <div className="flex-1 pr-2">
+          <h2 className="text-white font-black text-xl leading-tight">{ex.name}</h2>
+          <p className="text-slate-500 text-xs">{ex.en}</p>
+        </div>
+        <div className="text-right flex-shrink-0">
+          <div className="text-white font-black text-2xl">{ex.sets}×{ex.reps}</div>
+          {ex.repsNote&&<div className="text-slate-400 text-xs">{ex.repsNote}</div>}
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-2 mt-2">
+        <span className="bg-blue-900 bg-opacity-60 text-blue-300 text-xs font-bold px-3 py-1 rounded-full">🎯 {ex.focus}</span>
+        <span className="bg-slate-800 text-slate-300 text-xs px-3 py-1 rounded-full">🔧 {ex.eq}</span>
+        {(()=>{const pr=ld('fc_prs',{})[ex.id];return pr?<span className="bg-yellow-900 bg-opacity-50 text-yellow-400 text-xs font-bold px-3 py-1 rounded-full">🏆 PR: {pr.w}kg×{pr.r}</span>:null;})()}
+      </div>
+      <div className="bg-slate-800 bg-opacity-60 rounded-xl p-3 mt-2"><span className="text-slate-400 text-xs">💡 {ex.tip}</span></div>
+    </div>
+    <div className="px-4 flex-1 overflow-y-auto pb-4">
+      <div className="flex justify-between items-center mb-2">
+        <span className="text-slate-400 text-sm font-bold">Sett ({done}/{ex.sets})</span>
+        <button onClick={()=>setTimer(true)} className="text-xs bg-slate-800 text-blue-400 font-bold px-3 py-1.5 rounded-full">⏱ Hvile</button>
+      </div>
+      <div className="grid grid-cols-12 gap-2 mb-2 px-1">
+        {['Sett','Kg','Reps','✓'].map((h,i)=><div key={i} className={`text-slate-500 text-xs text-center ${i===0?'col-span-2':i<3?'col-span-4':'col-span-2'}`}>{h}</div>)}
+      </div>
+      {sets.map((s,i)=>(
+        <div key={i} className={`grid grid-cols-12 gap-2 mb-2 items-center px-1 py-2.5 rounded-xl ${s.done?'bg-green-900 bg-opacity-30':'bg-slate-800 bg-opacity-60'}`}>
+          <div className={`col-span-2 text-center text-sm font-black ${s.done?'text-green-400':'text-slate-400'}`}>{i+1}</div>
+          <input type="number" inputMode="decimal" placeholder="kg" value={s.w} onChange={e=>upd(i,'w',e.target.value)}
+            className={`col-span-4 rounded-xl py-2 text-center text-sm font-bold w-full focus:outline-none ${s.done?'bg-green-900 bg-opacity-40 text-green-300 border border-green-700':'bg-slate-700 text-white border border-slate-600'}`}/>
+          <input type={ex.reps==='hold'?'text':'number'} inputMode="numeric" placeholder={ex.reps==='hold'?'sek':'reps'} value={s.r} onChange={e=>upd(i,'r',e.target.value)}
+            className={`col-span-4 rounded-xl py-2 text-center text-sm font-bold w-full focus:outline-none ${s.done?'bg-green-900 bg-opacity-40 text-green-300 border border-green-700':'bg-slate-700 text-white border border-slate-600'}`}/>
+          <div className="col-span-2 flex justify-center">
+            <button onClick={()=>toggle(i)} className={`w-9 h-9 rounded-full border-2 font-bold text-sm transition-all ${s.done?'bg-green-500 border-green-500 text-white':'border-slate-600 text-slate-600 hover:border-green-500'}`}>{s.done?'✓':''}</button>
+          </div>
+        </div>
+      ))}
+      <div className="flex gap-3 mt-4">
+        {idx>0&&<button onClick={()=>setIdx(i=>i-1)} className="flex-1 bg-slate-800 border border-slate-700 text-slate-300 py-3.5 rounded-2xl font-bold text-sm">← Forrige</button>}
+        {idx<total-1
+          ?<button onClick={()=>setIdx(i=>i+1)} className="flex-1 text-white py-3.5 rounded-2xl font-bold text-sm" style={{background:`linear-gradient(135deg,${workout.from},${workout.to})`}}>Neste →</button>
+          :<button onClick={()=>setFinish(true)} className="flex-1 bg-green-600 text-white py-3.5 rounded-2xl font-bold text-sm">🏆 Fullfør</button>}
+      </div>
+    </div>
+    {timer&&<RestTimer onClose={()=>setTimer(false)}/>}
+    {finish&&<div className="fixed inset-0 z-50 flex items-center justify-center" style={{background:'rgba(0,0,0,0.85)'}}>
+      <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 mx-4 w-full max-w-sm text-center su">
+        <div className="text-5xl mb-3">🏆</div>
+        <h3 className="text-xl font-black text-white mb-1">Økt fullført!</h3>
+        <p className="text-slate-400 text-sm mb-5">Bra jobbet, {ME.name}! PR-er oppdateres automatisk.</p>
+        <button onClick={saveSession} className="w-full bg-green-600 text-white py-3.5 rounded-2xl font-black text-lg mb-3">✅ Lagre økt</button>
+        <button onClick={()=>setFinish(false)} className="w-full bg-slate-800 text-slate-300 py-3 rounded-2xl font-semibold">Fortsett trening</button>
+      </div>
+    </div>}
+  </div>;
 }
 
-// ═══════════════════════════════════════════════════════════════
-// WORKOUT SCREEN
-// ═══════════════════════════════════════════════════════════════
+// ─── STYRKEHISTORIKK ──────────────────────────────────────────
+function StrengthHistory(){
+  const sessions=ld('fc_sessions',[]);
+  const prs=ld('fc_prs',{});
+  // build per-exercise history
+  const history={};
+  sessions.forEach(sess=>{
+    Object.entries(sess.log||{}).forEach(([exId,sets])=>{
+      if(!history[exId])history[exId]=[];
+      const best=sets.filter(s=>s.done&&s.w&&s.r).reduce((b,s)=>{
+        const v=(parseFloat(s.w)||0)*(parseInt(s.r)||0);
+        return(!b||v>b.vol)?{w:s.w,r:s.r,vol:v}:b;
+      },null);
+      if(best)history[exId].push({date:sess.date.slice(0,10),w:best.w,r:best.r,vol:best.vol});
+    });
+  });
+  const workoutsWithData=WORKOUTS.filter(wk=>wk.exercises.some(e=>history[e.id]?.length));
+  if(!workoutsWithData.length)return(
+    <div className="bg-slate-800 rounded-2xl p-8 text-center">
+      <div className="text-4xl mb-3">📊</div>
+      <div className="text-slate-300 font-bold">Ingen styrkedata enda</div>
+      <div className="text-slate-500 text-sm mt-1">Logg din første økt for å se fremgang</div>
+    </div>
+  );
+  return<div className="space-y-4">
+    {WORKOUTS.map(wk=>{
+      const exWithData=wk.exercises.filter(e=>history[e.id]?.length);
+      if(!exWithData.length)return null;
+      return<div key={wk.id} className="bg-slate-800 rounded-2xl overflow-hidden">
+        <div className="px-4 py-3 border-b border-slate-700 flex items-center gap-2">
+          <span className="text-xl">{wk.emoji}</span>
+          <span className="text-white font-bold text-sm">{wk.title}</span>
+        </div>
+        {exWithData.map(ex=>{
+          const hist=history[ex.id]||[];
+          const pr=prs[ex.id];
+          const latest=hist[hist.length-1];
+          const prev=hist.length>1?hist[hist.length-2]:null;
+          const improved=prev&&latest&&parseFloat(latest.w)>parseFloat(prev.w);
+          return<div key={ex.id} className="px-4 py-3 border-b border-slate-700 last:border-0">
+            <div className="flex justify-between items-start mb-1">
+              <div className="flex-1 min-w-0 pr-2">
+                <div className="text-white text-sm font-semibold truncate">{ex.name}</div>
+                <div className="text-slate-500 text-xs">{hist.length} loggede sett-dager</div>
+              </div>
+              <div className="text-right flex-shrink-0">
+                {pr&&<div className="text-yellow-400 text-sm font-black">🏆 {pr.w}kg×{pr.r}</div>}
+                {improved&&<div className="text-green-400 text-xs">↑ +{(parseFloat(latest.w)-parseFloat(prev.w)).toFixed(1)}kg</div>}
+              </div>
+            </div>
+            {/* Mini chart bars */}
+            {hist.length>1&&<div className="flex items-end gap-1 h-8 mt-1">
+              {hist.slice(-8).map((h,i)=>{
+                const maxVol=Math.max(...hist.slice(-8).map(x=>x.vol));
+                const pct=maxVol>0?h.vol/maxVol:0;
+                const isLast=i===hist.slice(-8).length-1;
+                return<div key={i} className="flex-1 rounded-sm transition-all" style={{height:`${Math.max(pct*100,8)}%`,background:isLast?'#22c55e':'#334155'}}/>;
+              })}
+            </div>}
+            {hist.length>0&&<div className="text-slate-500 text-xs mt-1">Sist: {hist[hist.length-1].w}kg × {hist[hist.length-1].r} reps · {hist[hist.length-1].date}</div>}
+          </div>;
+        })}
+      </div>;
+    })}
+  </div>;
+}
 
+// ─── WORKOUT SCREEN ───────────────────────────────────────────
 function WorkoutScreen({initialId}){
   const[view,setView]=useState(initialId?'detail':null);
-  const[sel,setSel]=useState(initialId?([...WORKOUTS,KB_WORKOUT].find(w=>w.id===initialId)||null):null);
-  const sessions=load('fc_sessions',[]);
-  const lastFor=id=>{
-    const s=[...sessions].reverse().find(s=>s.workoutId===id);
-    return s?new Date(s.date).toLocaleDateString('no-NO',{day:'numeric',month:'short'}):null;
-  };
-  if(view==='active'&&sel)return<ActiveWorkout workout={sel} onBack={()=>setView('detail')} onDone={()=>setView(null)}/>;
+  const[sel,setSel]=useState(initialId?(WORKOUTS.find(w=>w.id===initialId)||null):null);
+  const[subTab,setSubTab]=useState('okter');
+  const sessions=ld('fc_sessions',[]);
+  const lastFor=id=>{const s=[...sessions].reverse().find(s=>s.workoutId===id);return s?new Date(s.date).toLocaleDateString('no-NO',{day:'numeric',month:'short'}):null;};
+  if(view==='active'&&sel)return<ActiveWorkout workout={sel} onBack={()=>setView('detail')} onDone={()=>{setView(null);setSubTab('rekorder');}}/>;
   if(view==='detail'&&sel)return(
-    <div className="min-h-screen safe-bottom" style={{background:'#0f172a'}}>
+    <div className="min-h-screen safe" style={{background:'#0f172a'}}>
       <div className="text-white px-4 pt-12 pb-8 relative" style={{background:`linear-gradient(135deg,${sel.from},${sel.to})`}}>
         <button onClick={()=>setView(null)} className="absolute top-4 left-4 bg-white bg-opacity-20 rounded-xl px-3 py-1.5 text-sm font-medium">← Tilbake</button>
         <div className="text-5xl mb-3 mt-6">{sel.emoji}</div>
         <h1 className="text-2xl font-black">{sel.title}</h1>
         <p className="text-white text-opacity-80 text-sm mt-1">{sel.sub}</p>
       </div>
-      <div className="p-4 space-y-3">
-        {sel.exercises.map((ex,i)=>(
-          <div key={ex.id} className="bg-slate-800 rounded-2xl overflow-hidden flex su" style={{animationDelay:`${i*0.04}s`}}>
-            <div className="w-20 h-16 flex-shrink-0" style={{background:'#1e3a5f'}}>
-              <img src={ex.img} alt={ex.name} className="w-full h-full object-cover" onError={e=>e.target.style.display='none'}/>
+      <div className="p-4 space-y-2">
+        {sel.exercises.map((ex,i)=>{
+          const pr=ld('fc_prs',{})[ex.id];
+          return<div key={ex.id} className="bg-slate-800 rounded-2xl overflow-hidden flex su" style={{animationDelay:`${i*0.03}s`}}>
+            <div className="w-20 h-16 flex-shrink-0 overflow-hidden" style={{background:'#1e3a5f'}}>
+              <img src={ex.img} alt="" className="w-full h-full object-cover" onError={e=>e.target.style.display='none'}/>
             </div>
             <div className="flex-1 p-3 flex items-center justify-between">
               <div className="min-w-0 pr-2">
                 <div className="text-white font-bold text-sm truncate">{ex.name}</div>
                 <div className="text-slate-400 text-xs truncate">{ex.eq}</div>
-                <span className="text-blue-400 text-xs">{ex.focus}</span>
+                {pr&&<div className="text-yellow-400 text-xs">🏆 PR: {pr.w}kg×{pr.r}</div>}
               </div>
               <div className="text-right flex-shrink-0">
                 <div className="text-white font-black text-base">{ex.sets}×{ex.reps}</div>
                 {ex.repsNote&&<div className="text-slate-500 text-xs">{ex.repsNote}</div>}
               </div>
             </div>
-          </div>
-        ))}
+          </div>;
+        })}
       </div>
       <div className="px-4 pb-6">
-        <button onClick={()=>setView('active')} className="w-full text-white py-4 rounded-2xl font-black text-lg" style={{background:`linear-gradient(135deg,${sel.from},${sel.to})`}}>
-          🚀 Start økt
-        </button>
+        <button onClick={()=>setView('active')} className="w-full text-white py-4 rounded-2xl font-black text-lg" style={{background:`linear-gradient(135deg,${sel.from},${sel.to})`}}>🚀 Start økt</button>
       </div>
     </div>
   );
   return(
-    <div className="min-h-screen safe-bottom" style={{background:'#0f172a'}}>
+    <div className="min-h-screen safe" style={{background:'#0f172a'}}>
       <div className="px-4 pt-12 pb-4" style={{background:'linear-gradient(180deg,#1e293b 0%,#0f172a 100%)'}}>
-        <h1 className="text-2xl font-black text-white">💪 Treningsøkter</h1>
-        <p className="text-slate-400 text-sm">Velg økt og gå gjennom øvelsene</p>
+        <h1 className="text-2xl font-black text-white">💪 Trening</h1>
       </div>
-      <div className="px-4 space-y-3">
-        {[...WORKOUTS,KB_WORKOUT].map(w=>(
-          <button key={w.id} onClick={()=>{setSel(w);setView('detail');}} className="w-full text-left bg-slate-800 rounded-2xl overflow-hidden su">
+      <div className="flex px-4 gap-2 mb-4">
+        {[['okter','Økter'],['rekorder','🏆 Rekorder']].map(([k,l])=>(
+          <button key={k} onClick={()=>setSubTab(k)} className={`px-4 py-2 rounded-xl text-sm font-bold ${subTab===k?'bg-white text-slate-900':'bg-slate-800 text-slate-400'}`}>{l}</button>
+        ))}
+      </div>
+      {subTab==='okter'&&<div className="px-4 space-y-3">
+        {WORKOUTS.map(w=>(
+          <button key={w.id} onClick={()=>{setSel(w);setView('detail');}} className="w-full text-left bg-slate-800 rounded-2xl overflow-hidden">
             <div className="h-1.5" style={{background:`linear-gradient(90deg,${w.from},${w.to})`}}/>
             <div className="p-4 flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0" style={{background:`linear-gradient(135deg,${w.from}33,${w.to}55)`}}>
-                {w.emoji}
-              </div>
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0" style={{background:`linear-gradient(135deg,${w.from}33,${w.to}55)`}}>{w.emoji}</div>
               <div className="flex-1 min-w-0">
                 <div className="text-white font-black">{w.title}</div>
                 <div className="text-slate-400 text-sm truncate">{w.sub}</div>
                 <div className="text-slate-500 text-xs mt-0.5">{w.exercises.length} øvelser{lastFor(w.id)?` · Sist: ${lastFor(w.id)}`:''}
-                  {w.id==='KB'?' · Bonusøkt':''}</div>
+                  {w.id==='KB'?' · Bonus':''}</div>
               </div>
               <div className="text-slate-500 text-xl">›</div>
             </div>
           </button>
         ))}
-        {/* History */}
-        <div className="bg-slate-800 rounded-2xl p-4 mt-4">
-          <div className="text-slate-300 font-bold mb-3">📋 Siste loggede økter</div>
-          {(()=>{
-            const sess=load('fc_sessions',[]);
-            if(!sess.length)return<p className="text-slate-500 text-sm text-center py-2">Ingen logger enda</p>;
-            return[...sess].reverse().slice(0,5).map((s,i)=>{
-              const w=[...WORKOUTS,KB_WORKOUT].find(x=>x.id===s.workoutId);
-              const kg=Object.values(s.log||{}).flatMap(sets=>sets).reduce((a,set)=>set.done&&set.w&&set.r?a+(parseFloat(set.w)||0)*(parseInt(set.r)||0):a,0);
-              return(
-                <div key={i} className="flex items-center justify-between py-2.5 border-b border-slate-700 last:border-0">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xl">{w?.emoji||'💪'}</span>
-                    <div>
-                      <div className="text-white text-sm font-semibold">{s.workoutTitle}</div>
-                      <div className="text-slate-500 text-xs">{new Date(s.date).toLocaleDateString('no-NO',{weekday:'short',day:'numeric',month:'short'})}</div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-green-400 text-sm font-bold">{Math.round(kg).toLocaleString('no-NO')} kg</div>
-                    <div className="text-slate-500 text-xs">løftet</div>
-                  </div>
-                </div>
-              );
-            });
-          })()}
-        </div>
-      </div>
+      </div>}
+      {subTab==='rekorder'&&<div className="px-4"><StrengthHistory/></div>}
     </div>
   );
 }
 
-// ═══════════════════════════════════════════════════════════════
-// FOOD SCREEN
-// ═══════════════════════════════════════════════════════════════
-
+// ─── FOOD SCREEN ──────────────────────────────────────────────
 function FoodScreen(){
-  const[log,setLog]=useState(()=>load('fc_food_log',{}));
-  const[modal,setModal]=useState(null);// {mealType}
+  const[log,setLog]=useState(()=>ld('fc_food_log',{}));
+  const[modal,setModal]=useState(null);
   const[custom,setCustom]=useState({name:'',protein:'',kcal:''});
   const today=todayStr();
   const todayLog=log[today]||[];
@@ -649,477 +482,669 @@ function FoodScreen(){
   const kcalTarget=isTrain?ME.kcalTrain:ME.kcalRest;
   const addMeal=(meal,type)=>{
     const entry={...meal,id:Date.now(),mealType:type,time:new Date().toLocaleTimeString('no-NO',{hour:'2-digit',minute:'2-digit'})};
-    const newLog={...log,[today]:[...(log[today]||[]),entry]};
-    setLog(newLog);save('fc_food_log',newLog);setModal(null);
+    const n={...log,[today]:[...(log[today]||[]),entry]};
+    setLog(n);sv('fc_food_log',n);setModal(null);setCustom({name:'',protein:'',kcal:''});
   };
-  const addCustom=(type)=>{
-    if(!custom.name)return;
-    addMeal({name:custom.name,desc:'',protein:parseFloat(custom.protein)||0,kcal:parseFloat(custom.kcal)||0},type);
-    setCustom({name:'',protein:'',kcal:''});
-  };
-  const removeEntry=id=>{
-    const newLog={...log,[today]:(log[today]||[]).filter(e=>e.id!==id)};
-    setLog(newLog);save('fc_food_log',newLog);
-  };
-  const mealLabels={frokost:'🌅 Frokost',lunsj:'☀️ Lunsj',mellom:'🍌 Mellommåltid',middag:'🍽 Middag',kveld:'🌙 Kveld'};
-  return(
-    <div className="min-h-screen safe-bottom" style={{background:'#0f172a'}}>
-      <div className="px-4 pt-12 pb-4" style={{background:'linear-gradient(180deg,#14532d 0%,#0f172a 100%)'}}>
-        <h1 className="text-2xl font-black text-white">🥗 Matlogg</h1>
-        <p className="text-slate-400 text-sm">{isTrain?'Treningsdag':'Hviledag'} · {kcalTarget} kcal mål</p>
-        <div className="flex gap-4 mt-4">
-          <div className="flex-1 bg-green-900 bg-opacity-40 rounded-2xl p-3">
-            <div className="text-green-400 text-xs font-bold">Protein</div>
-            <div className="text-white font-black text-xl">{totalP}g <span className="text-slate-500 text-sm font-normal">/ {ME.targetProtein}g</span></div>
-            <div className="h-1.5 bg-slate-700 rounded-full mt-2 overflow-hidden">
-              <div className="h-full bg-green-500 rounded-full" style={{width:`${Math.min(totalP/ME.targetProtein*100,100)}%`}}/>
-            </div>
-          </div>
-          <div className="flex-1 bg-blue-900 bg-opacity-40 rounded-2xl p-3">
-            <div className="text-blue-400 text-xs font-bold">Kalorier</div>
-            <div className="text-white font-black text-xl">{totalK} <span className="text-slate-500 text-sm font-normal">/ {kcalTarget}</span></div>
-            <div className="h-1.5 bg-slate-700 rounded-full mt-2 overflow-hidden">
-              <div className="h-full bg-blue-500 rounded-full" style={{width:`${Math.min(totalK/kcalTarget*100,100)}%`}}/>
-            </div>
-          </div>
+  const removeEntry=id=>{const n={...log,[today]:(log[today]||[]).filter(e=>e.id!==id)};setLog(n);sv('fc_food_log',n);};
+  const mealLabels={frokost:'🌅 Frokost',lunsj:'☀️ Lunsj',mellom:'🍌 Mellom',middag:'🍽 Middag',kveld:'🌙 Kveld'};
+  const proteinPct=Math.min(totalP/ME.targetProtein*100,100);
+  const kcalPct=Math.min(totalK/kcalTarget*100,100);
+  // Protein streak
+  const foodLog=ld('fc_food_log',{});
+  let streak=0;
+  for(let i=0;i<30;i++){
+    const d=new Date();d.setDate(d.getDate()-i);
+    const k=d.toISOString().slice(0,10);
+    const p=(foodLog[k]||[]).reduce((a,f)=>a+(f.protein||0),0);
+    if(p>=ME.targetProtein)streak++;else break;
+  }
+  return<div className="min-h-screen safe" style={{background:'#0f172a'}}>
+    <div className="px-4 pt-12 pb-5" style={{background:'linear-gradient(180deg,#14532d 0%,#0f172a 100%)'}}>
+      <div className="flex justify-between items-start mb-3">
+        <div><h1 className="text-2xl font-black text-white">🥗 Mat</h1><p className="text-slate-400 text-sm">{isTrain?'Treningsdag':'Hviledag'} · mål {kcalTarget} kcal</p></div>
+        {streak>0&&<div className="bg-orange-900 bg-opacity-50 border border-orange-700 border-opacity-50 rounded-xl px-3 py-2 text-center">
+          <div className="text-orange-400 font-black text-lg">{streak}🔥</div>
+          <div className="text-orange-300 text-xs">protein streak</div>
+        </div>}
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="bg-green-900 bg-opacity-40 rounded-2xl p-3">
+          <div className="flex justify-between items-center mb-1"><span className="text-green-400 text-xs font-bold">Protein</span><span className="text-green-300 text-xs">{Math.round(proteinPct)}%</span></div>
+          <div className="text-white font-black text-xl">{totalP}g <span className="text-slate-500 text-sm font-normal">/ {ME.targetProtein}g</span></div>
+          <div className="h-1.5 bg-slate-700 rounded-full mt-2 overflow-hidden"><div className="h-full bg-green-500 rounded-full transition-all" style={{width:`${proteinPct}%`}}/></div>
+        </div>
+        <div className="bg-blue-900 bg-opacity-40 rounded-2xl p-3">
+          <div className="flex justify-between items-center mb-1"><span className="text-blue-400 text-xs font-bold">Kalorier</span><span className="text-blue-300 text-xs">{Math.round(kcalPct)}%</span></div>
+          <div className="text-white font-black text-xl">{totalK} <span className="text-slate-500 text-sm font-normal">/ {kcalTarget}</span></div>
+          <div className="h-1.5 bg-slate-700 rounded-full mt-2 overflow-hidden"><div className="h-full bg-blue-500 rounded-full transition-all" style={{width:`${kcalPct}%`}}/></div>
         </div>
       </div>
-      <div className="px-4 space-y-3">
-        {Object.keys(mealLabels).map(type=>{
-          const entries=todayLog.filter(e=>e.mealType===type);
-          return(
-            <div key={type} className="bg-slate-800 rounded-2xl overflow-hidden">
-              <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
-                <div>
-                  <span className="text-white font-bold text-sm">{mealLabels[type]}</span>
-                  {entries.length>0&&<span className="text-slate-400 text-xs ml-2">{entries.reduce((a,e)=>a+e.protein,0)}g · {entries.reduce((a,e)=>a+e.kcal,0)} kcal</span>}
-                </div>
-                <button onClick={()=>setModal(type)} className="bg-slate-700 text-slate-300 text-xs px-3 py-1.5 rounded-lg font-bold">+ Legg til</button>
-              </div>
-              {entries.map(e=>(
-                <div key={e.id} className="flex items-center justify-between px-4 py-2.5 border-b border-slate-700 last:border-0">
-                  <div className="flex-1 min-w-0">
-                    <div className="text-white text-sm font-semibold truncate">{e.name}</div>
-                    <div className="text-slate-500 text-xs">{e.time} · {e.desc}</div>
-                  </div>
-                  <div className="flex items-center gap-3 flex-shrink-0">
-                    <div className="text-right">
-                      <div className="text-green-400 text-xs font-bold">{e.protein}g</div>
-                      <div className="text-slate-500 text-xs">{e.kcal} kcal</div>
-                    </div>
-                    <button onClick={()=>removeEntry(e.id)} className="text-slate-600 hover:text-red-400 text-lg">×</button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          );
-        })}
-        {/* Protein tip */}
-        <div className="bg-slate-800 rounded-2xl p-4">
-          <div className="text-slate-300 text-sm font-bold mb-2">💡 Fordel protein på dagen</div>
-          <div className="text-slate-400 text-xs space-y-1">
-            <div>🌅 Frokost: 30-40g protein</div>
-            <div>☀️ Lunsj: 35-45g protein</div>
-            <div>🍽 Middag: 40-50g protein</div>
-            <div>🌙 Kveld: 20-30g – ikke baguette!</div>
-          </div>
-        </div>
-      </div>
-      {/* Add modal */}
-      {modal&&(
-        <div className="fixed inset-0 z-50 flex items-end justify-center" style={{background:'rgba(0,0,0,0.8)'}}>
-          <div className="bg-slate-900 border border-slate-700 rounded-t-3xl w-full max-w-md max-h-[85vh] overflow-y-auto p-5 su">
-            <div className="flex justify-between items-center mb-4">
-              <div className="text-white font-bold">{mealLabels[modal]}</div>
-              <button onClick={()=>setModal(null)} className="text-slate-400 text-2xl">✕</button>
-            </div>
-            <div className="text-slate-400 text-xs font-bold uppercase tracking-wide mb-2">Hurtigvalg fra planen</div>
-            <div className="space-y-2 mb-4">
-              {(MEALS[modal]||[]).map((m,i)=>(
-                <button key={i} onClick={()=>addMeal(m,modal)} className="w-full text-left bg-slate-800 rounded-xl p-3 flex justify-between items-center">
-                  <div className="flex-1 min-w-0">
-                    <div className="text-white text-sm font-bold">{m.name}</div>
-                    <div className="text-slate-400 text-xs truncate">{m.desc}</div>
-                  </div>
-                  <div className="text-right flex-shrink-0 ml-3">
-                    <div className="text-green-400 text-xs font-bold">{m.protein}g</div>
-                    <div className="text-slate-500 text-xs">{m.kcal} kcal</div>
-                  </div>
-                </button>
-              ))}
-            </div>
-            <div className="text-slate-400 text-xs font-bold uppercase tracking-wide mb-2">Legg til manuelt</div>
-            <div className="space-y-2">
-              <input placeholder="Navn på mat" value={custom.name} onChange={e=>setCustom({...custom,name:e.target.value})}
-                className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl p-3 text-sm"/>
-              <div className="flex gap-2">
-                <input type="number" placeholder="Protein (g)" value={custom.protein} onChange={e=>setCustom({...custom,protein:e.target.value})}
-                  className="flex-1 bg-slate-800 border border-slate-700 text-white rounded-xl p-3 text-sm"/>
-                <input type="number" placeholder="Kalorier" value={custom.kcal} onChange={e=>setCustom({...custom,kcal:e.target.value})}
-                  className="flex-1 bg-slate-800 border border-slate-700 text-white rounded-xl p-3 text-sm"/>
-              </div>
-              <button onClick={()=>addCustom(modal)} className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">+ Legg til</button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
-  );
+    <div className="px-4 space-y-3">
+      {Object.keys(mealLabels).map(type=>{
+        const entries=todayLog.filter(e=>e.mealType===type);
+        return<div key={type} className="bg-slate-800 rounded-2xl overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
+            <div><span className="text-white font-bold text-sm">{mealLabels[type]}</span>
+              {entries.length>0&&<span className="text-slate-400 text-xs ml-2">{entries.reduce((a,e)=>a+e.protein,0)}g · {entries.reduce((a,e)=>a+e.kcal,0)} kcal</span>}
+            </div>
+            <button onClick={()=>setModal(type)} className="bg-slate-700 text-slate-300 text-xs px-3 py-1.5 rounded-lg font-bold">+ Legg til</button>
+          </div>
+          {entries.map(e=>(
+            <div key={e.id} className="flex items-center justify-between px-4 py-2.5 border-b border-slate-700 last:border-0">
+              <div className="flex-1 min-w-0"><div className="text-white text-sm font-semibold truncate">{e.name}</div><div className="text-slate-500 text-xs">{e.time}</div></div>
+              <div className="flex items-center gap-3 flex-shrink-0">
+                <div className="text-right"><div className="text-green-400 text-xs font-bold">{e.protein}g</div><div className="text-slate-500 text-xs">{e.kcal} kcal</div></div>
+                <button onClick={()=>removeEntry(e.id)} className="text-slate-600 hover:text-red-400 text-xl leading-none">×</button>
+              </div>
+            </div>
+          ))}
+        </div>;
+      })}
+      {totalP>=ME.targetProtein&&<div className="bg-green-900 bg-opacity-30 border border-green-700 border-opacity-40 rounded-2xl p-4 text-center pop">
+        <div className="text-2xl mb-1">🎯</div>
+        <div className="text-green-400 font-bold">Proteinmål nådd!</div>
+        <div className="text-slate-400 text-sm">Bra jobbet – muskelmasse bevares under cut</div>
+      </div>}
+    </div>
+    {modal&&<div className="fixed inset-0 z-50 flex items-end justify-center" style={{background:'rgba(0,0,0,0.8)'}}>
+      <div className="bg-slate-900 border border-slate-700 rounded-t-3xl w-full max-w-md max-h-[88vh] overflow-y-auto p-5 su">
+        <div className="flex justify-between items-center mb-4"><div className="text-white font-bold">{mealLabels[modal]}</div><button onClick={()=>setModal(null)} className="text-slate-400 text-2xl">✕</button></div>
+        <div className="text-slate-400 text-xs font-bold uppercase tracking-wide mb-2">Hurtigvalg fra planen</div>
+        <div className="space-y-2 mb-4">
+          {(MEALS[modal]||[]).map((m,i)=>(
+            <button key={i} onClick={()=>addMeal(m,modal)} className="w-full text-left bg-slate-800 rounded-xl p-3 flex justify-between items-center">
+              <div className="flex-1 min-w-0"><div className="text-white text-sm font-bold">{m.name}</div><div className="text-slate-400 text-xs truncate">{m.desc}</div></div>
+              <div className="text-right flex-shrink-0 ml-3"><div className="text-green-400 text-xs font-bold">{m.protein}g</div><div className="text-slate-500 text-xs">{m.kcal} kcal</div></div>
+            </button>
+          ))}
+        </div>
+        <div className="text-slate-400 text-xs font-bold uppercase tracking-wide mb-2">Manuell inntasting</div>
+        <div className="space-y-2">
+          <input placeholder="Navn på mat" value={custom.name} onChange={e=>setCustom({...custom,name:e.target.value})} className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl p-3 text-sm"/>
+          <div className="flex gap-2">
+            <input type="number" placeholder="Protein (g)" value={custom.protein} onChange={e=>setCustom({...custom,protein:e.target.value})} className="flex-1 bg-slate-800 border border-slate-700 text-white rounded-xl p-3 text-sm"/>
+            <input type="number" placeholder="Kalorier" value={custom.kcal} onChange={e=>setCustom({...custom,kcal:e.target.value})} className="flex-1 bg-slate-800 border border-slate-700 text-white rounded-xl p-3 text-sm"/>
+          </div>
+          <button onClick={()=>{if(custom.name)addMeal({name:custom.name,desc:'',protein:parseFloat(custom.protein)||0,kcal:parseFloat(custom.kcal)||0},modal);}} className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">+ Legg til</button>
+        </div>
+      </div>
+    </div>}
+  </div>;
 }
 
-// ═══════════════════════════════════════════════════════════════
-// PROGRESS SCREEN
-// ═══════════════════════════════════════════════════════════════
+// ─── WEIGHT CHART ─────────────────────────────────────────────
+function WeightChart({progData,startDate}){
+  const points=[];
+  for(let w=1;w<=12;w++){
+    const d=progData[`w${w}`]||{};
+    const avg=d.weights?.length?(d.weights.reduce((a,b)=>a+b,0)/d.weights.length):null;
+    points.push({w,avg});
+  }
+  const withData=points.filter(p=>p.avg);
+  if(withData.length<2)return<div className="bg-slate-800 rounded-2xl p-6 text-center"><div className="text-slate-400 text-sm">Logg vekt i minst 2 uker for å se grafen</div></div>;
+  const vals=withData.map(p=>p.avg);
+  const minV=Math.min(...vals)-0.5, maxV=Math.max(ME.startWeight,...vals)+0.5;
+  const range=maxV-minV||1;
+  const W=320,H=100,pad=8;
+  const x=w=>(w-1)/(11)*( W-pad*2)+pad;
+  const y=v=>H-pad-(v-minV)/range*(H-pad*2);
+  const pathData=withData.map((p,i)=>`${i===0?'M':'L'}${x(p.w-1).toFixed(1)},${y(p.avg).toFixed(1)}`).join(' ');
+  const current=withData[withData.length-1];
+  return<div className="bg-slate-800 rounded-2xl p-4">
+    <div className="text-slate-300 font-bold mb-3">📈 Vekttrend – 12 uker</div>
+    <div className="flex justify-between text-xs text-slate-500 mb-1">
+      <span>Uke 1</span><span>Uke 12</span>
+    </div>
+    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{height:100}}>
+      {/* Grid lines */}
+      {[0.25,0.5,0.75].map(f=><line key={f} x1={pad} x2={W-pad} y1={pad+(H-pad*2)*f} y2={pad+(H-pad*2)*f} stroke="#1e293b" strokeWidth="1"/>)}
+      {/* Goal line */}
+      <line x1={pad} x2={W-pad} y1={y(ME.goalWeight)} y2={y(ME.goalWeight)} stroke="#22c55e" strokeWidth="1" strokeDasharray="4,4"/>
+      <text x={W-pad-2} y={y(ME.goalWeight)-3} fill="#22c55e" fontSize="8" textAnchor="end">mål</text>
+      {/* Start line */}
+      <line x1={pad} x2={W-pad} y1={y(ME.startWeight)} y2={y(ME.startWeight)} stroke="#64748b" strokeWidth="1" strokeDasharray="2,2"/>
+      {/* Path */}
+      <path d={pathData} fill="none" stroke="#3b82f6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+      {/* Dots */}
+      {withData.map((p,i)=><circle key={i} cx={x(p.w-1)} cy={y(p.avg)} r="3.5" fill="#3b82f6" stroke="#0f172a" strokeWidth="1.5"/>)}
+      {/* Current dot highlight */}
+      {current&&<circle cx={x(current.w-1)} cy={y(current.avg)} r="5" fill="#60a5fa" stroke="#0f172a" strokeWidth="2"/>}
+    </svg>
+    <div className="flex justify-between text-xs mt-2">
+      <div><span className="text-slate-500">Start: </span><span className="text-white font-bold">{ME.startWeight}kg</span></div>
+      {current&&<div><span className="text-slate-500">Nå: </span><span className="text-blue-400 font-bold">{current.avg.toFixed(1)}kg</span></div>}
+      <div><span className="text-slate-500">Mål: </span><span className="text-green-400 font-bold">{ME.goalWeight}kg</span></div>
+    </div>
+    {current&&(current.avg<ME.startWeight)&&<div className="mt-2 text-center text-green-400 text-sm font-bold">↓ {(ME.startWeight-current.avg).toFixed(1)}kg ned fra start 🎉</div>}
+  </div>;
+}
 
+// ─── PROGRESS SCREEN ─────────────────────────────────────────
 function ProgressScreen({startDate}){
   const week=getWeekNum(startDate)||1;
-  const[prog,setProg]=useState(()=>load('fc_progress',{}));
+  const[prog,setProg]=useState(()=>ld('fc_progress',{}));
   const[activeWeek,setActiveWeek]=useState(week);
+  const[newW,setNewW]=useState('');
   const wk=`w${activeWeek}`;
-  const data=prog[wk]||{weights:[],waist:'',sleep:0,note:''};
-  const upd=obj=>{const n={...prog,[wk]:{...data,...obj}};setProg(n);save('fc_progress',n);};
-  const addWeight=v=>{if(!v)return;const w=[...(data.weights||[]),parseFloat(v)].slice(-3);upd({weights:w});};
+  const data=prog[wk]||{weights:[],waist:'',arm:'',chest:'',shoulder:'',sleep:0,steps:'',note:''};
+  const upd=obj=>{const n={...prog,[wk]:{...data,...obj}};setProg(n);sv('fc_progress',n);};
+  const addWeight=v=>{if(!v)return;const w=[...(data.weights||[]),parseFloat(v)].slice(-3);upd({weights:w});setNewW('');};
   const avgW=data.weights?.length?(data.weights.reduce((a,b)=>a+b,0)/data.weights.length).toFixed(1):null;
-  const sessions=load('fc_sessions',[]);
-  const weekSessions=wk=>{
+  const sessions=ld('fc_sessions',[]);
+  const weekSessions=wn=>{
     if(!startDate)return[];
-    const wn=parseInt(wk.replace('w',''));
     const start=new Date(startDate);start.setDate(start.getDate()+(wn-1)*7);
     const end=new Date(start);end.setDate(end.getDate()+7);
     return sessions.filter(s=>new Date(s.date)>=start&&new Date(s.date)<end);
   };
-  const[newW,setNewW]=useState('');
-  return(
-    <div className="min-h-screen safe-bottom" style={{background:'#0f172a'}}>
-      <div className="px-4 pt-12 pb-4" style={{background:'linear-gradient(180deg,#1e1b4b 0%,#0f172a 100%)'}}>
-        <h1 className="text-2xl font-black text-white">📊 Fremgang</h1>
-        <p className="text-slate-400 text-sm">Start: {ME.startWeight} kg · Mål: ~{ME.goalWeight} kg</p>
+  const[bodyTab,setBodyTab]=useState('vekt');
+  return<div className="min-h-screen safe" style={{background:'#0f172a'}}>
+    <div className="px-4 pt-12 pb-4" style={{background:'linear-gradient(180deg,#1e1b4b 0%,#0f172a 100%)'}}>
+      <h1 className="text-2xl font-black text-white">📊 Fremgang</h1>
+      <p className="text-slate-400 text-sm">Start: {ME.startWeight}kg · Mål: ~{ME.goalWeight}kg</p>
+    </div>
+    <div className="px-4 space-y-4">
+      {/* Week selector */}
+      <div className="flex gap-1.5 overflow-x-auto pb-1">
+        {Array.from({length:12},(_,i)=>i+1).map(w=>{
+          const ws=weekSessions(w);
+          return<button key={w} onClick={()=>setActiveWeek(w)}
+            className={`flex-shrink-0 w-10 h-10 rounded-xl text-sm font-black relative ${w===activeWeek?'bg-purple-600 text-white':'bg-slate-800 text-slate-400'} ${w===week?'ring-2 ring-purple-400':''}`}>
+            {w}
+            {ws.length>0&&<div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full"/>}
+          </button>;
+        })}
       </div>
-      <div className="px-4 space-y-4">
-        {/* Week selector */}
-        <div className="flex gap-1.5 overflow-x-auto pb-1">
-          {Array.from({length:12},(_,i)=>i+1).map(w=>{
-            const ws=weekSessions(`w${w}`);
-            return(
-              <button key={w} onClick={()=>setActiveWeek(w)}
-                className={`flex-shrink-0 w-10 h-10 rounded-xl text-sm font-black transition-all relative ${w===activeWeek?'bg-purple-600 text-white':'bg-slate-800 text-slate-400'} ${w===week?'ring-2 ring-purple-400':''}`}>
-                {w}
-                {ws.length>0&&<div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full"/>}
-              </button>
-            );
-          })}
+      <div className="text-slate-500 text-xs">{activeWeek===week?'← Nåværende uke · ':''}{getPhase(activeWeek)?.name}</div>
+
+      {/* Vekt-trend graf */}
+      <WeightChart progData={prog} startDate={startDate}/>
+
+      {/* Body measurement tabs */}
+      <div className="flex gap-2">
+        {[['vekt','⚖️ Vekt'],['mål','📏 Kroppsmål'],['søvn','😴 Søvn/steg']].map(([k,l])=>(
+          <button key={k} onClick={()=>setBodyTab(k)} className={`flex-1 py-2 rounded-xl text-xs font-bold ${bodyTab===k?'bg-white text-slate-900':'bg-slate-800 text-slate-400'}`}>{l}</button>
+        ))}
+      </div>
+
+      {bodyTab==='vekt'&&<div className="bg-slate-800 rounded-2xl p-4">
+        <div className="text-slate-300 font-bold mb-3">⚖️ Vekt – Uke {activeWeek}</div>
+        <div className="text-slate-400 text-xs mb-3">Vei deg 3 morgener (etter toalett). Snitt brukes.</div>
+        <div className="flex gap-2 mb-3 flex-wrap">
+          {(data.weights||[]).map((w,i)=>(
+            <div key={i} className="flex-1 min-w-0 bg-slate-700 rounded-xl p-2 text-center">
+              <div className="text-xs text-slate-400">Dag {i+1}</div>
+              <div className="text-white font-black text-sm">{w} kg</div>
+            </div>
+          ))}
+          {(data.weights||[]).length<3&&(
+            <div className="flex gap-2 flex-1 min-w-0">
+              <input type="number" step="0.1" placeholder="kg" value={newW} onChange={e=>setNewW(e.target.value)}
+                className="flex-1 min-w-0 bg-slate-700 border border-slate-600 text-white rounded-xl p-2 text-center text-sm"/>
+              <button onClick={()=>addWeight(newW)} className="bg-blue-600 text-white px-3 rounded-xl font-bold text-sm">+</button>
+            </div>
+          )}
         </div>
-        <div className="text-slate-400 text-xs">{activeWeek===week?'← Nåværende uke':''} {getPhase(activeWeek)?.name}</div>
-        {/* This week's data */}
-        <div className="bg-slate-800 rounded-2xl p-4">
-          <div className="text-slate-300 font-bold mb-3">⚖️ Vekt – Uke {activeWeek}</div>
-          <div className="text-slate-400 text-xs mb-2">Vei deg 3 morgener (etter toalett). Snitt brukes.</div>
-          <div className="flex gap-2 mb-3">
-            {(data.weights||[]).map((w,i)=>(
-              <div key={i} className="flex-1 bg-slate-700 rounded-xl p-2 text-center">
-                <div className="text-xs text-slate-400">Dag {i+1}</div>
-                <div className="text-white font-black">{w} kg</div>
-              </div>
-            ))}
-            {(data.weights||[]).length<3&&(
-              <div className="flex gap-2 flex-1">
-                <input type="number" step="0.1" placeholder="kg" value={newW} onChange={e=>setNewW(e.target.value)}
-                  className="flex-1 bg-slate-700 border border-slate-600 text-white rounded-xl p-2 text-center text-sm min-w-0"/>
-                <button onClick={()=>{addWeight(newW);setNewW('');}} className="bg-blue-600 text-white px-3 rounded-xl font-bold text-sm">+</button>
-              </div>
-            )}
+        {avgW&&<div className="bg-slate-700 rounded-xl p-3 text-center">
+          <div className="text-slate-400 text-xs">Snitt denne uken</div>
+          <div className="text-white font-black text-2xl">{avgW} kg</div>
+          <div className={`text-sm font-bold mt-1 ${parseFloat(avgW)<ME.startWeight?'text-green-400':'text-slate-400'}`}>
+            Endring: {(parseFloat(avgW)-ME.startWeight).toFixed(1)} kg fra start
           </div>
-          {avgW&&<div className="bg-slate-700 rounded-xl p-3 text-center">
-            <div className="text-slate-400 text-xs">Snitt denne uken</div>
-            <div className="text-white font-black text-2xl">{avgW} kg</div>
-            {ME.startWeight&&<div className="text-slate-400 text-xs">Endring: {(parseFloat(avgW)-ME.startWeight).toFixed(1)} kg</div>}
+        </div>}
+      </div>}
+
+      {bodyTab==='mål'&&<div className="bg-slate-800 rounded-2xl p-4 space-y-3">
+        <div className="text-slate-300 font-bold">📏 Kroppsmål – Uke {activeWeek}</div>
+        <div className="text-slate-400 text-xs">Mål disse jevnlig for å se muskelbygging selv om vekten ikke endres mye.</div>
+        {[
+          {key:'waist',label:'Midje (rundt navlen)',icon:'👜',target:'ned'},
+          {key:'chest',label:'Bryst (bredeste punkt)',icon:'💪',target:'opp'},
+          {key:'arm',label:'Overarm (høyre, spent)',icon:'🦾',target:'opp'},
+          {key:'shoulder',label:'Skuldre (bredeste)',icon:'🏆',target:'opp'},
+        ].map(({key,label,icon,target})=>{
+          // Get last week's value for comparison
+          const prevWeek=prog[`w${activeWeek-1}`];
+          const prevVal=prevWeek?.[key];
+          const currVal=data[key];
+          const diff=currVal&&prevVal?(parseFloat(currVal)-parseFloat(prevVal)).toFixed(1):null;
+          const improved=diff&&((target==='ned'&&parseFloat(diff)<0)||(target==='opp'&&parseFloat(diff)>0));
+          return<div key={key} className="flex items-center gap-3">
+            <span className="text-2xl">{icon}</span>
+            <div className="flex-1 min-w-0">
+              <div className="text-slate-300 text-sm font-medium">{label}</div>
+              {diff&&<div className={`text-xs font-bold ${improved?'text-green-400':'text-red-400'}`}>{target==='ned'?'':'+'}{diff} cm fra forrige uke</div>}
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <input type="number" step="0.1" placeholder="cm" value={data[key]||''} onChange={e=>upd({[key]:e.target.value})}
+                className="w-20 bg-slate-700 border border-slate-600 text-white rounded-xl p-2 text-center font-black text-sm"/>
+              <span className="text-slate-500 text-xs">cm</span>
+            </div>
+          </div>;
+        })}
+      </div>}
+
+      {bodyTab==='søvn'&&<div className="space-y-3">
+        <div className="bg-slate-800 rounded-2xl p-4">
+          <div className="text-slate-300 font-bold mb-2">😴 Søvn 7+ timer – Uke {activeWeek}</div>
+          <div className="text-slate-400 text-xs mb-3">Dårlig søvn = mer sult + dårligere resultater. Mål: 5-7 netter</div>
+          <div className="flex gap-1.5 justify-between">
+            {[0,1,2,3,4,5,6,7].map(n=>(
+              <button key={n} onClick={()=>upd({sleep:n})}
+                className={`flex-1 h-10 rounded-xl text-sm font-black transition-all ${(data.sleep||0)>=n&&n>0?'bg-purple-600 text-white':'bg-slate-700 text-slate-400'}`}>
+                {n||'0'}
+              </button>
+            ))}
+          </div>
+          {(data.sleep||0)>=5&&<div className="mt-3 bg-purple-900 bg-opacity-30 rounded-xl p-2 text-center text-purple-400 text-sm font-bold">😴 Bra søvnuke!</div>}
+        </div>
+        <div className="bg-slate-800 rounded-2xl p-4">
+          <div className="text-slate-300 font-bold mb-2">🚶 Gjennomsnittlig steg/dag</div>
+          <div className="flex items-center gap-3">
+            <input type="number" placeholder="antall steg" value={data.steps||''} onChange={e=>upd({steps:e.target.value})}
+              className="flex-1 bg-slate-700 border border-slate-600 text-white rounded-xl p-3 text-sm font-bold"/>
+            <span className="text-slate-500 text-sm">steg/dag</span>
+          </div>
+          {data.steps&&<div className="mt-2">
+            <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+              <div className="h-full rounded-full transition-all" style={{width:`${Math.min(parseInt(data.steps)/ME.stepGoal*100,100)}%`,background:parseInt(data.steps)>=ME.stepGoal?'#22c55e':'#3b82f6'}}/>
+            </div>
+            <div className={`text-xs mt-1 font-bold ${parseInt(data.steps)>=ME.stepGoal?'text-green-400':'text-slate-400'}`}>
+              {parseInt(data.steps)>=ME.stepGoal?`✅ Mål nådd (${ME.stepGoal.toLocaleString()} steg)`:`${parseInt(data.steps).toLocaleString()} / ${ME.stepGoal.toLocaleString()} steg`}
+            </div>
           </div>}
         </div>
-        {/* Waist & sleep */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="bg-slate-800 rounded-2xl p-4">
-            <div className="text-slate-300 text-sm font-bold mb-2">📏 Midje (cm)</div>
-            <div className="text-slate-400 text-xs mb-2">Mål rundt navlen, mandag morgen</div>
-            <input type="number" placeholder="cm" value={data.waist||''} onChange={e=>upd({waist:e.target.value})}
-              className="w-full bg-slate-700 border border-slate-600 text-white rounded-xl p-2 text-center font-black text-xl"/>
-          </div>
-          <div className="bg-slate-800 rounded-2xl p-4">
-            <div className="text-slate-300 text-sm font-bold mb-2">😴 Søvn 7+ timer</div>
-            <div className="text-slate-400 text-xs mb-2">Netter med 7+ timer denne uken</div>
-            <div className="flex gap-1 justify-center">
-              {[0,1,2,3,4,5,6,7].map(n=>(
-                <button key={n} onClick={()=>upd({sleep:n})}
-                  className={`w-7 h-7 rounded-lg text-xs font-black ${(data.sleep||0)>=n&&n>0?'bg-purple-600 text-white':'bg-slate-700 text-slate-400'}`}>
-                  {n||'0'}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-        {/* Workouts this week */}
-        <div className="bg-slate-800 rounded-2xl p-4">
-          <div className="text-slate-300 font-bold mb-2">💪 Økter – Uke {activeWeek}</div>
-          {(()=>{
-            const ws=weekSessions(wk);
-            if(!ws.length)return<p className="text-slate-500 text-sm">Ingen loggede økter denne uken</p>;
-            return ws.map((s,i)=>(<div key={i} className="flex justify-between py-2 border-b border-slate-700 last:border-0">
-              <span className="text-white text-sm">{s.workoutTitle}</span>
-              <span className="text-green-400 text-sm font-bold">✓</span>
-            </div>));
-          })()}
-        </div>
-        {/* Notes */}
         <div className="bg-slate-800 rounded-2xl p-4">
           <div className="text-slate-300 text-sm font-bold mb-2">📝 Kommentar uke {activeWeek}</div>
-          <textarea rows={2} placeholder="Hvordan gikk det denne uken? Energi, søvn, kosthold..."
-            value={data.note||''} onChange={e=>upd({note:e.target.value})}
-            className="w-full bg-slate-700 border border-slate-600 text-white rounded-xl p-3 text-sm resize-none"/>
+          <textarea rows={2} placeholder="Energi, søvn, kosthold, motivasjon..." value={data.note||''} onChange={e=>upd({note:e.target.value})}
+            className="w-full bg-slate-700 border border-slate-600 text-white rounded-xl p-3 text-sm"/>
         </div>
-        {/* 12-week overview table */}
-        <div className="bg-slate-800 rounded-2xl p-4 mb-4">
-          <div className="text-slate-300 font-bold mb-3">📈 12-ukers oversikt</div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs">
-              <thead><tr className="text-slate-400">
-                <th className="text-left py-1 pr-2">Uke</th>
-                <th className="text-center py-1 pr-2">Kg snitt</th>
-                <th className="text-center py-1 pr-2">Midje</th>
-                <th className="text-center py-1 pr-2">Økter</th>
-                <th className="text-center py-1">Søvn</th>
-              </tr></thead>
-              <tbody>
-                {Array.from({length:12},(_,i)=>i+1).map(w=>{
-                  const d=prog[`w${w}`]||{};
-                  const ws=weekSessions(`w${w}`);
-                  const avg=d.weights?.length?(d.weights.reduce((a,b)=>a+b,0)/d.weights.length).toFixed(1):null;
-                  return<tr key={w} className={`border-t border-slate-700 ${w===week?'bg-purple-900 bg-opacity-20':''}`}>
-                    <td className="py-1.5 pr-2 text-slate-300 font-bold">{w}{w===week?'*':''}</td>
-                    <td className="text-center pr-2 text-white">{avg||'—'}</td>
-                    <td className="text-center pr-2 text-white">{d.waist?`${d.waist}cm`:'—'}</td>
-                    <td className="text-center pr-2">{ws.length>0?<span className="text-green-400">{'✓'.repeat(Math.min(ws.length,3))}</span>:<span className="text-slate-600">···</span>}</td>
-                    <td className="text-center text-slate-300">{d.sleep||'—'}</td>
-                  </tr>;
-                })}
-              </tbody>
-            </table>
-          </div>
+      </div>}
+
+      {/* 12-week table */}
+      <div className="bg-slate-800 rounded-2xl p-4 mb-4">
+        <div className="text-slate-300 font-bold mb-3">📋 12-ukers oversikt</div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead><tr className="text-slate-400">
+              <th className="text-left py-1 pr-2">Uke</th>
+              <th className="text-center py-1 pr-1">Kg</th>
+              <th className="text-center py-1 pr-1">Midje</th>
+              <th className="text-center py-1 pr-1">Arm</th>
+              <th className="text-center py-1 pr-1">Økter</th>
+              <th className="text-center py-1">Søvn</th>
+            </tr></thead>
+            <tbody>
+              {Array.from({length:12},(_,i)=>i+1).map(w=>{
+                const d=prog[`w${w}`]||{};
+                const ws=weekSessions(w);
+                const avg=d.weights?.length?(d.weights.reduce((a,b)=>a+b,0)/d.weights.length).toFixed(1):null;
+                const prev=prog[`w${w-1}`];
+                const prevAvg=prev?.weights?.length?(prev.weights.reduce((a,b)=>a+b,0)/prev.weights.length):null;
+                const diff=avg&&prevAvg?(parseFloat(avg)-prevAvg).toFixed(1):null;
+                return<tr key={w} className={`border-t border-slate-700 ${w===week?'bg-purple-900 bg-opacity-20':''}`}>
+                  <td className="py-1.5 pr-2 text-slate-300 font-bold">{w}{w===week?'←':''}</td>
+                  <td className="text-center pr-1">
+                    <span className="text-white">{avg||'—'}</span>
+                    {diff&&<span className={`text-xs ml-0.5 ${parseFloat(diff)<0?'text-green-400':'text-red-400'}`}>{diff}</span>}
+                  </td>
+                  <td className="text-center pr-1 text-slate-300">{d.waist?`${d.waist}`:'-'}</td>
+                  <td className="text-center pr-1 text-slate-300">{d.arm?`${d.arm}`:'-'}</td>
+                  <td className="text-center pr-1">{ws.length>0?<span className="text-green-400">{'✓'.repeat(Math.min(ws.length,3))}</span>:<span className="text-slate-700">···</span>}</td>
+                  <td className="text-center text-slate-300">{d.sleep||'-'}</td>
+                </tr>;
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
-  );
+  </div>;
 }
 
-// ═══════════════════════════════════════════════════════════════
-// PLAN SCREEN
-// ═══════════════════════════════════════════════════════════════
+// ─── WEEKLY RAPPORT ───────────────────────────────────────────
+function WeeklyRapport({week,startDate}){
+  if(!week||!startDate)return null;
+  const prog=ld('fc_progress',{});
+  const sessions=ld('fc_sessions',[]);
+  const foodLog=ld('fc_food_log',{});
+  // This week's dates
+  const start=new Date(startDate);start.setDate(start.getDate()+(week-1)*7);
+  const end=new Date(start);end.setDate(end.getDate()+7);
+  // Sessions this week
+  const weekSess=sessions.filter(s=>new Date(s.date)>=start&&new Date(s.date)<end);
+  // Avg protein this week
+  const days=[];for(let i=0;i<7;i++){const d=new Date(start);d.setDate(d.getDate()+i);days.push(d.toISOString().slice(0,10));}
+  const dayProteins=days.map(d=>(foodLog[d]||[]).reduce((a,f)=>a+(f.protein||0),0));
+  const avgProtein=dayProteins.some(p=>p>0)?Math.round(dayProteins.filter(p=>p>0).reduce((a,b)=>a+b,0)/dayProteins.filter(p=>p>0).length):null;
+  // Weight this week
+  const wData=prog[`w${week}`]||{};
+  const avgW=wData.weights?.length?(wData.weights.reduce((a,b)=>a+b,0)/wData.weights.length).toFixed(1):null;
+  // Prev week weight
+  const prevW=prog[`w${week-1}`];
+  const prevAvg=prevW?.weights?.length?(prevW.weights.reduce((a,b)=>a+b,0)/prevW.weights.length).toFixed(1):null;
+  const wDiff=avgW&&prevAvg?(parseFloat(avgW)-parseFloat(prevAvg)).toFixed(1):null;
+  const phase=getPhase(week);
+  // Next week focus
+  const nextPhase=getPhase(week+1);
+  const tips=[];
+  if(weekSess.length<3)tips.push(`Prøv å fullføre ${3-weekSess.length} økt${weekSess.length===2?'':'er'} til`);
+  if(avgProtein&&avgProtein<ME.targetProtein-10)tips.push(`Øk protein – du lå på ~${avgProtein}g, mål er ${ME.targetProtein}g`);
+  if(wDiff&&parseFloat(wDiff)>0.5)tips.push('Vekten gikk opp – reduser kalorier litt neste uke');
+  if(wDiff&&parseFloat(wDiff)<-0.5)tips.push('Fint vektnedgang! Hold kursen neste uke');
+  if(!wData.waist)tips.push('Husk å måle midje mandag morgen');
+  if((wData.sleep||0)<5)tips.push('Prioriter mer søvn – kritisk for resultater');
+  if(tips.length===0)tips.push('Bra uke! Hold trykket oppe neste uke 💪');
+  return<div className="bg-slate-800 rounded-2xl overflow-hidden mb-4">
+    <div className="px-4 py-3 border-b border-slate-700" style={{background:`${phase?.color}22`}}>
+      <div className="text-white font-black">📋 Ukesrapport – Uke {week}</div>
+      <div className="text-slate-400 text-xs">{phase?.name}</div>
+    </div>
+    <div className="px-4 py-3 grid grid-cols-3 gap-3 border-b border-slate-700">
+      <div className="text-center">
+        <div className={`text-2xl font-black ${weekSess.length>=3?'text-green-400':'text-yellow-400'}`}>{weekSess.length}/3</div>
+        <div className="text-slate-400 text-xs">Økter</div>
+      </div>
+      <div className="text-center">
+        <div className={`text-2xl font-black ${avgProtein&&avgProtein>=ME.targetProtein-10?'text-green-400':'text-yellow-400'}`}>{avgProtein||'—'}g</div>
+        <div className="text-slate-400 text-xs">Snitt protein</div>
+      </div>
+      <div className="text-center">
+        <div className={`text-2xl font-black ${wDiff&&parseFloat(wDiff)<0?'text-green-400':'text-slate-300'}`}>{avgW?`${avgW}kg`:'—'}</div>
+        {wDiff&&<div className={`text-xs font-bold ${parseFloat(wDiff)<0?'text-green-400':'text-red-400'}`}>{parseFloat(wDiff)>0?'+':''}{wDiff}kg</div>}
+        <div className="text-slate-400 text-xs">Snitt vekt</div>
+      </div>
+    </div>
+    <div className="px-4 py-3">
+      <div className="text-slate-300 text-xs font-bold mb-2">🎯 Fokus neste uke</div>
+      <div className="space-y-1.5">
+        {tips.map((t,i)=><div key={i} className="flex items-start gap-2 text-sm text-slate-300"><span className="text-blue-400 mt-0.5">→</span>{t}</div>)}
+      </div>
+    </div>
+  </div>;
+}
 
+// ─── TODAY SCREEN ─────────────────────────────────────────────
+function TodayScreen({startDate,onGoWorkout,onGoFood}){
+  const week=getWeekNum(startDate);
+  const phase=getPhase(week);
+  const sessions=ld('fc_sessions',[]);
+  const foodLog=ld('fc_food_log',{});
+  const todayFood=foodLog[todayStr()]||[];
+  const totalP=todayFood.reduce((a,f)=>a+(f.protein||0),0);
+  const totalK=todayFood.reduce((a,f)=>a+(f.kcal||0),0);
+  const dow=new Date().getDay();
+  const todayPlan=WEEK_SCHEDULE[dow];
+  const isTrain=todayPlan?.type==='workout';
+  const kcalTarget=isTrain?ME.kcalTrain:ME.kcalRest;
+  const prog=ld('fc_progress',{});
+  const weekKey=`w${week}`;
+  const thisWeek=prog[weekKey]||{};
+  const weights=thisWeek.weights||[];
+  const avgWeight=weights.length?Math.round((weights.reduce((a,b)=>a+b,0)/weights.length)*10)/10:null;
+  const weekSessions=(()=>{
+    if(!startDate||!week)return[];
+    const start=new Date(startDate);start.setDate(start.getDate()+(week-1)*7);
+    const end=new Date(start);end.setDate(end.getDate()+7);
+    return sessions.filter(s=>new Date(s.date)>=start&&new Date(s.date)<end);
+  })();
+  const todaySteps=parseInt(thisWeek.steps)||0;
+  const dayName=new Date().toLocaleDateString('no-NO',{weekday:'long',day:'numeric',month:'long'});
+  const run=getRunning(week);
+  const runTip={1:run?.mon,3:run?.wed,6:run?.sat}[dow];
+  return<div className="min-h-screen safe" style={{background:'#0f172a'}}>
+    <div className="px-4 pt-12 pb-5" style={{background:'linear-gradient(180deg,#1e3a5f 0%,#0f172a 100%)'}}>
+      <div className="flex justify-between items-start mb-4">
+        <div><div className="text-slate-400 text-xs capitalize">{dayName}</div><h1 className="text-xl font-black text-white">Hei, {ME.name} 👋</h1></div>
+        {week&&<div className="bg-white bg-opacity-10 rounded-xl px-3 py-1.5 text-right">
+          <div className="text-white font-black text-sm">Uke {week}/12</div>
+          <div className="text-slate-400 text-xs">{phase?.name}</div>
+        </div>}
+      </div>
+      {phase&&<div className="rounded-2xl p-3 mb-4 flex items-center gap-3" style={{background:phase.color+'22',border:`1px solid ${phase.color}44`}}>
+        <span className="text-2xl">{phase.emoji}</span>
+        <div><div className="text-white font-bold text-sm">{phase.name} · {phase.rpe}</div><div className="text-slate-300 text-xs">{phase.tip}</div></div>
+      </div>}
+      {/* Rings */}
+      <div className="flex justify-around py-1">
+        <Ring value={totalP} max={ME.targetProtein} color="#22c55e" size={84} label={`${totalP}g`} sub="protein"/>
+        <Ring value={totalK} max={kcalTarget} color="#3b82f6" size={84} label={`${totalK}`} sub="kcal"/>
+        <Ring value={weekSessions.length} max={3} color="#a855f7" size={84} label={`${weekSessions.length}/3`} sub="økter"/>
+        <Ring value={todaySteps} max={ME.stepGoal} color="#f59e0b" size={84} label={todaySteps>0?`${Math.round(todaySteps/1000*10)/10}k`:'—'} sub="steg"/>
+      </div>
+    </div>
+    <div className="px-4 space-y-3">
+      {/* Today's training */}
+      {todayPlan&&<div className={`rounded-2xl p-4 su ${isTrain?'cursor-pointer active:scale-98':''}`}
+        style={{background:isTrain?'linear-gradient(135deg,#1e40af22,#7c3aed22)':'#1e293b',border:`1px solid ${isTrain?'#3b82f644':'#33415544'}`}}
+        onClick={()=>isTrain&&todayPlan.id&&onGoWorkout(todayPlan.id)}>
+        <div className="flex items-center justify-between">
+          <div><div className="text-slate-400 text-xs font-medium uppercase tracking-wide">I dag</div>
+            <div className="text-white font-bold mt-0.5">{todayPlan.label}</div>
+            <div className="text-slate-400 text-sm">{todayPlan.sub}</div>
+          </div>
+          {isTrain&&<div className="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold text-sm">Start →</div>}
+        </div>
+      </div>}
+      {/* Running tip */}
+      {week&&runTip&&<div className="bg-teal-900 bg-opacity-40 border border-teal-700 border-opacity-40 rounded-2xl p-3">
+        <div className="text-teal-400 text-xs font-bold mb-0.5">🏃 Løp i dag (uke {week})</div>
+        <div className="text-white text-sm">{runTip}</div>
+      </div>}
+      {/* Food quick action */}
+      <button onClick={onGoFood} className="w-full bg-slate-800 rounded-2xl p-4 flex items-center justify-between">
+        <div className="text-left">
+          <div className="text-slate-400 text-xs">Protein i dag</div>
+          <div className="text-white font-bold">{totalP}g / {ME.targetProtein}g</div>
+          <div className="h-1.5 bg-slate-700 rounded-full mt-2 w-44 overflow-hidden"><div className="h-full bg-green-500 rounded-full" style={{width:`${Math.min(totalP/ME.targetProtein*100,100)}%`}}/></div>
+        </div>
+        <div className="text-slate-400 text-sm">+ Logg mat →</div>
+      </button>
+      {/* Weight & measurements */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="bg-slate-800 rounded-2xl p-3 text-center">
+          <div className="text-slate-400 text-xs mb-1">⚖️ Vekt</div>
+          <div className="text-white font-black text-lg">{avgWeight?`${avgWeight}kg`:'—'}</div>
+          <div className="text-slate-500 text-xs">start {ME.startWeight}</div>
+        </div>
+        <div className="bg-slate-800 rounded-2xl p-3 text-center">
+          <div className="text-slate-400 text-xs mb-1">📏 Midje</div>
+          <div className="text-white font-black text-lg">{thisWeek.waist?`${thisWeek.waist}cm`:'—'}</div>
+        </div>
+        <div className="bg-slate-800 rounded-2xl p-3 text-center">
+          <div className="text-slate-400 text-xs mb-1">🦾 Arm</div>
+          <div className="text-white font-black text-lg">{thisWeek.arm?`${thisWeek.arm}cm`:'—'}</div>
+        </div>
+      </div>
+      {/* Weekly rapport */}
+      {week&&<WeeklyRapport week={week} startDate={startDate}/>}
+      {/* Daily reminders */}
+      <div className="bg-slate-800 rounded-2xl p-4">
+        <div className="text-slate-300 text-sm font-bold mb-2">📌 Huskeliste i dag</div>
+        <div className="space-y-1.5 text-slate-400 text-sm">
+          <div className={`flex items-center gap-2 ${totalP>=ME.targetProtein?'text-green-400':''}`}>{totalP>=ME.targetProtein?'✅':'○'} 130-150g protein</div>
+          <div className={`flex items-center gap-2 ${todaySteps>=ME.stepGoal?'text-green-400':''}`}>{todaySteps>=ME.stepGoal?'✅':'○'} 8000-10000 steg</div>
+          <div>💊 3-5g kreatin (hver dag)</div>
+          <div>💧 500ml vann når du stod opp</div>
+          <div>😴 Sikt på 7+ timer i natt</div>
+        </div>
+      </div>
+    </div>
+  </div>;
+}
+
+// ─── PLAN SCREEN ──────────────────────────────────────────────
 function PlanScreen({startDate}){
   const week=getWeekNum(startDate)||1;
   const phase=getPhase(week);
-  const run=getRunningForWeek(week);
+  const run=getRunning(week);
   const[tab,setTab]=useState('uke');
   const dayNames=['Søn','Man','Tir','Ons','Tor','Fre','Lør'];
-  return(
-    <div className="min-h-screen safe-bottom" style={{background:'#0f172a'}}>
-      <div className="px-4 pt-12 pb-4" style={{background:'linear-gradient(180deg,#1c1917 0%,#0f172a 100%)'}}>
-        <h1 className="text-2xl font-black text-white">📋 Plan</h1>
-        <p className="text-slate-400 text-sm">12 ukers Fight Club{week?` · Uke ${week}`:''}</p>
-      </div>
-      <div className="flex px-4 gap-2 mb-4">
-        {[['uke','Uke'],['løp','Løping'],['mat','Mat'],['supp','Tilskudd']].map(([k,l])=>(
-          <button key={k} onClick={()=>setTab(k)} className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${tab===k?'bg-slate-300 text-slate-900':'bg-slate-800 text-slate-400'}`}>{l}</button>
-        ))}
-      </div>
-      <div className="px-4 space-y-3">
-        {tab==='uke'&&<>
-          {/* Current phase */}
-          {phase&&<div className="rounded-2xl p-4" style={{background:phase.color+'22',border:`1px solid ${phase.color}44`}}>
-            <div className="text-white font-black text-lg">{phase.emoji} {phase.name}</div>
-            <div className="text-slate-300 text-sm mt-1">{phase.rpe} · Uke {phase.range[0]}-{phase.range[1]}</div>
-            <div className="text-slate-400 text-sm mt-1">{phase.tip}</div>
-          </div>}
-          {/* Progression rule */}
-          <div className="bg-slate-800 rounded-2xl p-4">
-            <div className="text-slate-300 font-bold mb-2">📈 Progresjonsregel</div>
-            <div className="text-slate-400 text-sm">Når du klarer øvre del av repsområdet på alle sett med god teknikk:</div>
-            <div className="mt-2 space-y-1 text-sm">
-              <div className="text-slate-300">• <span className="text-blue-400">Maskiner/bein:</span> +2-5 kg</div>
-              <div className="text-slate-300">• <span className="text-blue-400">Hantler/overkropp:</span> +1-2 kg per hånd</div>
-              <div className="text-slate-300">• <span className="text-blue-400">Alternativ:</span> +1-2 reps hvis du ikke kan øke vekt</div>
-            </div>
-          </div>
-          {/* Weekly schedule */}
-          <div className="bg-slate-800 rounded-2xl overflow-hidden">
-            <div className="px-4 py-3 border-b border-slate-700 text-slate-300 font-bold">Ukeoppsett</div>
-            {[1,2,3,4,5,6,0].map(d=>{
-              const p=WEEK_SCHEDULE[d];
-              const isW=p.type==='workout';
-              const isT=p.type==='rest';
-              return<div key={d} className={`flex items-center gap-3 px-4 py-3 border-b border-slate-700 last:border-0 ${isW?'bg-blue-900 bg-opacity-10':''}`}>
-                <div className="w-8 text-slate-400 text-sm font-bold">{dayNames[d]}</div>
-                <div className="flex-1">
-                  <div className="text-white text-sm font-semibold">{p.label}</div>
-                  <div className="text-slate-500 text-xs">{p.sub}</div>
-                </div>
-                {isW&&<div className="bg-blue-600 bg-opacity-20 text-blue-400 text-xs font-bold px-2 py-1 rounded-lg">GYM</div>}
-              </div>;
-            })}
-          </div>
-          <div className="bg-amber-900 bg-opacity-30 border border-amber-700 border-opacity-40 rounded-2xl p-4">
-            <div className="text-amber-400 font-bold text-sm mb-1">⚡ Fleksibel regel</div>
-            <div className="text-slate-300 text-sm">Hvis barna/dama/jobben gjør at en dag ryker – flytt økten. Ikke start uka på nytt. Gjør neste økt så raskt du kan.</div>
-          </div>
-        </>}
-        {tab==='løp'&&<>
-          {run&&week&&<div className="bg-teal-900 bg-opacity-40 border border-teal-700 border-opacity-40 rounded-2xl p-4 mb-2">
-            <div className="text-teal-400 font-bold mb-2">🏃 Uke {week} – Løpeplan</div>
-            <div className="space-y-2">
-              <div><span className="text-slate-400 text-xs">MANDAG (etter Økt A):</span><div className="text-white text-sm">{run.mon}</div></div>
-              <div><span className="text-slate-400 text-xs">ONSDAG (etter Økt B):</span><div className="text-white text-sm">{run.wed}</div></div>
-              <div><span className="text-slate-400 text-xs">LØRDAG (etter Økt C):</span><div className="text-white text-sm">{run.sat}</div></div>
-            </div>
-          </div>}
-          <div className="bg-slate-800 rounded-2xl overflow-hidden">
-            <div className="px-4 py-3 border-b border-slate-700 text-slate-300 font-bold text-sm">Full 12-ukers løpeplan</div>
-            {RUNNING.map((r,i)=>(
-              <div key={i} className={`px-4 py-3 border-b border-slate-700 last:border-0 ${week>=r.w[0]&&week<=r.w[1]?'bg-teal-900 bg-opacity-20':''}`}>
-                <div className="text-slate-300 font-bold text-sm mb-1">Uke {r.w[0]}-{r.w[1]} {week>=r.w[0]&&week<=r.w[1]?'← nå':''}</div>
-                <div className="text-slate-400 text-xs space-y-0.5">
-                  <div>Man: {r.mon}</div><div>Ons: {r.wed}</div><div>Lør: {r.sat}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="bg-slate-800 rounded-2xl p-4">
-            <div className="text-slate-300 font-bold mb-2">📌 Intensitet</div>
-            <div className="space-y-2 text-sm">
-              <div><span className="text-green-400 font-bold">Rolig løp:</span><span className="text-slate-300"> Du kan prate korte setninger. Sone 2.</span></div>
-              <div><span className="text-yellow-400 font-bold">Intervall:</span><span className="text-slate-300"> Andpusten, men ikke maks sprint.</span></div>
-              <div className="text-slate-400 text-xs">⚠️ Hvis knær/legg irriteres: bytt løp med rask gange i motbakke.</div>
-            </div>
-          </div>
-        </>}
-        {tab==='mat'&&<>
-          <div className="bg-slate-800 rounded-2xl p-4">
-            <div className="text-slate-300 font-bold mb-3">🎯 Dine mål</div>
-            <div className="grid grid-cols-2 gap-3">
-              {[['Protein','130-150g/dag','🟢'],['Treningsdag','2100-2200 kcal','🔵'],['Hviledag','1900-2000 kcal','⚫'],['Vektnedgang','0,3-0,5 kg/uke','🔴']].map(([l,v,e])=>(
-                <div key={l} className="bg-slate-700 rounded-xl p-3">
-                  <div className="text-slate-400 text-xs">{l}</div>
-                  <div className="text-white font-bold text-sm mt-0.5">{v}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-          {[['🌅 Frokost','frokost'],['☀️ Lunsj','lunsj'],['🍽 Middag','middag'],['🌙 Kveld','kveld']].map(([label,key])=>(
-            <div key={key} className="bg-slate-800 rounded-2xl overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-700 text-slate-300 font-bold text-sm">{label}</div>
-              {MEALS[key].map((m,i)=>(
-                <div key={i} className="flex justify-between items-center px-4 py-2.5 border-b border-slate-700 last:border-0">
-                  <div><div className="text-white text-sm">{m.name}</div><div className="text-slate-500 text-xs">{m.desc}</div></div>
-                  <div className="text-right flex-shrink-0 ml-2"><div className="text-green-400 text-xs font-bold">{m.protein}g</div><div className="text-slate-500 text-xs">{m.kcal} kcal</div></div>
-                </div>
-              ))}
-            </div>
-          ))}
-          <div className="bg-red-900 bg-opacity-30 border border-red-700 border-opacity-40 rounded-2xl p-4">
-            <div className="text-red-400 font-bold mb-1">🚫 Viktigste matregel</div>
-            <div className="text-slate-300 text-sm">Baguette sent på kvelden (etter kl. 21) må bort mesteparten av uka. Det er her magefettet oftest vinner.</div>
-          </div>
-          <div className="bg-slate-800 rounded-2xl p-4">
-            <div className="text-slate-300 font-bold mb-2">🛒 Handleliste</div>
-            {[['🥩 Protein','Egg, skyr, cottage cheese, kylling, karbonadedeig, tunfisk, laks, torsk'],
-              ['🌾 Karbo','Havregryn, poteter, ris, grove knekkebrød, frukt, bær'],
-              ['🥦 Grønt','Brokkoli, salat, agurk, paprika, gulrøtter, frosne wokgrønnsaker'],
-              ['🫙 Tilskudd','Whey protein, kreatin monohydrat'],
-            ].map(([l,v])=>(
-              <div key={l} className="py-2 border-b border-slate-700 last:border-0">
-                <div className="text-slate-300 text-sm font-bold">{l}</div>
-                <div className="text-slate-400 text-xs mt-0.5">{v}</div>
-              </div>
-            ))}
-          </div>
-          <div className="bg-slate-800 rounded-2xl p-4">
-            <div className="text-slate-300 font-bold mb-2">🍱 Meal prep søndag (30-45 min)</div>
-            <div className="space-y-1.5 text-slate-400 text-sm">
-              <div>• Lag 2-3 porsjoner kylling/karbonadedeig + ris/potet</div>
-              <div>• Kutt grønnsaker eller kjøp ferdig frossen miks</div>
-              <div>• Ha skyr/cottage cheese klar til kveldene</div>
-              <div>• Legg proteinpulver og shaker synlig</div>
-            </div>
-          </div>
-        </>}
-        {tab==='supp'&&<>
-          <div className="bg-slate-800 rounded-2xl p-4 mb-2">
-            <div className="text-slate-300 font-bold mb-1">✅ Anbefalt å kjøpe</div>
-            <div className="text-slate-500 text-xs">Dropp fat burners, testoboosters, BCAA og kompliserte pre-workout i starten.</div>
-          </div>
-          {SUPPLEMENTS.map((s,i)=>(
-            <div key={i} className="bg-slate-800 rounded-2xl p-4">
-              <div className="flex justify-between items-start mb-1">
-                <div className="text-white font-bold">{s.name}</div>
-                <span className="bg-slate-700 text-slate-300 text-xs px-2 py-1 rounded-lg">{s.dose}</span>
-              </div>
-              <div className="text-blue-400 text-xs font-medium mb-1">⏰ {s.when}</div>
-              <div className="text-slate-400 text-sm">{s.note}</div>
-            </div>
-          ))}
-          <div className="bg-slate-800 rounded-2xl p-4">
-            <div className="text-slate-300 font-bold mb-2">💧 Morgenrutine</div>
-            <div className="space-y-2 text-sm">
-              <div className="text-slate-300">• 500 ml vann når du står opp</div>
-              <div className="text-slate-300">• Kaffe er helt greit</div>
-              <div className="text-slate-300">• Frokost med protein innen 1-2 timer</div>
-              <div className="text-slate-400 text-xs mt-2">Vann med sitron, salt osv er greit for smak/hydrering, men ingen magisk fettforbrenner.</div>
-            </div>
-          </div>
-        </>}
-      </div>
+  return<div className="min-h-screen safe" style={{background:'#0f172a'}}>
+    <div className="px-4 pt-12 pb-4" style={{background:'linear-gradient(180deg,#1c1917 0%,#0f172a 100%)'}}>
+      <h1 className="text-2xl font-black text-white">📋 Plan</h1>
+      <p className="text-slate-400 text-sm">12 ukers Fight Club{week?` · Uke ${week}`:''}</p>
     </div>
-  );
+    <div className="flex px-4 gap-2 mb-4 overflow-x-auto pb-1">
+      {[['uke','Uke'],['løp','🏃 Løp'],['mat','🥗 Mat'],['supp','💊 Tilskudd']].map(([k,l])=>(
+        <button key={k} onClick={()=>setTab(k)} className={`flex-shrink-0 px-4 py-2 rounded-xl text-sm font-bold ${tab===k?'bg-white text-slate-900':'bg-slate-800 text-slate-400'}`}>{l}</button>
+      ))}
+    </div>
+    <div className="px-4 space-y-3">
+      {tab==='uke'&&<>
+        {phase&&<div className="rounded-2xl p-4" style={{background:phase.color+'22',border:`1px solid ${phase.color}44`}}>
+          <div className="text-white font-black text-lg">{phase.emoji} {phase.name}</div>
+          <div className="text-slate-300 text-sm mt-1">{phase.rpe} · Uke {phase.range[0]}-{phase.range[1]}</div>
+          <div className="text-slate-400 text-sm mt-1">{phase.tip}</div>
+        </div>}
+        <div className="bg-slate-800 rounded-2xl p-4">
+          <div className="text-slate-300 font-bold mb-2">📈 Progresjonsregel</div>
+          <div className="space-y-1 text-sm text-slate-300">
+            <div>• <span className="text-blue-400">Maskiner/bein:</span> +2-5 kg</div>
+            <div>• <span className="text-blue-400">Hantler/overkropp:</span> +1-2 kg per hånd</div>
+            <div>• <span className="text-blue-400">Alternativ:</span> +1-2 reps hvis du ikke kan øke vekt</div>
+          </div>
+        </div>
+        <div className="bg-slate-800 rounded-2xl overflow-hidden">
+          <div className="px-4 py-3 border-b border-slate-700 text-slate-300 font-bold">Ukeoppsett</div>
+          {[1,2,3,4,5,6,0].map(d=>{
+            const p=WEEK_SCHEDULE[d];
+            const isW=p.type==='workout';
+            return<div key={d} className={`flex items-center gap-3 px-4 py-3 border-b border-slate-700 last:border-0 ${isW?'bg-blue-900 bg-opacity-10':''}`}>
+              <div className="w-8 text-slate-400 text-sm font-bold">{dayNames[d]}</div>
+              <div className="flex-1"><div className="text-white text-sm font-semibold">{p.label}</div><div className="text-slate-500 text-xs">{p.sub}</div></div>
+              {isW&&<div className="bg-blue-600 bg-opacity-20 text-blue-400 text-xs font-bold px-2 py-1 rounded-lg">GYM</div>}
+            </div>;
+          })}
+        </div>
+        <div className="bg-amber-900 bg-opacity-30 border border-amber-700 border-opacity-40 rounded-2xl p-4">
+          <div className="text-amber-400 font-bold text-sm mb-1">⚡ Fleksibel regel</div>
+          <div className="text-slate-300 text-sm">Hvis barna/dama/jobben gjør at en dag ryker – flytt økten. Ikke start uka på nytt.</div>
+        </div>
+      </>}
+      {tab==='løp'&&<>
+        {run&&week&&<div className="bg-teal-900 bg-opacity-40 border border-teal-700 border-opacity-40 rounded-2xl p-4 mb-2">
+          <div className="text-teal-400 font-bold mb-2">🏃 Uke {week} – Din løpeplan</div>
+          <div className="space-y-2">
+            <div><span className="text-slate-400 text-xs">MANDAG:</span><div className="text-white text-sm">{run.mon}</div></div>
+            <div><span className="text-slate-400 text-xs">ONSDAG:</span><div className="text-white text-sm">{run.wed}</div></div>
+            <div><span className="text-slate-400 text-xs">LØRDAG:</span><div className="text-white text-sm">{run.sat}</div></div>
+          </div>
+        </div>}
+        <div className="bg-slate-800 rounded-2xl overflow-hidden">
+          {RUNNING.map((r,i)=>(
+            <div key={i} className={`px-4 py-3 border-b border-slate-700 last:border-0 ${week>=r.w[0]&&week<=r.w[1]?'bg-teal-900 bg-opacity-20':''}`}>
+              <div className="text-slate-300 font-bold text-sm mb-1">Uke {r.w[0]}-{r.w[1]} {week>=r.w[0]&&week<=r.w[1]?'← nå':''}</div>
+              <div className="text-slate-400 text-xs space-y-0.5"><div>Man: {r.mon}</div><div>Ons: {r.wed}</div><div>Lør: {r.sat}</div></div>
+            </div>
+          ))}
+        </div>
+        <div className="bg-slate-800 rounded-2xl p-4">
+          <div className="text-slate-300 font-bold mb-2">📌 Intensitet</div>
+          <div className="space-y-1.5 text-sm">
+            <div><span className="text-green-400 font-bold">Rolig løp:</span><span className="text-slate-300"> Du kan prate korte setninger.</span></div>
+            <div><span className="text-yellow-400 font-bold">Intervall:</span><span className="text-slate-300"> Andpusten, men ikke maks sprint.</span></div>
+            <div className="text-slate-500 text-xs">Hvis knær/legg irriteres: bytt med rask gange i motbakke.</div>
+          </div>
+        </div>
+      </>}
+      {tab==='mat'&&<>
+        <div className="bg-slate-800 rounded-2xl p-4">
+          <div className="text-slate-300 font-bold mb-3">🎯 Dine daglige mål</div>
+          <div className="grid grid-cols-2 gap-3">
+            {[['Protein','130-150g/dag'],['Treningsdag','2100-2200 kcal'],['Hviledag','1900-2000 kcal'],['Vektnedgang','0,3-0,5 kg/uke']].map(([l,v])=>(
+              <div key={l} className="bg-slate-700 rounded-xl p-3"><div className="text-slate-400 text-xs">{l}</div><div className="text-white font-bold text-sm mt-0.5">{v}</div></div>
+            ))}
+          </div>
+        </div>
+        {[['🌅 Frokost','frokost'],['☀️ Lunsj','lunsj'],['🍽 Middag','middag'],['🌙 Kveld','kveld']].map(([label,key])=>(
+          <div key={key} className="bg-slate-800 rounded-2xl overflow-hidden">
+            <div className="px-4 py-3 border-b border-slate-700 text-slate-300 font-bold text-sm">{label}</div>
+            {MEALS[key].map((m,i)=>(
+              <div key={i} className="flex justify-between items-center px-4 py-2.5 border-b border-slate-700 last:border-0">
+                <div><div className="text-white text-sm">{m.name}</div><div className="text-slate-500 text-xs">{m.desc}</div></div>
+                <div className="text-right ml-2 flex-shrink-0"><div className="text-green-400 text-xs font-bold">{m.protein}g</div><div className="text-slate-500 text-xs">{m.kcal} kcal</div></div>
+              </div>
+            ))}
+          </div>
+        ))}
+        <div className="bg-red-900 bg-opacity-30 border border-red-700 border-opacity-40 rounded-2xl p-4">
+          <div className="text-red-400 font-bold mb-1">🚫 Viktigste matregel</div>
+          <div className="text-slate-300 text-sm">Baguette sent på kvelden (etter kl. 21) må bort mesteparten av uka. Det er her magefettet vinner.</div>
+        </div>
+        <div className="bg-slate-800 rounded-2xl p-4">
+          <div className="text-slate-300 font-bold mb-2">🛒 Handleliste</div>
+          {[['🥩 Protein','Egg, skyr, cottage cheese, kylling, karbonadedeig, tunfisk, laks, torsk, kalkunpålegg'],
+            ['🌾 Karbo','Havregryn, poteter, ris, grove knekkebrød, grovt brød, frukt, bær'],
+            ['🥦 Grønt','Brokkoli, salat, agurk, paprika, gulrøtter, frosne wokgrønnsaker, spinat'],
+            ['🫙 Tilskudd','Whey protein, kreatin monohydrat'],
+          ].map(([l,v])=>(
+            <div key={l} className="py-2 border-b border-slate-700 last:border-0">
+              <div className="text-slate-300 text-sm font-bold">{l}</div>
+              <div className="text-slate-400 text-xs mt-0.5">{v}</div>
+            </div>
+          ))}
+        </div>
+        <div className="bg-slate-800 rounded-2xl p-4 mb-4">
+          <div className="text-slate-300 font-bold mb-2">🍱 Meal prep søndag (30-45 min)</div>
+          <div className="space-y-1.5 text-slate-400 text-sm">
+            <div>• Lag 2-3 porsjoner kylling/karbonadedeig + ris/potet</div>
+            <div>• Kutt grønnsaker eller kjøp ferdig frossen miks</div>
+            <div>• Ha skyr/cottage cheese klar til kveldene</div>
+            <div>• Legg proteinpulver og shaker synlig</div>
+          </div>
+        </div>
+      </>}
+      {tab==='supp'&&<>
+        <div className="bg-slate-800 rounded-2xl p-3 mb-1"><div className="text-slate-300 font-bold mb-1">✅ Anbefalt</div><div className="text-slate-500 text-xs">Dropp fat burners, testoboosters, BCAA og kompliserte pre-workout. Pre-workout sent på dagen ødelegger søvn.</div></div>
+        {SUPPLEMENTS.map((s,i)=>(
+          <div key={i} className="bg-slate-800 rounded-2xl p-4">
+            <div className="flex justify-between items-start mb-1"><div className="text-white font-bold">{s.name}</div><span className="bg-slate-700 text-slate-300 text-xs px-2 py-1 rounded-lg">{s.dose}</span></div>
+            <div className="text-blue-400 text-xs font-medium mb-1">⏰ {s.when}</div>
+            <div className="text-slate-400 text-sm">{s.note}</div>
+          </div>
+        ))}
+        <div className="bg-slate-800 rounded-2xl p-4 mb-4">
+          <div className="text-slate-300 font-bold mb-2">💧 Morgenrutine</div>
+          <div className="space-y-1.5 text-sm text-slate-300">
+            <div>• 500 ml vann når du står opp</div><div>• Kaffe er helt greit</div><div>• Frokost med protein innen 1-2 timer</div>
+          </div>
+        </div>
+      </>}
+    </div>
+  </div>;
 }
 
-// ═══════════════════════════════════════════════════════════════
-// BOTTOM NAV
-// ═══════════════════════════════════════════════════════════════
-
+// ─── BOTTOM NAV ───────────────────────────────────────────────
 function BottomNav({active,onChange}){
   const tabs=[['today','🏠','I dag'],['workout','💪','Trening'],['food','🥗','Mat'],['progress','📊','Fremgang'],['plan','📋','Plan']];
-  return(
-    <nav className="bottom-nav">
-      <div className="flex">
-        {tabs.map(([id,icon,label])=>(
-          <button key={id} onClick={()=>onChange(id)} className={`flex-1 flex flex-col items-center py-3 gap-0.5 transition-all ${active===id?'text-blue-400':'text-slate-500'}`}>
-            <span className="text-xl leading-none">{icon}</span>
-            <span className="text-xs font-medium">{label}</span>
-          </button>
-        ))}
-      </div>
-    </nav>
-  );
+  return<nav className="bnav">
+    <div className="flex">
+      {tabs.map(([id,icon,label])=>(
+        <button key={id} onClick={()=>onChange(id)} className={`flex-1 flex flex-col items-center py-3 gap-0.5 transition-all ${active===id?'text-blue-400':'text-slate-500'}`}>
+          <span className="text-xl leading-none">{icon}</span>
+          <span className="text-xs font-medium">{label}</span>
+        </button>
+      ))}
+    </div>
+  </nav>;
 }
 
-// ═══════════════════════════════════════════════════════════════
-// APP ROOT
-// ═══════════════════════════════════════════════════════════════
-
+// ─── APP ──────────────────────────────────────────────────────
 function App(){
-  const[startDate,setStartDate]=useState(()=>load('fc_start',null));
+  const[startDate,setStartDate]=useState(()=>ld('fc_start',null));
   const[tab,setTab]=useState('today');
   const[workoutId,setWorkoutId]=useState(null);
   if(!startDate)return<SetupScreen onDone={d=>setStartDate(d)}/>;
-  const goWorkout=id=>{setWorkoutId(id);setTab('workout');};
-  const goFood=()=>setTab('food');
-  return(
-    <div>
-      {tab==='today'&&<TodayScreen startDate={startDate} onGoWorkout={goWorkout} onGoFood={goFood}/>}
-      {tab==='workout'&&<WorkoutScreen initialId={workoutId}/>}
-      {tab==='food'&&<FoodScreen/>}
-      {tab==='progress'&&<ProgressScreen startDate={startDate}/>}
-      {tab==='plan'&&<PlanScreen startDate={startDate}/>}
-      <BottomNav active={tab} onChange={t=>{if(t!=='workout')setWorkoutId(null);setTab(t);}}/>
-    </div>
-  );
+  return<div>
+    {tab==='today'&&<TodayScreen startDate={startDate} onGoWorkout={id=>{setWorkoutId(id);setTab('workout');}} onGoFood={()=>setTab('food')}/>}
+    {tab==='workout'&&<WorkoutScreen initialId={workoutId}/>}
+    {tab==='food'&&<FoodScreen/>}
+    {tab==='progress'&&<ProgressScreen startDate={startDate}/>}
+    {tab==='plan'&&<PlanScreen startDate={startDate}/>}
+    <BottomNav active={tab} onChange={t=>{if(t!=='workout')setWorkoutId(null);setTab(t);}}/>
+  </div>;
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
