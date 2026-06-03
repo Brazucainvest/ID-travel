@@ -38,7 +38,7 @@ const PHASES=[
 ];
 const WEEK_SCHEDULE={
   1:{type:'workout',id:'A',label:'Økt A – Push 🏋️',sub:'Bryst, skuldre, triceps'},
-  2:{type:'bonus',label:'Kettlebell hjemme 🏠',sub:'15-20 min med 10kg KB eller 30 min gange'},
+  2:{type:'bonus',id:'NØD',label:'Nødøkt / Kettlebell hjemme ⚡',sub:'15 min nødøkt eller full KB-program hjemme'},
   3:{type:'workout',id:'B',label:'Økt B – Pull 💪',sub:'Rygg, biceps + intervall ute'},
   4:{type:'rest',label:'Hvile + steg 🚶',sub:'8000-10000 steg. Lett mobilitet.'},
   5:{type:'rest',label:'Fri – prioriter søvn 😴',sub:'Kort KB hjemme hvis du mistet en økt.'},
@@ -81,13 +81,20 @@ const WORKOUTS=[
     {id:'C6',name:'Biceps curl lett',en:'Dumbbell Biceps Curl',sets:3,reps:'12-15',focus:'Biceps pump',eq:'Kabel eller hantler',tip:'Pump og kontroll. Ikke maks.',img:'https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-biceps-curl.jpg'},
     {id:'C7',name:'Planke / Sideplanke',en:'Plank / Side Plank',sets:3,reps:'hold',repsNote:'3 sett',focus:'Core',eq:'Matte',tip:'Hold ribbein ned og rumpa stram.',img:'https://liftmanual.com/wp-content/uploads/2023/04/lateral-side-plank.jpg'},
   ]},
+  {id:'NØD',title:'Nødøkt – 15 min',sub:'3 runder · ingen unnskyldning',from:'#dc2626',to:'#9f1239',emoji:'⚡',exercises:[
+    {id:'N1',name:'Goblet squat',en:'KB Goblet Squat',sets:3,reps:'10',focus:'Bein',eq:'10kg kettlebell',tip:'Hold kula foran brystet. Rolig ned.',img:'https://liftmanual.com/wp-content/uploads/2023/04/kettlebell-goblet-squat.jpg'},
+    {id:'N2',name:'Push-ups',en:'Push Up',sets:3,reps:'10',focus:'Bryst / triceps',eq:'Gulv eller mot benk',tip:'Full range of motion. Bryst nesten på gulv.',img:'https://liftmanual.com/wp-content/uploads/2026/05/push-up-m.jpg'},
+    {id:'N3',name:'Enarms roing',en:'KB One Arm Row',sets:3,reps:'10',repsNote:'per side',focus:'Rygg',eq:'10kg kettlebell + stol',tip:'Støtt deg på benk/stol.',img:'https://liftmanual.com/wp-content/uploads/2023/04/kettlebell-one-arm-row.jpg'},
+    {id:'N4',name:'Kettlebell swing',en:'KB Swing',sets:3,reps:'15',focus:'Kondisjon + helkropp',eq:'10kg kettlebell',tip:'Hoftebevegelse, ikke knebøy.',img:'https://liftmanual.com/wp-content/uploads/2023/04/kettlebell-swing.jpg'},
+    {id:'N5',name:'Rask gange / stepping',en:'Fast Walk / Stepping',sets:3,reps:'20',focus:'Kondisjon',eq:'Ingen',tip:'20 steg på stedet, eller gå raskt 1 min.',img:'https://liftmanual.com/wp-content/uploads/2023/04/dead-bug.jpg'},
+  ]},
   {id:'KB',title:'Kettlebell hjemme',sub:'10kg – bonus, ikke stress',from:'#0f766e',to:'#0e7490',emoji:'🏠',exercises:[
-    {id:'KB1',name:'Goblet squat',en:'KB Goblet Squat',sets:3,reps:'12',focus:'Bein / teknikk',eq:'10kg kettlebell',tip:'Hold kula foran brystet. Rolig ned.',img:'https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-goblet-squat.jpg'},
-    {id:'KB2',name:'KB Rumensk markløft',en:'KB Romanian Deadlift',sets:3,reps:'12',focus:'Bakside lår',eq:'10kg kettlebell',tip:'Hofte bak, rett rygg.',img:'https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-romanian-deadlift.jpg'},
-    {id:'KB3',name:'Enarms roing',en:'KB One Arm Row',sets:3,reps:'10',repsNote:'per side',focus:'Rygg',eq:'10kg kettlebell + stol',tip:'Støtt deg på benk/stol.',img:'https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-one-arm-bent-over-row.jpg'},
-    {id:'KB4',name:'Floor press',en:'KB Floor Press',sets:3,reps:'10',repsNote:'per side',focus:'Bryst',eq:'10kg kettlebell',tip:'Ligg på gulv, press kontrollert.',img:'https://liftmanual.com/wp-content/uploads/2023/04/lever-chest-press.jpg'},
-    {id:'KB5',name:'Kettlebell swing',en:'KB Swing',sets:6,reps:'15',focus:'Kondisjon + helkropp',eq:'10kg kettlebell',tip:'Hoftebevegelse, ikke knebøy. Teknikk først.',img:'https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-lateral-raise.jpg'},
-    {id:'KB6',name:'Dead bug',en:'Dead Bug',sets:3,reps:'10',repsNote:'per side',focus:'Core',eq:'Matte',tip:'Rygg mot gulv hele veien.',img:'https://liftmanual.com/wp-content/uploads/2023/04/lateral-side-plank.jpg'},
+    {id:'KB1',name:'Goblet squat',en:'KB Goblet Squat',sets:3,reps:'12',focus:'Bein / teknikk',eq:'10kg kettlebell',tip:'Hold kula foran brystet. Rolig ned.',img:'https://liftmanual.com/wp-content/uploads/2023/04/kettlebell-goblet-squat.jpg'},
+    {id:'KB2',name:'KB Rumensk markløft',en:'KB Romanian Deadlift',sets:3,reps:'12',focus:'Bakside lår',eq:'10kg kettlebell',tip:'Hofte bak, rett rygg.',img:'https://liftmanual.com/wp-content/uploads/2023/04/kettlebell-romanian-deadlift.jpg'},
+    {id:'KB3',name:'Enarms roing',en:'KB One Arm Row',sets:3,reps:'10',repsNote:'per side',focus:'Rygg',eq:'10kg kettlebell + stol',tip:'Støtt deg på benk/stol.',img:'https://liftmanual.com/wp-content/uploads/2023/04/kettlebell-one-arm-row.jpg'},
+    {id:'KB4',name:'Floor press',en:'KB Floor Press',sets:3,reps:'10',repsNote:'per side',focus:'Bryst',eq:'10kg kettlebell',tip:'Ligg på gulv, press kontrollert.',img:'https://liftmanual.com/wp-content/uploads/2023/04/kettlebell-one-arm-floor-press.jpg'},
+    {id:'KB5',name:'Kettlebell swing',en:'KB Swing',sets:6,reps:'15',focus:'Kondisjon + helkropp',eq:'10kg kettlebell',tip:'Hoftebevegelse, ikke knebøy. Teknikk først.',img:'https://liftmanual.com/wp-content/uploads/2023/04/kettlebell-swing.jpg'},
+    {id:'KB6',name:'Dead bug',en:'Dead Bug',sets:3,reps:'10',repsNote:'per side',focus:'Core',eq:'Matte',tip:'Rygg mot gulv hele veien.',img:'https://liftmanual.com/wp-content/uploads/2023/04/dead-bug.jpg'},
   ]},
 ];
 const ALL_EXERCISES=WORKOUTS.flatMap(w=>w.exercises);
