@@ -349,9 +349,11 @@ function ActiveWorkout({workout,onBack,onDone,retroMode=false,editSession=null})
   const[timer,setTimer]=useState(false);
   const[finish,setFinish]=useState(false);
   const[retroDate,setRetroDate]=useState(()=>editSession?.date?.slice(0,10)||todayStr());
+  const prevSession=useMemo(()=>{const sess=ld('fc_sessions',[]);const f=editSession?sess.filter(s=>s.id!==editSession.id):sess;return[...f].reverse().find(s=>s.workoutId===workout.id)||null;},[workout.id]);
   const ex=workout.exercises[idx];
   const sets=log[ex.id];
   const done=sets.filter(s=>s.done).length;
+  const prevSets=(prevSession?.log?.[ex.id]||[]).filter(s=>s.done&&s.w&&s.r);
   const total=workout.exercises.length;
   const prog=(idx/total*100)+(done/ex.sets/total*100);
   const upd=(i,f,v)=>setLog(p=>({...p,[ex.id]:p[ex.id].map((s,j)=>j===i?{...s,[f]:v}:s)}));
@@ -421,11 +423,17 @@ function ActiveWorkout({workout,onBack,onDone,retroMode=false,editSession=null})
         <span className="text-slate-400 text-sm font-bold">Sett ({done}/{ex.sets})</span>
         <button onClick={()=>setTimer(true)} className="text-xs bg-slate-800 text-blue-400 font-bold px-3 py-1.5 rounded-full">⏱ Hvile</button>
       </div>
+      {prevSets.length>0&&<div className="bg-slate-700 bg-opacity-60 rounded-xl px-3 py-2 mb-2 flex items-center gap-2 flex-wrap">
+        <span className="text-slate-400 text-xs font-bold flex-shrink-0">Sist:</span>
+        {prevSets.map((s,i)=><span key={i} className="text-slate-300 text-xs bg-slate-600 rounded-lg px-2 py-1">{s.w}kg×{s.r}</span>)}
+      </div>}
       <div className="grid grid-cols-12 gap-2 mb-2 px-1">
         {['Sett','Kg','Reps','✓'].map((h,i)=><div key={i} className={`text-slate-500 text-xs text-center ${i===0?'col-span-2':i<3?'col-span-4':'col-span-2'}`}>{h}</div>)}
       </div>
-      {sets.map((s,i)=>(
-        <div key={i} className={`grid grid-cols-12 gap-2 mb-2 items-center px-1 py-2.5 rounded-xl ${s.done?'bg-green-900 bg-opacity-30':'bg-slate-800 bg-opacity-60'}`}>
+      {sets.map((s,i)=>{
+        const orm=s.done&&s.w&&parseInt(s.r)>1?Math.round(parseFloat(s.w)*(1+parseInt(s.r)/30)):null;
+        return<React.Fragment key={i}>
+        <div className={`grid grid-cols-12 gap-2 mb-0.5 items-center px-1 py-2.5 rounded-xl ${s.done?'bg-green-900 bg-opacity-30':'bg-slate-800 bg-opacity-60'}`}>
           <div className={`col-span-2 text-center text-sm font-black ${s.done?'text-green-400':'text-slate-400'}`}>{i+1}</div>
           <input type="number" inputMode="decimal" placeholder="kg" value={s.w} onChange={e=>upd(i,'w',e.target.value)}
             className={`col-span-4 rounded-xl py-2 text-center text-sm font-bold w-full focus:outline-none ${s.done?'bg-green-900 bg-opacity-40 text-green-300 border border-green-700':'bg-slate-700 text-white border border-slate-600'}`}/>
@@ -435,7 +443,9 @@ function ActiveWorkout({workout,onBack,onDone,retroMode=false,editSession=null})
             <button onClick={()=>toggle(i)} className={`w-9 h-9 rounded-full border-2 font-bold text-sm transition-all ${s.done?'bg-green-500 border-green-500 text-white':'border-slate-600 text-slate-600 hover:border-green-500'}`}>{s.done?'✓':''}</button>
           </div>
         </div>
-      ))}
+        {orm&&<div className="text-xs text-purple-400 text-right pr-2 mb-1">≈{orm}kg 1RM</div>}
+        </React.Fragment>;
+      })}
     </div>
     {/* Sticky nav — always visible above home indicator */}
     <div className="px-4 flex-shrink-0 border-t border-slate-800 flex gap-3" style={{paddingTop:12,paddingBottom:'max(16px,env(safe-area-inset-bottom,16px))',background:'#0f172a'}}>
@@ -786,6 +796,8 @@ function FoodScreen(){
   const today=todayStr();
   const todayLog=log[today]||[];
   const totalP=todayLog.reduce((a,f)=>a+(f.protein||0),0);
+  const totalC=todayLog.reduce((a,f)=>a+(f.carbs||0),0);
+  const totalF=todayLog.reduce((a,f)=>a+(f.fat||0),0);
   const totalK=todayLog.reduce((a,f)=>a+(f.kcal||0),0);
   const dow=new Date().getDay();
   const isTrain=[1,3,6].includes(dow);
@@ -827,8 +839,23 @@ function FoodScreen(){
           <div className="flex justify-between items-center mb-1"><span className="text-blue-400 text-xs font-bold">Kalorier</span><span className="text-blue-300 text-xs">{Math.round(kcalPct)}%</span></div>
           <div className="text-white font-black text-xl">{totalK} <span className="text-slate-500 text-sm font-normal">/ {kcalTarget}</span></div>
           <div className="h-1.5 bg-slate-700 rounded-full mt-2 overflow-hidden"><div className="h-full bg-blue-500 rounded-full transition-all" style={{width:`${kcalPct}%`}}/></div>
+          {totalK>0&&<div className={`text-xs font-bold mt-1 ${totalK<=kcalTarget?'text-green-400':'text-red-400'}`}>{totalK<=kcalTarget?`${kcalTarget-totalK} kcal igjen`:`${totalK-kcalTarget} over mål ⚠️`}</div>}
         </div>
       </div>
+      {totalK>0&&<div className="mt-2 px-1">
+        <div className="flex justify-between text-xs mb-1">
+          <span className="text-green-400 font-bold">{totalP}g protein</span>
+          <span className="text-blue-400">{totalC}g karbs</span>
+          <span className="text-yellow-400">{totalF}g fett</span>
+        </div>
+        <div className="h-2 rounded-full overflow-hidden flex" style={{background:'#1e293b'}}>
+          {(()=>{const tot=(totalP*4+totalC*4+totalF*9)||1;return<>
+            <div style={{width:`${totalP*4/tot*100}%`,background:'#22c55e'}} className="h-full transition-all"/>
+            <div style={{width:`${totalC*4/tot*100}%`,background:'#3b82f6'}} className="h-full transition-all"/>
+            <div style={{width:`${totalF*9/tot*100}%`,background:'#f59e0b'}} className="h-full transition-all"/>
+          </>;})()}
+        </div>
+      </div>}
     </div>
     <div className="flex px-4 gap-2 my-3">
       {[['logger','📋 Logger'],['guide','📚 Kostguide']].map(([k,l])=>(
@@ -1332,6 +1359,9 @@ function TodayScreen({startDate,onGoWorkout,onGoFood}){
   const weightLost=latestWeight?+(ME.startWeight-latestWeight).toFixed(1):0;
   const weightToGo=latestWeight?+Math.max(latestWeight-ME.goalWeight,0).toFixed(1):+(ME.startWeight-ME.goalWeight).toFixed(1);
   const weightPct=latestWeight?Math.min(Math.max(weightLost/(ME.startWeight-ME.goalWeight)*100,0),100):0;
+  const paceVals=[];for(let w=1;w<=(week||1);w++){const d=prog[`w${w}`];const avg=d?.weights?.length?+(d.weights.reduce((a,b)=>a+b,0)/d.weights.length).toFixed(1):null;if(avg)paceVals.push(avg);}
+  const weeklyDelta=paceVals.length>=2?(paceVals[paceVals.length-1]-paceVals[0])/(paceVals.length-1):null;
+  const weeksToGoalEst=weeklyDelta&&weeklyDelta<-0.05&&weightToGo>0?Math.ceil(weightToGo/Math.abs(weeklyDelta)):null;
 
   // Program progress
   const programPct=week?Math.min((week-1)/12*100,100):0;
@@ -1441,7 +1471,8 @@ function TodayScreen({startDate,onGoWorkout,onGoFood}){
           <div className="h-1.5 bg-slate-700 rounded-full mt-2 mb-1 overflow-hidden">
             <div className="h-full rounded-full" style={{width:`${weightPct}%`,background:'linear-gradient(90deg,#22c55e,#84cc16)'}}/>
           </div>
-          <div className="text-slate-500 text-xs">{weightToGo>0?`${weightToGo} kg til mål (${ME.goalWeight} kg)`:'🎯 Mål nådd!'}</div>
+          <div className="text-slate-500 text-xs">{weightToGo>0?`${weightToGo} kg til mål`:'🎯 Mål nådd!'}</div>
+          {weeksToGoalEst&&weeksToGoalEst<30&&<div className="text-green-400 text-xs font-bold">🏁 ~{weeksToGoalEst} uker til mål</div>}
         </div>
       </div>
 
