@@ -541,6 +541,7 @@ function WorkoutScreen({initialId}){
         <div className="text-5xl mb-3 mt-6">{sel.emoji}</div>
         <h1 className="text-2xl font-black">{sel.title}</h1>
         <p className="text-white text-opacity-80 text-sm mt-1">{sel.sub}</p>
+        {(()=>{const day={A:'Mandag',B:'Onsdag',C:'Lørdag'}[sel.id];return day?<div className="text-white text-opacity-70 text-xs mt-1">📅 Fast dag: {day}</div>:null;})()}
       </div>
       <div className="p-4 space-y-2">
         {sel.exercises.map((ex,i)=>{
@@ -588,8 +589,8 @@ function WorkoutScreen({initialId}){
               <div className="flex-1 min-w-0">
                 <div className="text-white font-black">{w.title}</div>
                 <div className="text-slate-400 text-sm truncate">{w.sub}</div>
-                <div className="text-slate-500 text-xs mt-0.5">{w.exercises.length} øvelser{lastFor(w.id)?` · Sist: ${lastFor(w.id)}`:''}
-                  {w.id==='KB'?' · Bonus':''}</div>
+                {(()=>{const day={A:'Mandag',B:'Onsdag',C:'Lørdag'}[w.id];return day?<div className="text-blue-400 text-xs font-bold mt-0.5">📅 {day}</div>:null;})()}
+                <div className="text-slate-500 text-xs mt-0.5">{w.exercises.length} øvelser{lastFor(w.id)?` · Sist: ${lastFor(w.id)}`:''}{w.id==='KB'?' · Bonus':''}</div>
               </div>
               <div className="text-slate-500 text-xl">›</div>
             </div>
