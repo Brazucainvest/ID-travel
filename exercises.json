@@ -1,0 +1,254 @@
+{
+  "workouts": [
+    {
+      "id": "A",
+      "title": "Økt A – Mandag: Push",
+      "subtitle": "Bryst / skuldre / triceps",
+      "color": "#2563eb",
+      "emoji": "🏋️",
+      "exercises": [
+        {
+          "id": "A1",
+          "name": "Skråbenk med hantler",
+          "englishName": "Incline Dumbbell Press",
+          "sets": 4,
+          "reps": "8-10",
+          "focus": "Øvre bryst",
+          "equipment": "Skråbenk + hantler",
+          "imageUrl": "https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-incline-bench-press.jpg"
+        },
+        {
+          "id": "A2",
+          "name": "Brystpress-maskin",
+          "englishName": "Chest Press Machine",
+          "sets": 3,
+          "reps": "8-12",
+          "focus": "Brystmasse",
+          "equipment": "Chest press machine",
+          "imageUrl": "https://liftmanual.com/wp-content/uploads/2023/04/lever-chest-press.jpg"
+        },
+        {
+          "id": "A3",
+          "name": "Kabel-flyes / Pec deck",
+          "englishName": "Cable Chest Fly / Pec Deck",
+          "sets": 3,
+          "reps": "12-15",
+          "focus": "Brystform",
+          "equipment": "Kabelstasjon eller pec deck",
+          "imageUrl": "https://liftmanual.com/wp-content/uploads/2023/04/lever-pec-deck-fly.jpg"
+        },
+        {
+          "id": "A4",
+          "name": "Skulderpress",
+          "englishName": "Dumbbell Shoulder Press",
+          "sets": 3,
+          "reps": "8-10",
+          "focus": "Skuldre",
+          "equipment": "Hantler eller maskin",
+          "imageUrl": "https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-seated-shoulder-press.jpg"
+        },
+        {
+          "id": "A5",
+          "name": "Sidehev",
+          "englishName": "Dumbbell Lateral Raise",
+          "sets": 4,
+          "reps": "12-20",
+          "focus": "Bredde",
+          "equipment": "Hantler",
+          "imageUrl": "https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-lateral-raise.jpg"
+        },
+        {
+          "id": "A6",
+          "name": "Triceps pushdown",
+          "englishName": "Cable Triceps Pushdown",
+          "sets": 3,
+          "reps": "10-15",
+          "focus": "Armer",
+          "equipment": "Kabel + tau/stang",
+          "imageUrl": "https://liftmanual.com/wp-content/uploads/2023/04/cable-pushdown.jpg"
+        },
+        {
+          "id": "A7",
+          "name": "Cable crunch",
+          "englishName": "Cable Crunch",
+          "sets": 3,
+          "reps": "10-15",
+          "focus": "Sixpack / core",
+          "equipment": "Kabel + tau",
+          "imageUrl": "https://liftmanual.com/wp-content/uploads/2023/04/cable-kneeling-crunch.jpg"
+        }
+      ]
+    },
+    {
+      "id": "B",
+      "title": "Økt B – Onsdag: Pull",
+      "subtitle": "Rygg / biceps + intervall",
+      "color": "#16a34a",
+      "emoji": "💪",
+      "exercises": [
+        {
+          "id": "B1",
+          "name": "Nedtrekk / Assisted pull-up",
+          "englishName": "Lat Pulldown / Assisted Pull-up",
+          "sets": 4,
+          "reps": "8-10",
+          "focus": "Ryggbredde",
+          "equipment": "Nedtrekk eller assisted pull-up",
+          "imageUrl": "https://liftmanual.com/wp-content/uploads/2023/04/cable-wide-grip-lat-pulldown.jpg"
+        },
+        {
+          "id": "B2",
+          "name": "Sittende roing",
+          "englishName": "Seated Cable Row",
+          "sets": 3,
+          "reps": "8-12",
+          "focus": "Ryggtykkelse",
+          "equipment": "Seated cable row",
+          "imageUrl": "https://liftmanual.com/wp-content/uploads/2026/05/cable-front-seated-row.jpg"
+        },
+        {
+          "id": "B3",
+          "name": "Enarms roing",
+          "englishName": "One Arm Dumbbell Row",
+          "sets": 3,
+          "reps": "10",
+          "repsNote": "per side",
+          "focus": "Rygg / kontroll",
+          "equipment": "Benk + hantel",
+          "imageUrl": "https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-one-arm-bent-over-row.jpg"
+        },
+        {
+          "id": "B4",
+          "name": "Face pulls",
+          "englishName": "Cable Face Pull",
+          "sets": 3,
+          "reps": "12-15",
+          "focus": "Bakside skulder / holdning",
+          "equipment": "Kabel + tau",
+          "imageUrl": "https://liftmanual.com/wp-content/uploads/2023/04/cable-standing-face-pull.jpg"
+        },
+        {
+          "id": "B5",
+          "name": "Biceps curl",
+          "englishName": "Dumbbell Biceps Curl",
+          "sets": 3,
+          "reps": "10-12",
+          "focus": "Biceps",
+          "equipment": "Hantler",
+          "imageUrl": "https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-biceps-curl.jpg"
+        },
+        {
+          "id": "B6",
+          "name": "Hammer curl",
+          "englishName": "Dumbbell Hammer Curl",
+          "sets": 3,
+          "reps": "10-12",
+          "focus": "Armtykkelse",
+          "equipment": "Hantler",
+          "imageUrl": "https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-hammer-curl.jpg"
+        },
+        {
+          "id": "B7",
+          "name": "Reverse crunch / Knee raise",
+          "englishName": "Reverse Crunch / Hanging Knee Raise",
+          "sets": 3,
+          "reps": "10-15",
+          "focus": "Mage",
+          "equipment": "Stang / matte",
+          "imageUrl": "https://liftmanual.com/wp-content/uploads/2023/04/assisted-hanging-knee-raise.jpg"
+        }
+      ]
+    },
+    {
+      "id": "C",
+      "title": "Økt C – Lørdag: Bein",
+      "subtitle": "Bein + ekstra bryst/armer + rolig løp",
+      "color": "#ea580c",
+      "emoji": "🦵",
+      "exercises": [
+        {
+          "id": "C1",
+          "name": "Beinpress",
+          "englishName": "Leg Press Machine",
+          "sets": 4,
+          "reps": "10",
+          "focus": "Bein / forbrenning",
+          "equipment": "Leg press maskin",
+          "imageUrl": "https://liftmanual.com/wp-content/uploads/2023/04/sled-45-leg-press.jpg"
+        },
+        {
+          "id": "C2",
+          "name": "Rumensk markløft",
+          "englishName": "Romanian Deadlift",
+          "sets": 3,
+          "reps": "8-10",
+          "focus": "Bakside lår / rumpe",
+          "equipment": "Hantler eller stang",
+          "imageUrl": "https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-romanian-deadlift.jpg"
+        },
+        {
+          "id": "C3",
+          "name": "Bulgarsk utfall",
+          "englishName": "Bulgarian Split Squat",
+          "sets": 3,
+          "reps": "8",
+          "repsNote": "per side",
+          "focus": "Bein / atletisk",
+          "equipment": "Kroppsvekt / hantler",
+          "imageUrl": "https://liftmanual.com/wp-content/uploads/2023/04/bulgarian-split-squat.jpg"
+        },
+        {
+          "id": "C4",
+          "name": "Brystpress / Push-ups",
+          "englishName": "Chest Press / Push Up",
+          "sets": 3,
+          "reps": "10-12",
+          "focus": "Ekstra bryst",
+          "equipment": "Maskin eller kroppsvekt",
+          "imageUrl": "https://liftmanual.com/wp-content/uploads/2026/05/push-up-m.jpg"
+        },
+        {
+          "id": "C5",
+          "name": "Kabel-flyes / Pec deck",
+          "englishName": "Cable Fly / Pec Deck",
+          "sets": 3,
+          "reps": "12-15",
+          "focus": "Brystform",
+          "equipment": "Kabelstasjon eller pec deck",
+          "imageUrl": "https://liftmanual.com/wp-content/uploads/2023/04/lever-pec-deck-fly.jpg"
+        },
+        {
+          "id": "C6",
+          "name": "Overhead triceps extension",
+          "englishName": "Overhead Triceps Extension",
+          "sets": 3,
+          "reps": "10-12",
+          "focus": "Triceps / langt hode",
+          "equipment": "Kabel eller hantel",
+          "imageUrl": "https://liftmanual.com/wp-content/uploads/2026/05/dumbbell-seated-single-arm-overhead-triceps-extension.jpg"
+        },
+        {
+          "id": "C7",
+          "name": "Biceps curl lett",
+          "englishName": "Dumbbell Biceps Curl",
+          "sets": 3,
+          "reps": "12-15",
+          "focus": "Biceps",
+          "equipment": "Hantler",
+          "imageUrl": "https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-biceps-curl.jpg"
+        },
+        {
+          "id": "C8",
+          "name": "Planke / Sideplanke",
+          "englishName": "Plank / Side Plank",
+          "sets": 3,
+          "reps": "hold",
+          "repsNote": "3 sett",
+          "focus": "Core",
+          "equipment": "Matte",
+          "imageUrl": "https://liftmanual.com/wp-content/uploads/2023/04/lateral-side-plank.jpg"
+        }
+      ]
+    }
+  ]
+}

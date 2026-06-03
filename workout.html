@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Treningsapp</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f1f5f9; margin: 0; }
+    input[type=number]::-webkit-inner-spin-button { opacity: 1; }
+    @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+    .slide-up { animation: slideUp 0.25s ease; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+    .pulse { animation: pulse 1s infinite; }
+    .img-container { background: linear-gradient(135deg,#1e3a5f,#2d5a8e); }
+    ::-webkit-scrollbar { display: none; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+// ── Data ──────────────────────────────────────────────────────────────────────
+const WORKOUTS = [
+  {
+    id: 'A', title: 'Økt A – Mandag', subtitle: 'Push: Bryst / skuldre / triceps',
+    from: '#1d4ed8', to: '#7c3aed', emoji: '🏋️',
+    exercises: [
+      { id:'A1', name:'Skråbenk med hantler', englishName:'Incline Dumbbell Press', sets:4, reps:'8-10', focus:'Øvre bryst', equipment:'Skråbenk + hantler', imageUrl:'https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-incline-bench-press.jpg' },
+      { id:'A2', name:'Brystpress-maskin', englishName:'Chest Press Machine', sets:3, reps:'8-12', focus:'Brystmasse', equipment:'Chest press machine', imageUrl:'https://liftmanual.com/wp-content/uploads/2023/04/lever-chest-press.jpg' },
+      { id:'A3', name:'Kabel-flyes / Pec deck', englishName:'Cable Chest Fly / Pec Deck', sets:3, reps:'12-15', focus:'Brystform', equipment:'Kabelstasjon eller pec deck', imageUrl:'https://liftmanual.com/wp-content/uploads/2023/04/lever-pec-deck-fly.jpg' },
+      { id:'A4', name:'Skulderpress', englishName:'Dumbbell Shoulder Press', sets:3, reps:'8-10', focus:'Skuldre', equipment:'Hantler eller maskin', imageUrl:'https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-seated-shoulder-press.jpg' },
+      { id:'A5', name:'Sidehev', englishName:'Dumbbell Lateral Raise', sets:4, reps:'12-20', focus:'Bredde', equipment:'Hantler', imageUrl:'https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-lateral-raise.jpg' },
+      { id:'A6', name:'Triceps pushdown', englishName:'Cable Triceps Pushdown', sets:3, reps:'10-15', focus:'Armer', equipment:'Kabel + tau/stang', imageUrl:'https://liftmanual.com/wp-content/uploads/2023/04/cable-pushdown.jpg' },
+      { id:'A7', name:'Cable crunch', englishName:'Cable Crunch', sets:3, reps:'10-15', focus:'Core', equipment:'Kabel + tau', imageUrl:'https://liftmanual.com/wp-content/uploads/2023/04/cable-kneeling-crunch.jpg' },
+    ]
+  },
+  {
+    id: 'B', title: 'Økt B – Onsdag', subtitle: 'Pull: Rygg / biceps + intervall',
+    from: '#15803d', to: '#0891b2', emoji: '💪',
+    exercises: [
+      { id:'B1', name:'Nedtrekk / Assisted pull-up', englishName:'Lat Pulldown / Assisted Pull-up', sets:4, reps:'8-10', focus:'Ryggbredde', equipment:'Nedtrekk eller assisted pull-up', imageUrl:'https://liftmanual.com/wp-content/uploads/2023/04/cable-wide-grip-lat-pulldown.jpg' },
+      { id:'B2', name:'Sittende roing', englishName:'Seated Cable Row', sets:3, reps:'8-12', focus:'Ryggtykkelse', equipment:'Seated cable row', imageUrl:'https://liftmanual.com/wp-content/uploads/2026/05/cable-front-seated-row.jpg' },
+      { id:'B3', name:'Enarms roing', englishName:'One Arm Dumbbell Row', sets:3, reps:'10', repsNote:'per side', focus:'Rygg / kontroll', equipment:'Benk + hantel', imageUrl:'https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-one-arm-bent-over-row.jpg' },
+      { id:'B4', name:'Face pulls', englishName:'Cable Face Pull', sets:3, reps:'12-15', focus:'Bakside skulder', equipment:'Kabel + tau', imageUrl:'https://liftmanual.com/wp-content/uploads/2023/04/cable-standing-face-pull.jpg' },
+      { id:'B5', name:'Biceps curl', englishName:'Dumbbell Biceps Curl', sets:3, reps:'10-12', focus:'Biceps', equipment:'Hantler', imageUrl:'https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-biceps-curl.jpg' },
+      { id:'B6', name:'Hammer curl', englishName:'Dumbbell Hammer Curl', sets:3, reps:'10-12', focus:'Armtykkelse', equipment:'Hantler', imageUrl:'https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-hammer-curl.jpg' },
+      { id:'B7', name:'Reverse crunch / Knee raise', englishName:'Reverse Crunch / Hanging Knee Raise', sets:3, reps:'10-15', focus:'Mage', equipment:'Stang / matte', imageUrl:'https://liftmanual.com/wp-content/uploads/2023/04/assisted-hanging-knee-raise.jpg' },
+    ]
+  },
+  {
+    id: 'C', title: 'Økt C – Lørdag', subtitle: 'Bein + ekstra bryst/armer',
+    from: '#c2410c', to: '#b45309', emoji: '🦵',
+    exercises: [
+      { id:'C1', name:'Beinpress', englishName:'Leg Press Machine', sets:4, reps:'10', focus:'Bein / forbrenning', equipment:'Leg press maskin', imageUrl:'https://liftmanual.com/wp-content/uploads/2023/04/sled-45-leg-press.jpg' },
+      { id:'C2', name:'Rumensk markløft', englishName:'Romanian Deadlift', sets:3, reps:'8-10', focus:'Bakside lår / rumpe', equipment:'Hantler eller stang', imageUrl:'https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-romanian-deadlift.jpg' },
+      { id:'C3', name:'Bulgarsk utfall', englishName:'Bulgarian Split Squat', sets:3, reps:'8', repsNote:'per side', focus:'Bein / atletisk', equipment:'Kroppsvekt / hantler', imageUrl:'https://liftmanual.com/wp-content/uploads/2023/04/bulgarian-split-squat.jpg' },
+      { id:'C4', name:'Brystpress / Push-ups', englishName:'Chest Press / Push Up', sets:3, reps:'10-12', focus:'Ekstra bryst', equipment:'Maskin eller kroppsvekt', imageUrl:'https://liftmanual.com/wp-content/uploads/2026/05/push-up-m.jpg' },
+      { id:'C5', name:'Kabel-flyes / Pec deck', englishName:'Cable Fly / Pec Deck', sets:3, reps:'12-15', focus:'Brystform', equipment:'Kabelstasjon eller pec deck', imageUrl:'https://liftmanual.com/wp-content/uploads/2023/04/lever-pec-deck-fly.jpg' },
+      { id:'C6', name:'Overhead triceps extension', englishName:'Overhead Triceps Extension', sets:3, reps:'10-12', focus:'Triceps', equipment:'Kabel eller hantel', imageUrl:'https://liftmanual.com/wp-content/uploads/2026/05/dumbbell-seated-single-arm-overhead-triceps-extension.jpg' },
+      { id:'C7', name:'Biceps curl lett', englishName:'Dumbbell Biceps Curl', sets:3, reps:'12-15', focus:'Biceps', equipment:'Hantler', imageUrl:'https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-biceps-curl.jpg' },
+      { id:'C8', name:'Planke / Sideplanke', englishName:'Plank / Side Plank', sets:3, reps:'hold', repsNote:'3 sett', focus:'Core', equipment:'Matte', imageUrl:'https://liftmanual.com/wp-content/uploads/2023/04/lateral-side-plank.jpg' },
+    ]
+  }
+];
+
+function loadSessions() {
+  try { return JSON.parse(localStorage.getItem('w_sessions') || '[]'); }
+  catch { return []; }
+}
+function saveSessions(s) {
+  localStorage.setItem('w_sessions', JSON.stringify(s));
+}
+
+// ── Rest Timer Component ───────────────────────────────────────────────────────
+function RestTimer({ onClose }) {
+  const [secs, setSecs] = useState(90);
+  const [total, setTotal] = useState(90);
+  const [running, setRunning] = useState(true);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (running) {
+      ref.current = setInterval(() => setSecs(s => {
+        if (s <= 1) { clearInterval(ref.current); setRunning(false); if ('vibrate' in navigator) navigator.vibrate([200,100,200]); return 0; }
+        return s - 1;
+      }), 1000);
+    } else clearInterval(ref.current);
+    return () => clearInterval(ref.current);
+  }, [running]);
+
+  const setPreset = (t) => { clearInterval(ref.current); setSecs(t); setTotal(t); setRunning(true); };
+  const pct = total > 0 ? (secs / total) * 100 : 0;
+  const color = pct > 50 ? '#2563eb' : pct > 20 ? '#f59e0b' : '#ef4444';
+  const mm = String(Math.floor(secs / 60)).padStart(2,'0');
+  const ss = String(secs % 60).padStart(2,'0');
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center" style={{background:'rgba(0,0,0,0.6)'}}>
+      <div className="bg-white rounded-t-3xl w-full max-w-md p-6 pb-8 slide-up">
+        <div className="flex justify-between items-center mb-4">
+          <span className="font-bold text-lg text-gray-800">⏱ Hviletimer</span>
+          <button onClick={onClose} className="text-gray-400 text-2xl leading-none">✕</button>
+        </div>
+        <div className="text-center mb-2">
+          <span className={`text-6xl font-black ${secs === 0 ? 'text-green-500' : 'text-blue-700'}`} style={{fontVariantNumeric:'tabular-nums'}}>
+            {secs === 0 ? '✅ GÅ!' : `${mm}:${ss}`}
+          </span>
+        </div>
+        <div className="relative h-3 bg-gray-100 rounded-full mb-5 overflow-hidden">
+          <div className="h-full rounded-full transition-all duration-1000" style={{width:`${pct}%`, background:color}} />
+        </div>
+        <div className="flex gap-2 justify-center mb-5">
+          {[60,90,120,180].map(t => (
+            <button key={t} onClick={() => setPreset(t)}
+              className={`px-3 py-2 rounded-xl text-sm font-semibold border-2 transition-all ${total===t ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-gray-200 text-gray-500'}`}>
+              {t < 60 ? `${t}s` : t === 60 ? '1 min' : t === 90 ? '90 sek' : `${t/60} min`}
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-3">
+          <button onClick={() => { clearInterval(ref.current); setRunning(r => !r); }}
+            className="flex-1 bg-blue-600 text-white py-3 rounded-2xl font-bold text-lg">
+            {running ? '⏸ Pause' : '▶ Start'}
+          </button>
+          <button onClick={() => { clearInterval(ref.current); setSecs(total); setRunning(true); }}
+            className="bg-gray-100 text-gray-600 px-5 py-3 rounded-2xl font-bold">
+            ↺
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── ExerciseImage ──────────────────────────────────────────────────────────────
+function ExerciseImage({ url, name }) {
+  const [err, setErr] = useState(false);
+  return (
+    <div className="img-container w-full flex items-center justify-center overflow-hidden" style={{height:240}}>
+      {!err
+        ? <img src={url} alt={name} onError={() => setErr(true)}
+            className="w-full h-full object-cover" />
+        : <div className="text-center p-8">
+            <div className="text-6xl mb-2">🏋️</div>
+            <div className="text-white text-opacity-70 text-sm">{name}</div>
+          </div>
+      }
+    </div>
+  );
+}
+
+// ── Active Workout Screen ──────────────────────────────────────────────────────
+function ActiveWorkout({ workout, onFinish, onBack }) {
+  const [exIdx, setExIdx] = useState(0);
+  const [log, setLog] = useState(() => {
+    const init = {};
+    workout.exercises.forEach(ex => {
+      init[ex.id] = Array.from({length: ex.sets}, () => ({weight:'', reps:'', done:false}));
+    });
+    return init;
+  });
+  const [showTimer, setShowTimer] = useState(false);
+  const [finishModal, setFinishModal] = useState(false);
+
+  const ex = workout.exercises[exIdx];
+  const sets = log[ex.id];
+  const doneSets = sets.filter(s => s.done).length;
+  const totalEx = workout.exercises.length;
+  const progress = (exIdx / totalEx) * 100 + (doneSets / ex.sets / totalEx) * 100;
+
+  const updateSet = (i, field, val) => {
+    setLog(prev => ({
+      ...prev,
+      [ex.id]: prev[ex.id].map((s, idx) => idx === i ? {...s, [field]: val} : s)
+    }));
+  };
+
+  const toggleDone = (i) => {
+    setLog(prev => {
+      const updated = prev[ex.id].map((s, idx) => idx === i ? {...s, done: !s.done} : s);
+      const justDone = !prev[ex.id][i].done;
+      if (justDone) setShowTimer(true);
+      return {...prev, [ex.id]: updated};
+    });
+  };
+
+  const allExDone = () => workout.exercises.every(ex2 =>
+    log[ex2.id].some(s => s.done)
+  );
+
+  const handleFinish = () => {
+    const sessions = loadSessions();
+    sessions.push({
+      id: Date.now(),
+      date: new Date().toISOString(),
+      workoutId: workout.id,
+      workoutTitle: workout.title,
+      log: JSON.parse(JSON.stringify(log))
+    });
+    saveSessions(sessions);
+    onFinish();
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      {/* Header */}
+      <div className="text-white px-4 pt-4 pb-3" style={{background:`linear-gradient(135deg,${workout.from},${workout.to})`}}>
+        <div className="flex items-center justify-between mb-3">
+          <button onClick={() => { if(confirm('Avslutte økt? Fremgang lagres ikke.')) onBack(); }}
+            className="bg-white bg-opacity-20 rounded-xl px-3 py-1.5 text-sm font-medium">
+            ← Avbryt
+          </button>
+          <div className="text-sm font-semibold opacity-90">{exIdx+1} / {totalEx} øvelser</div>
+          <button onClick={() => setFinishModal(true)}
+            className="bg-white bg-opacity-20 rounded-xl px-3 py-1.5 text-sm font-medium">
+            Fullfør
+          </button>
+        </div>
+        {/* Progress bar */}
+        <div className="h-1.5 bg-white bg-opacity-30 rounded-full overflow-hidden">
+          <div className="h-full bg-white rounded-full transition-all duration-500"
+            style={{width:`${progress}%`}} />
+        </div>
+      </div>
+
+      {/* Exercise image */}
+      <ExerciseImage url={ex.imageUrl} name={ex.name} />
+
+      {/* Exercise info */}
+      <div className="px-4 pt-4 pb-2 slide-up" key={ex.id}>
+        <div className="flex items-start justify-between mb-1">
+          <div className="flex-1 pr-3">
+            <h2 className="text-xl font-bold text-gray-900 leading-tight">{ex.name}</h2>
+            <p className="text-gray-400 text-sm">{ex.englishName}</p>
+          </div>
+          <div className="text-right flex-shrink-0">
+            <div className="text-2xl font-black text-gray-800">{ex.sets}×{ex.reps}</div>
+            {ex.repsNote && <div className="text-xs text-gray-400">{ex.repsNote}</div>}
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2 mt-2">
+          <span className="bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full">
+            🎯 {ex.focus}
+          </span>
+          <span className="bg-gray-100 text-gray-600 text-xs font-medium px-3 py-1 rounded-full">
+            🔧 {ex.equipment}
+          </span>
+        </div>
+      </div>
+
+      {/* Set logger */}
+      <div className="px-4 flex-1 overflow-y-auto pb-4">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-bold text-gray-700">Sett ({doneSets}/{ex.sets} fullført)</span>
+          <button onClick={() => setShowTimer(true)}
+            className="text-xs bg-blue-100 text-blue-700 font-semibold px-3 py-1.5 rounded-full">
+            ⏱ Hvile-timer
+          </button>
+        </div>
+
+        {/* Column headers */}
+        <div className="grid grid-cols-12 gap-2 mb-2 px-1">
+          <div className="col-span-2 text-xs text-gray-400 text-center">Sett</div>
+          <div className="col-span-4 text-xs text-gray-400 text-center">Kg</div>
+          <div className="col-span-4 text-xs text-gray-400 text-center">Reps</div>
+          <div className="col-span-2 text-xs text-gray-400 text-center">✓</div>
+        </div>
+
+        {sets.map((s, i) => (
+          <div key={i} className={`grid grid-cols-12 gap-2 mb-2 items-center px-1 py-2 rounded-xl transition-all ${s.done ? 'bg-green-50' : 'bg-white shadow-sm'}`}>
+            <div className={`col-span-2 text-center text-sm font-bold ${s.done ? 'text-green-600' : 'text-gray-500'}`}>{i+1}</div>
+            <input
+              type="number" inputMode="decimal" placeholder="kg"
+              value={s.weight}
+              onChange={e => updateSet(i, 'weight', e.target.value)}
+              className={`col-span-4 border rounded-xl py-2 text-center text-sm font-semibold w-full focus:outline-none focus:border-blue-400 ${s.done ? 'border-green-300 bg-green-50 text-green-700' : 'border-gray-200 bg-white'}`}
+            />
+            <input
+              type={ex.reps === 'hold' ? 'text' : 'number'} inputMode="numeric"
+              placeholder={ex.reps === 'hold' ? 'sek' : 'reps'}
+              value={s.reps}
+              onChange={e => updateSet(i, 'reps', e.target.value)}
+              className={`col-span-4 border rounded-xl py-2 text-center text-sm font-semibold w-full focus:outline-none focus:border-blue-400 ${s.done ? 'border-green-300 bg-green-50 text-green-700' : 'border-gray-200 bg-white'}`}
+            />
+            <div className="col-span-2 flex justify-center">
+              <button onClick={() => toggleDone(i)}
+                className={`w-9 h-9 rounded-full border-2 font-bold text-sm transition-all ${s.done ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300 text-gray-300 hover:border-green-400'}`}>
+                {s.done ? '✓' : ''}
+              </button>
+            </div>
+          </div>
+        ))}
+
+        {/* Previous/Next exercise */}
+        <div className="flex gap-3 mt-4">
+          {exIdx > 0 && (
+            <button onClick={() => setExIdx(i => i - 1)}
+              className="flex-1 bg-white border-2 border-gray-200 text-gray-600 py-3.5 rounded-2xl font-bold text-sm">
+              ← Forrige
+            </button>
+          )}
+          {exIdx < totalEx - 1 ? (
+            <button onClick={() => setExIdx(i => i + 1)}
+              className="flex-1 text-white py-3.5 rounded-2xl font-bold text-sm"
+              style={{background:`linear-gradient(135deg,${workout.from},${workout.to})`}}>
+              Neste øvelse →
+            </button>
+          ) : (
+            <button onClick={() => setFinishModal(true)}
+              className="flex-1 bg-green-600 text-white py-3.5 rounded-2xl font-bold text-sm">
+              🏆 Fullfør økt
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Rest timer modal */}
+      {showTimer && <RestTimer onClose={() => setShowTimer(false)} />}
+
+      {/* Finish modal */}
+      {finishModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{background:'rgba(0,0,0,0.6)'}}>
+          <div className="bg-white rounded-3xl p-6 mx-4 w-full max-w-sm text-center slide-up">
+            <div className="text-5xl mb-3">🏆</div>
+            <h3 className="text-xl font-bold text-gray-900 mb-1">Økt fullført!</h3>
+            <p className="text-gray-500 text-sm mb-5">Bra jobbet! Lagre og se historikken din.</p>
+            <button onClick={handleFinish}
+              className="w-full bg-green-600 text-white py-3.5 rounded-2xl font-bold text-lg mb-3">
+              ✅ Lagre økt
+            </button>
+            <button onClick={() => setFinishModal(false)}
+              className="w-full bg-gray-100 text-gray-600 py-3 rounded-2xl font-semibold">
+              Fortsett trening
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Workout Detail Screen ──────────────────────────────────────────────────────
+function WorkoutDetail({ workout, onStart, onBack }) {
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero header */}
+      <div className="relative text-white px-4 pt-12 pb-8"
+        style={{background:`linear-gradient(135deg,${workout.from},${workout.to})`}}>
+        <button onClick={onBack}
+          className="absolute top-4 left-4 bg-white bg-opacity-20 rounded-xl px-3 py-1.5 text-sm font-medium">
+          ← Tilbake
+        </button>
+        <div className="text-5xl mb-3">{workout.emoji}</div>
+        <h1 className="text-2xl font-black">{workout.title}</h1>
+        <p className="text-white text-opacity-80 text-sm mt-1">{workout.subtitle}</p>
+        <p className="text-white text-opacity-70 text-xs mt-2">{workout.exercises.length} øvelser</p>
+      </div>
+
+      {/* Exercise list */}
+      <div className="p-4 space-y-3">
+        {workout.exercises.map((ex, i) => (
+          <div key={ex.id} className="bg-white rounded-2xl overflow-hidden shadow-sm flex slide-up">
+            <div className="w-24 h-20 flex-shrink-0 img-container flex items-center justify-center overflow-hidden">
+              <ExerciseImage url={ex.imageUrl} name={ex.name} />
+            </div>
+            <div className="flex-1 p-3 flex items-center justify-between min-w-0">
+              <div className="min-w-0 pr-2">
+                <div className="font-bold text-gray-900 text-sm truncate">{ex.name}</div>
+                <div className="text-xs text-gray-400 truncate">{ex.equipment}</div>
+                <span className="inline-block mt-1 bg-blue-50 text-blue-600 text-xs font-medium px-2 py-0.5 rounded-full">{ex.focus}</span>
+              </div>
+              <div className="text-right flex-shrink-0">
+                <div className="text-lg font-black text-gray-800">{ex.sets}×{ex.reps}</div>
+                {ex.repsNote && <div className="text-xs text-gray-400">{ex.repsNote}</div>}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Start button */}
+      <div className="p-4 pb-8">
+        <button onClick={onStart}
+          className="w-full text-white py-4 rounded-2xl font-black text-lg shadow-lg active:scale-95 transition-transform"
+          style={{background:`linear-gradient(135deg,${workout.from},${workout.to})`}}>
+          🚀 Start økt
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── History Screen ─────────────────────────────────────────────────────────────
+function History({ onBack }) {
+  const [sessions] = useState(loadSessions);
+  const [expanded, setExpanded] = useState(null);
+
+  const totalKg = (log) => {
+    let kg = 0;
+    Object.values(log).forEach(sets => sets.forEach(s => {
+      if (s.done && s.weight && s.reps) kg += (parseFloat(s.weight)||0) * (parseInt(s.reps)||0);
+    }));
+    return Math.round(kg);
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="bg-gradient-to-r from-gray-800 to-gray-900 text-white px-4 pt-12 pb-6">
+        <button onClick={onBack} className="text-sm font-medium opacity-70 mb-3 block">← Tilbake</button>
+        <h1 className="text-2xl font-black">📊 Historikk</h1>
+        <p className="text-gray-400 text-sm mt-1">{sessions.length} loggede økter</p>
+      </div>
+
+      <div className="p-4">
+        {sessions.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="text-6xl mb-4">📭</div>
+            <p className="text-gray-400 font-medium">Ingen økter enda.</p>
+            <p className="text-gray-300 text-sm">Start din første økt!</p>
+          </div>
+        ) : (
+          [...sessions].reverse().map((session, i) => {
+            const workout = WORKOUTS.find(w => w.id === session.workoutId);
+            const kg = totalKg(session.log);
+            const d = new Date(session.date);
+            const dateStr = d.toLocaleDateString('no-NO', {weekday:'long', day:'numeric', month:'long'});
+            const timeStr = d.toLocaleTimeString('no-NO', {hour:'2-digit', minute:'2-digit'});
+            const isOpen = expanded === session.id;
+
+            return (
+              <div key={session.id} className="bg-white rounded-2xl mb-3 shadow-sm overflow-hidden">
+                <button className="w-full text-left px-4 py-4 flex items-center gap-3"
+                  onClick={() => setExpanded(isOpen ? null : session.id)}>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
+                    style={{background:`linear-gradient(135deg,${workout?.from||'#666'},${workout?.to||'#999'})`}}>
+                    {workout?.emoji || '💪'}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-bold text-gray-900 text-sm">{session.workoutTitle}</div>
+                    <div className="text-gray-400 text-xs capitalize">{dateStr} · {timeStr}</div>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <div className="text-sm font-bold text-gray-700">{kg.toLocaleString('no-NO')} kg</div>
+                    <div className="text-xs text-gray-400">løftet</div>
+                  </div>
+                  <div className="text-gray-300 ml-1">{isOpen ? '▲' : '▼'}</div>
+                </button>
+
+                {isOpen && (
+                  <div className="border-t border-gray-100 px-4 py-3 bg-gray-50">
+                    {workout?.exercises.map(ex => {
+                      const exLog = session.log[ex.id] || [];
+                      const doneSets = exLog.filter(s => s.done);
+                      if (doneSets.length === 0) return null;
+                      return (
+                        <div key={ex.id} className="mb-3">
+                          <div className="text-xs font-bold text-gray-600 mb-1">{ex.name}</div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {exLog.map((s, si) => s.done && (
+                              <span key={si} className="bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full">
+                                {s.weight ? `${s.weight}kg` : '—'} × {s.reps || '—'}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Home Screen ────────────────────────────────────────────────────────────────
+function Home({ onSelectWorkout, onHistory }) {
+  const sessions = loadSessions();
+  const now = new Date();
+  const dayOfWeek = now.getDay();
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+  monday.setHours(0,0,0,0);
+  const weekCount = sessions.filter(s => new Date(s.date) >= monday).length;
+
+  const dateStr = now.toLocaleDateString('no-NO', {weekday:'long', day:'numeric', month:'long'});
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white px-5 pt-12 pb-6">
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-2xl font-black mb-0.5">💪 Treningsapp</h1>
+            <p className="text-slate-400 text-sm capitalize">{dateStr}</p>
+          </div>
+          <div className="text-right">
+            <div className="text-2xl font-black text-white">{weekCount}</div>
+            <div className="text-slate-400 text-xs">denne uke</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-4">
+        <h2 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-3 px-1">Treningsprogram</h2>
+
+        {/* Workout cards */}
+        <div className="space-y-3 mb-6">
+          {WORKOUTS.map(w => {
+            const lastSession = [...sessions].reverse().find(s => s.workoutId === w.id);
+            const lastDate = lastSession
+              ? new Date(lastSession.date).toLocaleDateString('no-NO', {day:'numeric', month:'short'})
+              : null;
+            return (
+              <button key={w.id} onClick={() => onSelectWorkout(w)}
+                className="w-full text-left bg-white rounded-2xl shadow-sm overflow-hidden active:scale-98 transition-transform">
+                <div className="h-2" style={{background:`linear-gradient(90deg,${w.from},${w.to})`}} />
+                <div className="p-4 flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0"
+                    style={{background:`linear-gradient(135deg,${w.from}22,${w.to}44)`}}>
+                    {w.emoji}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-black text-gray-900">{w.title}</div>
+                    <div className="text-gray-500 text-sm truncate">{w.subtitle}</div>
+                    <div className="text-gray-300 text-xs mt-1">{w.exercises.length} øvelser{lastDate ? ` · Sist: ${lastDate}` : ''}</div>
+                  </div>
+                  <div className="text-gray-300 text-xl">›</div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Stats row */}
+        <div className="grid grid-cols-3 gap-3 mb-4">
+          {[
+            { label:'Totalt', value: sessions.length, suffix:'økter', color:'blue' },
+            { label:'Denne uke', value: weekCount, suffix:'økter', color:'purple' },
+            { label:'Streak', value: calcStreak(sessions), suffix:'dager 🔥', color:'orange' },
+          ].map(stat => (
+            <div key={stat.label} className="bg-white rounded-2xl p-3 text-center shadow-sm">
+              <div className={`text-2xl font-black text-${stat.color}-600`}>{stat.value}</div>
+              <div className="text-gray-400 text-xs mt-0.5 leading-tight">{stat.label}<br/>{stat.suffix}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* History button */}
+        <button onClick={onHistory}
+          className="w-full bg-white rounded-2xl py-3.5 font-bold text-gray-700 shadow-sm border border-gray-100 flex items-center justify-center gap-2">
+          📊 Se treningshistorikk
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function calcStreak(sessions) {
+  if (!sessions.length) return 0;
+  const dates = [...new Set(sessions.map(s => s.date.slice(0,10)))].sort().reverse();
+  let streak = 1;
+  const today = new Date().toISOString().slice(0,10);
+  if (dates[0] < today) {
+    const diff = (new Date(today) - new Date(dates[0])) / 86400000;
+    if (diff > 1) return 0;
+  }
+  for (let i = 1; i < dates.length; i++) {
+    if ((new Date(dates[i-1]) - new Date(dates[i])) / 86400000 === 1) streak++;
+    else break;
+  }
+  return streak;
+}
+
+// ── App Root ───────────────────────────────────────────────────────────────────
+function App() {
+  const [screen, setScreen] = useState('home');
+  const [selectedWorkout, setSelectedWorkout] = useState(null);
+  const [activeWorkout, setActiveWorkout] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  if (screen === 'history') {
+    return <History onBack={() => setScreen('home')} />;
+  }
+
+  if (screen === 'active' && activeWorkout) {
+    return (
+      <ActiveWorkout
+        workout={activeWorkout}
+        onBack={() => { setScreen('detail'); setActiveWorkout(null); }}
+        onFinish={() => { setScreen('home'); setActiveWorkout(null); setSelectedWorkout(null); setRefreshKey(k => k+1); }}
+      />
+    );
+  }
+
+  if (screen === 'detail' && selectedWorkout) {
+    return (
+      <WorkoutDetail
+        workout={selectedWorkout}
+        onBack={() => { setScreen('home'); setSelectedWorkout(null); }}
+        onStart={() => { setActiveWorkout(selectedWorkout); setScreen('active'); }}
+      />
+    );
+  }
+
+  return (
+    <Home
+      key={refreshKey}
+      onSelectWorkout={w => { setSelectedWorkout(w); setScreen('detail'); }}
+      onHistory={() => setScreen('history')}
+    />
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
