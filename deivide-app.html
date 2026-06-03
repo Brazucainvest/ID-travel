@@ -148,6 +148,71 @@ const SHOPPING_LIST=[
   {cat:'💧 Drikke',items:['Vann (nok til 500ml ved oppvåkning)','Kaffe','Sukkerfri brus (ved behov)','Elektrolytt-tabletter (hvis du svetter mye)']},
   {cat:'🫙 Tilskudd',items:['Whey protein','Kreatin monohydrat','Vitamin D (vinterstid)']},
 ];
+const FOOD_DB=[
+  // KJØTT
+  {id:'kyllingfilet',name:'Kyllingfilet',emoji:'🍗',cat:'Kjøtt',per100:{p:23,c:0,f:1,k:105},portions:[{g:150,l:'Liten (150g)'},{g:200,l:'Normal (200g)'},{g:300,l:'Stor (300g)'}]},
+  {id:'kyllinglaar',name:'Kyllinglårfilet',emoji:'🍗',cat:'Kjøtt',per100:{p:19,c:0,f:9,k:160},portions:[{g:150,l:'1 lår (150g)'},{g:200,l:'2 lår (200g)'}]},
+  {id:'karbonadedeig',name:'Karbonadedeig / kjøttdeig',emoji:'🥩',cat:'Kjøtt',per100:{p:20,c:0,f:10,k:175},portions:[{g:100,l:'100g'},{g:200,l:'200g'},{g:150,l:'150g'}]},
+  {id:'svinefilet',name:'Svinefilet',emoji:'🥩',cat:'Kjøtt',per100:{p:22,c:0,f:3,k:120},portions:[{g:150,l:'150g'},{g:200,l:'200g'}]},
+  {id:'biff',name:'Biff / storfekjøtt',emoji:'🥩',cat:'Kjøtt',per100:{p:20,c:0,f:15,k:220},portions:[{g:150,l:'150g'},{g:200,l:'200g'}]},
+  {id:'grillpolse',name:'Grillpølse',emoji:'🌭',cat:'Kjøtt',per100:{p:12,c:5,f:18,k:235},portions:[{g:80,l:'1 stk (80g)'},{g:160,l:'2 stk (160g)'}]},
+  {id:'wienerpols',name:'Wiener / kjøttpølse',emoji:'🌭',cat:'Kjøtt',per100:{p:11,c:3,f:20,k:240},portions:[{g:60,l:'1 stk (60g)'},{g:120,l:'2 stk (120g)'},{g:180,l:'3 stk (180g)'}]},
+  {id:'kalkun',name:'Kalkunpålegg',emoji:'🦃',cat:'Kjøtt',per100:{p:20,c:1,f:1,k:96},portions:[{g:50,l:'2-3 skiver (50g)'},{g:100,l:'100g'}]},
+  {id:'bacon',name:'Bacon',emoji:'🥓',cat:'Kjøtt',per100:{p:12,c:0,f:38,k:395},portions:[{g:50,l:'2-3 skiver (50g)'},{g:100,l:'100g'}]},
+  // FISK
+  {id:'laks',name:'Laks',emoji:'🐟',cat:'Fisk',per100:{p:20,c:0,f:13,k:200},portions:[{g:130,l:'Liten (130g)'},{g:200,l:'Normal (200g)'},{g:250,l:'Stor (250g)'}]},
+  {id:'torsk',name:'Torsk / hvit fisk',emoji:'🐟',cat:'Fisk',per100:{p:18,c:0,f:1,k:80},portions:[{g:150,l:'150g'},{g:200,l:'200g'}]},
+  {id:'tunfisk',name:'Tunfisk i vann (boks)',emoji:'🥫',cat:'Fisk',per100:{p:24,c:0,f:1,k:103},portions:[{g:185,l:'1 boks (185g)'},{g:100,l:'100g'}]},
+  {id:'makrell',name:'Makrell i tomat (boks)',emoji:'🥫',cat:'Fisk',per100:{p:17,c:3,f:8,k:153},portions:[{g:170,l:'1 boks (170g)'}]},
+  {id:'reker',name:'Reker',emoji:'🍤',cat:'Fisk',per100:{p:20,c:0,f:1,k:93},portions:[{g:100,l:'100g'},{g:200,l:'200g'}]},
+  // EGG / MEIERI
+  {id:'egg',name:'Egg',emoji:'🥚',cat:'Egg/Meieri',per100:{p:13,c:1,f:11,k:155},portions:[{g:60,l:'1 egg (60g)'},{g:120,l:'2 egg (120g)'},{g:180,l:'3 egg (180g)'},{g:240,l:'4 egg (240g)'}]},
+  {id:'skyr',name:'Skyr / gresk yoghurt',emoji:'🥛',cat:'Egg/Meieri',per100:{p:11,c:4,f:0,k:62},portions:[{g:150,l:'Liten (150g)'},{g:300,l:'Normal (300g)'}]},
+  {id:'cottagecheese',name:'Cottage cheese',emoji:'🧀',cat:'Egg/Meieri',per100:{p:10,c:3,f:4,k:88},portions:[{g:125,l:'Halvpakke (125g)'},{g:250,l:'Hel pakke (250g)'}]},
+  {id:'melk',name:'Melk (lett)',emoji:'🥛',cat:'Egg/Meieri',per100:{p:3,c:5,f:1,k:42},portions:[{g:200,l:'1 glass (200ml)'},{g:300,l:'1 kopp (300ml)'}]},
+  {id:'gulost',name:'Gulost (30%)',emoji:'🧀',cat:'Egg/Meieri',per100:{p:27,c:0,f:27,k:353},portions:[{g:20,l:'1 skive (20g)'},{g:40,l:'2 skiver (40g)'}]},
+  {id:'kesam',name:'Kesam / lett rømme',emoji:'🥛',cat:'Egg/Meieri',per100:{p:8,c:3,f:1,k:54},portions:[{g:100,l:'100g'},{g:200,l:'200g'}]},
+  // KARBOHYDRATER
+  {id:'ris',name:'Ris (kokt)',emoji:'🍚',cat:'Karbo',per100:{p:3,c:28,f:0,k:130},portions:[{g:100,l:'Liten (100g)'},{g:150,l:'Normal (150g)'},{g:200,l:'Stor (200g)'}]},
+  {id:'pasta',name:'Pasta (kokt)',emoji:'🍝',cat:'Karbo',per100:{p:5,c:25,f:1,k:131},portions:[{g:150,l:'Liten (150g)'},{g:200,l:'Normal (200g)'},{g:250,l:'Stor (250g)'}]},
+  {id:'potet',name:'Poteter (kokt)',emoji:'🥔',cat:'Karbo',per100:{p:2,c:17,f:0,k:77},portions:[{g:150,l:'2 stk (150g)'},{g:200,l:'3 stk (200g)'},{g:300,l:'4-5 stk (300g)'}]},
+  {id:'soetpotet',name:'Søtpotet (kokt)',emoji:'🍠',cat:'Karbo',per100:{p:1,c:20,f:0,k:90},portions:[{g:150,l:'150g'},{g:200,l:'200g'}]},
+  {id:'havregryn',name:'Havregryn (rå)',emoji:'🌾',cat:'Karbo',per100:{p:13,c:58,f:6,k:370},portions:[{g:40,l:'Liten (40g)'},{g:60,l:'Normal (60g)'},{g:80,l:'Stor (80g)'}]},
+  {id:'grovtbrod',name:'Grovt brød (1 skive)',emoji:'🍞',cat:'Karbo',per100:{p:9,c:41,f:3,k:229},portions:[{g:40,l:'1 skive (40g)'},{g:80,l:'2 skiver (80g)'}]},
+  {id:'knekkebroed',name:'Knekkebrød (grovt)',emoji:'🫓',cat:'Karbo',per100:{p:10,c:55,f:7,k:344},portions:[{g:10,l:'1 stk (10g)'},{g:20,l:'2 stk (20g)'},{g:40,l:'4 stk (40g)'}]},
+  {id:'baguette',name:'Baguette / loff',emoji:'🥖',cat:'Karbo',per100:{p:9,c:49,f:3,k:267},portions:[{g:60,l:'1 bit (60g)'},{g:100,l:'100g'},{g:200,l:'Halv baguette (200g)'}]},
+  {id:'taco',name:'Taco-skjell / lompe',emoji:'🫔',cat:'Karbo',per100:{p:7,c:60,f:12,k:370},portions:[{g:25,l:'1 stk (25g)'},{g:50,l:'2 stk (50g)'}]},
+  // GRØNNSAKER
+  {id:'brokkoli',name:'Brokkoli',emoji:'🥦',cat:'Grønnsaker',per100:{p:3,c:5,f:0,k:35},portions:[{g:100,l:'100g'},{g:200,l:'200g (halvt hode)'}]},
+  {id:'gulrot',name:'Gulrot',emoji:'🥕',cat:'Grønnsaker',per100:{p:1,c:8,f:0,k:40},portions:[{g:80,l:'1 stk (80g)'},{g:160,l:'2 stk (160g)'}]},
+  {id:'tomat',name:'Tomat',emoji:'🍅',cat:'Grønnsaker',per100:{p:1,c:4,f:0,k:20},portions:[{g:100,l:'1 stk (100g)'}]},
+  {id:'agurk',name:'Agurk',emoji:'🥒',cat:'Grønnsaker',per100:{p:1,c:2,f:0,k:15},portions:[{g:100,l:'100g'},{g:200,l:'200g'}]},
+  {id:'paprika',name:'Paprika',emoji:'🫑',cat:'Grønnsaker',per100:{p:1,c:6,f:0,k:30},portions:[{g:100,l:'1/2 stk (100g)'},{g:150,l:'1 stk (150g)'}]},
+  {id:'salat',name:'Salat / isbergsalat',emoji:'🥬',cat:'Grønnsaker',per100:{p:1,c:2,f:0,k:17},portions:[{g:50,l:'En håndfull (50g)'},{g:100,l:'100g'}]},
+  {id:'spinat',name:'Spinat',emoji:'🥬',cat:'Grønnsaker',per100:{p:3,c:2,f:0,k:23},portions:[{g:50,l:'50g'},{g:100,l:'100g'}]},
+  {id:'lök',name:'Løk',emoji:'🧅',cat:'Grønnsaker',per100:{p:1,c:9,f:0,k:44},portions:[{g:80,l:'1 stk (80g)'}]},
+  {id:'mais',name:'Mais (hermetisk)',emoji:'🌽',cat:'Grønnsaker',per100:{p:3,c:19,f:1,k:95},portions:[{g:80,l:'80g'}]},
+  {id:'wokgront',name:'Wokgrønnsaker (frosne)',emoji:'🥦',cat:'Grønnsaker',per100:{p:2,c:6,f:0,k:35},portions:[{g:150,l:'150g'},{g:250,l:'250g'}]},
+  // FRUKT
+  {id:'banan',name:'Banan',emoji:'🍌',cat:'Frukt',per100:{p:1,c:23,f:0,k:95},portions:[{g:100,l:'Liten (100g)'},{g:120,l:'Normal (120g)'},{g:150,l:'Stor (150g)'}]},
+  {id:'eple',name:'Eple',emoji:'🍎',cat:'Frukt',per100:{p:0,c:14,f:0,k:58},portions:[{g:130,l:'1 stk (130g)'}]},
+  {id:'appelsin',name:'Appelsin',emoji:'🍊',cat:'Frukt',per100:{p:1,c:12,f:0,k:50},portions:[{g:150,l:'1 stk (150g)'}]},
+  {id:'baer',name:'Bær (blåbær/jordbær)',emoji:'🫐',cat:'Frukt',per100:{p:1,c:10,f:0,k:45},portions:[{g:100,l:'1 dl (100g)'}]},
+  // FETT / DIVERSE
+  {id:'avokado',name:'Avokado',emoji:'🥑',cat:'Fett',per100:{p:2,c:9,f:15,k:160},portions:[{g:75,l:'Halvt (75g)'},{g:150,l:'Hel (150g)'}]},
+  {id:'noetter',name:'Nøtter (blandet)',emoji:'🥜',cat:'Fett',per100:{p:18,c:20,f:48,k:600},portions:[{g:20,l:'Liten neve (20g)'},{g:30,l:'Normal neve (30g)'}]},
+  {id:'olivenolje',name:'Olivenolje',emoji:'🫒',cat:'Fett',per100:{p:0,c:0,f:100,k:900},portions:[{g:5,l:'1 ts (5g)'},{g:10,l:'1 ss (10g)'}]},
+  {id:'smor',name:'Smør / margarin',emoji:'🧈',cat:'Fett',per100:{p:1,c:0,f:81,k:733},portions:[{g:5,l:'Tynt lag (5g)'},{g:10,l:'Tykt lag (10g)'}]},
+  // FERDIG / DIVERSE
+  {id:'proteinpulver',name:'Proteinpulver (whey)',emoji:'💪',cat:'Tilskudd',per100:{p:75,c:8,f:5,k:385},portions:[{g:30,l:'1 scoop (30g)'}]},
+  {id:'boinner',name:'Kidneybønner (hermetisk)',emoji:'🫘',cat:'Diverse',per100:{p:7,c:18,f:0,k:100},portions:[{g:150,l:'150g'}]},
+  {id:'pizzamarg',name:'Pizza margherita',emoji:'🍕',cat:'Ferdigmat',per100:{p:10,c:29,f:8,k:229},portions:[{g:200,l:'2 skiver (~200g)'},{g:400,l:'Halv pizza (400g)'}]},
+  {id:'kebab',name:'Kebab (kjøtt)',emoji:'🥙',cat:'Ferdigmat',per100:{p:16,c:12,f:15,k:245},portions:[{g:200,l:'Normal kebab (200g)'}]},
+  {id:'burger',name:'Hamburger (stor)',emoji:'🍔',cat:'Ferdigmat',per100:{p:14,c:22,f:15,k:280},portions:[{g:200,l:'1 burger (200g)'}]},
+  {id:'soyasaus',name:'Soyasaus',emoji:'🍶',cat:'Diverse',per100:{p:8,c:6,f:0,k:60},portions:[{g:15,l:'1 ss (15g)'}]},
+  {id:'salsa',name:'Salsa (ferdig)',emoji:'🍅',cat:'Diverse',per100:{p:1,c:8,f:0,k:35},portions:[{g:30,l:'2 ss (30g)'}]},
+  {id:'kesamprodukter',name:'Rømme (lett)',emoji:'🥛',cat:'Egg/Meieri',per100:{p:3,c:5,f:8,k:105},portions:[{g:30,l:'1 ss (30g)'},{g:100,l:'100g'}]},
+];
 const RECIPES=[
   {id:'R1',name:'Kylling-bowl 5 min',emoji:'🍗',time:'5 min',protein:52,kcal:580,
    desc:'Den ultimate meal prep-bowlen',
@@ -679,6 +744,11 @@ function FoodScreen(){
   const[modal,setModal]=useState(null);
   const[custom,setCustom]=useState({name:'',protein:'',kcal:''});
   const[foodTab,setFoodTab]=useState('logger');
+  const[modalTab,setModalTab]=useState('søk');
+  const[query,setQuery]=useState('');
+  const[selFood,setSelFood]=useState(null);
+  const[selG,setSelG]=useState('');
+  const[basket,setBasket]=useState([]);
   const today=todayStr();
   const todayLog=log[today]||[];
   const totalP=todayLog.reduce((a,f)=>a+(f.protein||0),0);
@@ -740,13 +810,17 @@ function FoodScreen(){
             <div><span className="text-white font-bold text-sm">{mealLabels[type]}</span>
               {entries.length>0&&<span className="text-slate-400 text-xs ml-2">{entries.reduce((a,e)=>a+e.protein,0)}g · {entries.reduce((a,e)=>a+e.kcal,0)} kcal</span>}
             </div>
-            <button onClick={()=>setModal(type)} className="bg-slate-700 text-slate-300 text-xs px-3 py-1.5 rounded-lg font-bold">+ Legg til</button>
+            <button onClick={()=>{setModal(type);setModalTab('søk');setBasket([]);setSelFood(null);setQuery('');}} className="bg-slate-700 text-slate-300 text-xs px-3 py-1.5 rounded-lg font-bold">+ Legg til</button>
           </div>
           {entries.map(e=>(
             <div key={e.id} className="flex items-center justify-between px-4 py-2.5 border-b border-slate-700 last:border-0">
               <div className="flex-1 min-w-0"><div className="text-white text-sm font-semibold truncate">{e.name}</div><div className="text-slate-500 text-xs">{e.time}</div></div>
               <div className="flex items-center gap-3 flex-shrink-0">
-                <div className="text-right"><div className="text-green-400 text-xs font-bold">{e.protein}g</div><div className="text-slate-500 text-xs">{e.kcal} kcal</div></div>
+                <div className="text-right">
+                  <div className="text-green-400 text-xs font-bold">{e.protein}g P</div>
+                  {e.carbs>0&&<div className="text-blue-400 text-xs">{e.carbs}g K</div>}
+                  <div className="text-slate-500 text-xs">{e.kcal} kcal</div>
+                </div>
                 <button onClick={()=>removeEntry(e.id)} className="text-slate-600 hover:text-red-400 text-xl leading-none">×</button>
               </div>
             </div>
@@ -759,29 +833,124 @@ function FoodScreen(){
         <div className="text-slate-400 text-sm">Bra jobbet – muskelmasse bevares under cut</div>
       </div>}
     </div>}
-    {modal&&<div className="fixed inset-0 z-50 flex items-end justify-center" style={{background:'rgba(0,0,0,0.8)'}}>
-      <div className="bg-slate-900 border border-slate-700 rounded-t-3xl w-full max-w-md max-h-[88vh] overflow-y-auto p-5 su">
-        <div className="flex justify-between items-center mb-4"><div className="text-white font-bold">{mealLabels[modal]}</div><button onClick={()=>setModal(null)} className="text-slate-400 text-2xl">✕</button></div>
-        <div className="text-slate-400 text-xs font-bold uppercase tracking-wide mb-2">Hurtigvalg fra planen</div>
-        <div className="space-y-2 mb-4">
-          {(MEALS[modal]||[]).map((m,i)=>(
-            <button key={i} onClick={()=>addMeal(m,modal)} className="w-full text-left bg-slate-800 rounded-xl p-3 flex justify-between items-center">
-              <div className="flex-1 min-w-0"><div className="text-white text-sm font-bold">{m.name}</div><div className="text-slate-400 text-xs truncate">{m.desc}</div></div>
-              <div className="text-right flex-shrink-0 ml-3"><div className="text-green-400 text-xs font-bold">{m.protein}g</div><div className="text-slate-500 text-xs">{m.kcal} kcal</div></div>
-            </button>
+    {modal&&(()=>{
+    const calc=f=>f?{p:Math.round(f.per100.p*(parseFloat(selG)||0)/100),c:Math.round(f.per100.c*(parseFloat(selG)||0)/100),fat:Math.round(f.per100.f*(parseFloat(selG)||0)/100),k:Math.round(f.per100.k*(parseFloat(selG)||0)/100)}:null;
+    const preview=calc(selFood);
+    const basketTotals=basket.reduce((a,b)=>({p:a.p+b.protein,c:a.c+(b.carbs||0),fat:a.fat+(b.fat||0),k:a.k+b.kcal}),{p:0,c:0,fat:0,k:0});
+    const filteredFoods=FOOD_DB.filter(f=>f.name.toLowerCase().includes(query.toLowerCase())||f.cat.toLowerCase().includes(query.toLowerCase()));
+    const addFoodItem=()=>{
+      if(!selFood||!selG)return;
+      const g=parseFloat(selG);
+      const item={name:`${selFood.name} (${g}g)`,desc:`${selFood.cat} · ${g}g`,protein:Math.round(selFood.per100.p*g/100),carbs:Math.round(selFood.per100.c*g/100),fat:Math.round(selFood.per100.f*g/100),kcal:Math.round(selFood.per100.k*g/100)};
+      setBasket(b=>[...b,item]);setSelFood(null);setSelG('');
+    };
+    const addBasket=()=>{
+      if(!basket.length)return;
+      const combined={name:basket.length===1?basket[0].name:`Måltid (${basket.length} matvarer)`,desc:basket.map(b=>b.name).join(', '),protein:basketTotals.p,carbs:basketTotals.c,fat:basketTotals.fat,kcal:basketTotals.k};
+      addMeal(combined,modal);setBasket([]);setQuery('');setSelFood(null);
+    };
+    return<div className="fixed inset-0 z-50 flex items-end justify-center" style={{background:'rgba(0,0,0,0.85)'}}>
+      <div className="bg-slate-900 border border-slate-700 rounded-t-3xl w-full max-w-md flex flex-col su" style={{maxHeight:'92vh'}}>
+        {/* Header */}
+        <div className="flex justify-between items-center p-5 pb-3 flex-shrink-0">
+          <div className="text-white font-bold">{mealLabels[modal]}</div>
+          <button onClick={()=>{setModal(null);setBasket([]);setSelFood(null);setQuery('');}} className="text-slate-400 text-2xl">✕</button>
+        </div>
+        {/* Tabs */}
+        <div className="flex gap-2 px-5 pb-3 flex-shrink-0">
+          {[['søk','🔍 Søk mat'],['hurtig','⚡ Hurtigvalg'],['manuell','✏️ Manuell']].map(([k,l])=>(
+            <button key={k} onClick={()=>setModalTab(k)} className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${modalTab===k?'bg-white text-slate-900':'bg-slate-800 text-slate-400'}`}>{l}</button>
           ))}
         </div>
-        <div className="text-slate-400 text-xs font-bold uppercase tracking-wide mb-2">Manuell inntasting</div>
-        <div className="space-y-2">
-          <input placeholder="Navn på mat" value={custom.name} onChange={e=>setCustom({...custom,name:e.target.value})} className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl p-3 text-sm"/>
-          <div className="flex gap-2">
-            <input type="number" placeholder="Protein (g)" value={custom.protein} onChange={e=>setCustom({...custom,protein:e.target.value})} className="flex-1 bg-slate-800 border border-slate-700 text-white rounded-xl p-3 text-sm"/>
-            <input type="number" placeholder="Kalorier" value={custom.kcal} onChange={e=>setCustom({...custom,kcal:e.target.value})} className="flex-1 bg-slate-800 border border-slate-700 text-white rounded-xl p-3 text-sm"/>
+        {/* Basket summary */}
+        {basket.length>0&&<div className="mx-5 mb-3 bg-green-900 bg-opacity-30 border border-green-700 border-opacity-40 rounded-2xl p-3 flex-shrink-0">
+          <div className="flex justify-between items-center mb-2">
+            <div className="text-green-400 font-bold text-sm">🛒 Kurv ({basket.length} varer)</div>
+            <button onClick={()=>setBasket([])} className="text-slate-500 text-xs">Tøm</button>
           </div>
-          <button onClick={()=>{if(custom.name)addMeal({name:custom.name,desc:'',protein:parseFloat(custom.protein)||0,kcal:parseFloat(custom.kcal)||0},modal);}} className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">+ Legg til</button>
+          <div className="flex gap-3 text-xs mb-2">
+            <span className="text-green-400 font-bold">💪 {basketTotals.p}g</span>
+            <span className="text-blue-400">🍚 {basketTotals.c}g</span>
+            <span className="text-yellow-400">🥑 {basketTotals.fat}g</span>
+            <span className="text-slate-300">🔥 {basketTotals.k} kcal</span>
+          </div>
+          <div className="text-slate-500 text-xs mb-2 truncate">{basket.map(b=>b.name).join(' + ')}</div>
+          <button onClick={addBasket} className="w-full bg-green-600 text-white py-2 rounded-xl font-bold text-sm">✅ Legg til som måltid</button>
+        </div>}
+        {/* Content */}
+        <div className="overflow-y-auto flex-1 px-5 pb-6">
+          {modalTab==='søk'&&<div className="space-y-3">
+            <input autoFocus placeholder="Søk etter matvare... (f.eks. pølse, laks, ris)" value={query} onChange={e=>{setQuery(e.target.value);setSelFood(null);setSelG('');}}
+              className="w-full bg-slate-800 border border-slate-600 text-white rounded-xl p-3 text-sm"/>
+            {!selFood&&<div className="space-y-1.5 max-h-64 overflow-y-auto">
+              {(query.length>0?filteredFoods:FOOD_DB.slice(0,20)).map(f=>(
+                <button key={f.id} onClick={()=>{setSelFood(f);setSelG(String(f.portions[0].g));}} className="w-full flex items-center gap-3 bg-slate-800 rounded-xl p-3 text-left hover:bg-slate-700 transition-all">
+                  <span className="text-xl flex-shrink-0">{f.emoji}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-white text-sm font-semibold truncate">{f.name}</div>
+                    <div className="text-slate-500 text-xs">{f.cat}</div>
+                  </div>
+                  <div className="text-right flex-shrink-0 text-xs text-slate-500">
+                    <div className="text-green-400 font-bold">{f.per100.p}g P</div>
+                    <div>per 100g</div>
+                  </div>
+                </button>
+              ))}
+              {query.length>0&&filteredFoods.length===0&&<div className="text-slate-500 text-sm text-center py-4">Ingen treff – prøv manuell inntasting</div>}
+              {query.length===0&&<div className="text-slate-600 text-xs text-center py-2">Viser topp 20 – søk for å filtrere</div>}
+            </div>}
+            {selFood&&<div className="bg-slate-800 rounded-2xl p-4 su">
+              <div className="flex items-center gap-3 mb-3">
+                <span className="text-3xl">{selFood.emoji}</span>
+                <div>
+                  <div className="text-white font-black">{selFood.name}</div>
+                  <div className="text-slate-400 text-xs">Per 100g: {selFood.per100.p}g P · {selFood.per100.c}g K · {selFood.per100.f}g F · {selFood.per100.k} kcal</div>
+                </div>
+                <button onClick={()=>{setSelFood(null);setSelG('');}} className="ml-auto text-slate-500 text-xl">✕</button>
+              </div>
+              <div className="text-slate-400 text-xs font-bold mb-2">Hurtigporsjoner:</div>
+              <div className="flex flex-wrap gap-2 mb-3">
+                {selFood.portions.map(p=>(
+                  <button key={p.g} onClick={()=>setSelG(String(p.g))} className={`px-3 py-1.5 rounded-xl text-xs font-bold ${String(selG)===String(p.g)?'bg-blue-600 text-white':'bg-slate-700 text-slate-300'}`}>{p.l}</button>
+                ))}
+              </div>
+              <div className="flex gap-2 mb-3">
+                <input type="number" inputMode="numeric" placeholder="Gram" value={selG} onChange={e=>setSelG(e.target.value)} className="flex-1 bg-slate-700 border border-slate-600 text-white rounded-xl p-2.5 text-sm font-bold text-center"/>
+                <span className="text-slate-400 self-center text-sm">gram</span>
+              </div>
+              {preview&&parseFloat(selG)>0&&<div className="grid grid-cols-4 gap-2 mb-3">
+                {[{l:'Protein',v:preview.p+'g',c:'text-green-400'},{l:'Karbs',v:preview.c+'g',c:'text-blue-400'},{l:'Fett',v:preview.fat+'g',c:'text-yellow-400'},{l:'Kcal',v:preview.k,c:'text-white'}].map(x=>(
+                  <div key={x.l} className="bg-slate-700 rounded-xl p-2 text-center"><div className={`font-black text-sm ${x.c}`}>{x.v}</div><div className="text-slate-500 text-xs">{x.l}</div></div>
+                ))}
+              </div>}
+              <div className="flex gap-2">
+                <button onClick={addFoodItem} disabled={!selG} className="flex-1 bg-blue-600 text-white py-2.5 rounded-xl font-bold text-sm disabled:opacity-40">+ Legg i kurv</button>
+                <button onClick={()=>{if(!selFood||!selG)return;const g=parseFloat(selG);addMeal({name:`${selFood.name} (${g}g)`,desc:`${selFood.cat} · ${g}g`,protein:Math.round(selFood.per100.p*g/100),carbs:Math.round(selFood.per100.c*g/100),fat:Math.round(selFood.per100.f*g/100),kcal:Math.round(selFood.per100.k*g/100)},modal);setSelFood(null);setSelG('');setBasket([]);}} disabled={!selG} className="flex-1 bg-green-600 text-white py-2.5 rounded-xl font-bold text-sm disabled:opacity-40">✅ Legg til direkte</button>
+              </div>
+            </div>}
+          </div>}
+          {modalTab==='hurtig'&&<div className="space-y-2">
+            {(MEALS[modal]||[]).map((m,i)=>(
+              <button key={i} onClick={()=>addMeal(m,modal)} className="w-full text-left bg-slate-800 rounded-xl p-3 flex justify-between items-center">
+                <div className="flex-1 min-w-0"><div className="text-white text-sm font-bold">{m.name}</div><div className="text-slate-400 text-xs truncate">{m.desc}</div></div>
+                <div className="text-right flex-shrink-0 ml-3"><div className="text-green-400 text-xs font-bold">{m.protein}g P</div><div className="text-slate-500 text-xs">{m.kcal} kcal</div></div>
+              </button>
+            ))}
+          </div>}
+          {modalTab==='manuell'&&<div className="space-y-2">
+            <input placeholder="Navn på mat" value={custom.name} onChange={e=>setCustom({...custom,name:e.target.value})} className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl p-3 text-sm"/>
+            <div className="grid grid-cols-2 gap-2">
+              <input type="number" placeholder="Protein (g)" value={custom.protein} onChange={e=>setCustom({...custom,protein:e.target.value})} className="bg-slate-800 border border-slate-700 text-white rounded-xl p-3 text-sm"/>
+              <input type="number" placeholder="Karbs (g)" value={custom.carbs||''} onChange={e=>setCustom({...custom,carbs:e.target.value})} className="bg-slate-800 border border-slate-700 text-white rounded-xl p-3 text-sm"/>
+              <input type="number" placeholder="Fett (g)" value={custom.fat||''} onChange={e=>setCustom({...custom,fat:e.target.value})} className="bg-slate-800 border border-slate-700 text-white rounded-xl p-3 text-sm"/>
+              <input type="number" placeholder="Kalorier" value={custom.kcal} onChange={e=>setCustom({...custom,kcal:e.target.value})} className="bg-slate-800 border border-slate-700 text-white rounded-xl p-3 text-sm"/>
+            </div>
+            <button onClick={()=>{if(custom.name)addMeal({name:custom.name,desc:'Manuell',protein:parseFloat(custom.protein)||0,carbs:parseFloat(custom.carbs)||0,fat:parseFloat(custom.fat)||0,kcal:parseFloat(custom.kcal)||0},modal);}} className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">+ Legg til</button>
+          </div>}
         </div>
       </div>
-    </div>}
+    </div>;
+  })()}
   </div>;
 }
 
