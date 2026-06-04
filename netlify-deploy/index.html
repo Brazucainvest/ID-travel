@@ -27,6 +27,7 @@
     .score-track{background:rgba(255,255,255,0.07)}
     .grad-text{background:linear-gradient(135deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
     textarea{resize:none}
+    @keyframes spin{to{transform:rotate(360deg)}}
     button{-webkit-user-select:none;user-select:none}
   </style>
 </head>
@@ -37,6 +38,38 @@ const{useState,useEffect,useRef,useMemo}=React;
 // ─── CONSTANTS ────────────────────────────────────────────────
 const ME={name:'Deivide',age:40,height:171,startWeight:70.2,goalWeight:67,
   targetProtein:140,kcalTrain:2150,kcalRest:1950,stepGoal:10000};
+
+function resizeImage(file,maxPx=900){
+  return new Promise(resolve=>{
+    const img=new Image(),url=URL.createObjectURL(file);
+    img.onload=()=>{
+      let{width:w,height:h}=img;
+      if(w>maxPx||h>maxPx){if(w>h){h=Math.round(h*maxPx/w);w=maxPx;}else{w=Math.round(w*maxPx/h);h=maxPx;}}
+      const c=document.createElement('canvas');c.width=w;c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      URL.revokeObjectURL(url);
+      resolve(c.toDataURL('image/jpeg',0.82).split(',')[1]);
+    };
+    img.src=url;
+  });
+}
+
+async function analyzeFood(b64,key){
+  const r=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1024,messages:[{role:'user',content:[
+      {type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},
+      {type:'text',text:`Analyser matbildet og estimer næringsinnhold. Svar KUN med en JSON-array, ingen annen tekst. Hvert element skal ha feltene: name (norsk matvare), portion (f.eks. "ca. 250g"), protein (heltall gram), carbs (heltall gram), fat (heltall gram), kcal (heltall). List hvert hovedelement separat. Estimer realistiske porsjoner fra det du ser.`}
+    ]}]})
+  });
+  if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error?.message||`Feil ${r.status}`);}
+  const d=await r.json();
+  const txt=d.content[0].text.trim();
+  const m=txt.match(/\[[\s\S]*?\]/);
+  if(!m)throw new Error('Kunne ikke tolke AI-svar');
+  return JSON.parse(m[0]);
+}
 
 const PHASES=[
   {range:[1,4],name:'Fase 1 – Teknikk',emoji:'🎯',color:'#3b82f6',rpe:'RPE 6-7',tip:'Lær øvelsene riktig. Bygg vanen. Ikke maks.'},
@@ -850,6 +883,11 @@ function FoodScreen(){
   const[selFood,setSelFood]=useState(null);
   const[selG,setSelG]=useState('');
   const[basket,setBasket]=useState([]);
+  const[apiKey,setApiKey]=useState(()=>ld('fc_api_key',''));
+  const[apiKeyInput,setApiKeyInput]=useState('');
+  const[analyzing,setAnalyzing]=useState(false);
+  const[photoResult,setPhotoResult]=useState(null);
+  const[photoError,setPhotoError]=useState('');
   const today=todayStr();
   const todayLog=log[today]||[];
   const totalP=todayLog.reduce((a,f)=>a+(f.protein||0),0);
@@ -859,6 +897,26 @@ function FoodScreen(){
   const dow=new Date().getDay();
   const isTrain=[1,3,6].includes(dow);
   const kcalTarget=isTrain?ME.kcalTrain:ME.kcalRest;
+  const addEntry=(meal,type)=>{
+    const entry={...meal,id:Date.now(),mealType:type,time:new Date().toLocaleTimeString('no-NO',{hour:'2-digit',minute:'2-digit'})};
+    const n={...log,[today]:[...(log[today]||[]),entry]};
+    setLog(n);sv('fc_food_log',n);
+  };
+  const handlePhoto=async e=>{
+    const file=e.target.files?.[0];
+    if(!file)return;
+    setAnalyzing(true);setPhotoError('');setPhotoResult(null);
+    try{
+      const b64=await resizeImage(file);
+      const items=await analyzeFood(b64,apiKey);
+      setPhotoResult(items);
+    }catch(err){
+      setPhotoError(err.message||'Noe gikk galt');
+    }finally{
+      setAnalyzing(false);
+      e.target.value='';
+    }
+  };
   const addMeal=(meal,type)=>{
     const entry={...meal,id:Date.now(),mealType:type,time:new Date().toLocaleTimeString('no-NO',{hour:'2-digit',minute:'2-digit'})};
     const n={...log,[today]:[...(log[today]||[]),entry]};
@@ -980,7 +1038,7 @@ function FoodScreen(){
         </div>
         {/* Tabs */}
         <div className="flex gap-2 px-5 pb-3 flex-shrink-0">
-          {[['søk','🔍 Søk mat'],['hurtig','⚡ Hurtigvalg'],['manuell','✏️ Manuell']].map(([k,l])=>(
+          {[['søk','🔍 Søk'],['hurtig','⚡ Hurtig'],['foto','📸 Foto'],['manuell','✏️ Manuell']].map(([k,l])=>(
             <button key={k} onClick={()=>setModalTab(k)} className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${modalTab===k?'bg-white text-slate-900':'bg-slate-800 text-slate-400'}`}>{l}</button>
           ))}
         </div>
@@ -1063,6 +1121,77 @@ function FoodScreen(){
               <input type="number" placeholder="Kalorier" value={custom.kcal} onChange={e=>setCustom({...custom,kcal:e.target.value})} className="bg-slate-800 border border-slate-700 text-white rounded-xl p-3 text-sm"/>
             </div>
             <button onClick={()=>{if(custom.name)addMeal({name:custom.name,desc:'Manuell',protein:parseFloat(custom.protein)||0,carbs:parseFloat(custom.carbs)||0,fat:parseFloat(custom.fat)||0,kcal:parseFloat(custom.kcal)||0},modal);}} className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">+ Legg til</button>
+          </div>}
+
+          {modalTab==='foto'&&<div className="space-y-4 pb-2">
+            {!apiKey&&<div className="space-y-3">
+              <div className="glass rounded-2xl p-4">
+                <div className="text-white font-bold text-sm mb-1">🔑 Anthropic API-nøkkel</div>
+                <div className="text-slate-400 text-xs mb-3">Kreves én gang for AI-analyse. Lagres kun på din telefon. Hent din nøkkel på <span className="text-blue-400">console.anthropic.com</span></div>
+                <input type="password" placeholder="sk-ant-api03-..." value={apiKeyInput} onChange={e=>setApiKeyInput(e.target.value)}
+                  className="w-full bg-slate-800 border border-slate-600 text-white rounded-xl p-3 text-sm mb-2 font-mono"/>
+                <button onClick={()=>{if(apiKeyInput.startsWith('sk-')){sv('fc_api_key',apiKeyInput);setApiKey(apiKeyInput);}else setPhotoError('Nøkkel må starte med sk-ant-...');}}
+                  className="w-full bg-blue-600 text-white py-2.5 rounded-xl font-bold text-sm">Lagre og aktiver</button>
+                {photoError&&<div className="text-red-400 text-xs mt-2 text-center">{photoError}</div>}
+              </div>
+            </div>}
+
+            {apiKey&&!analyzing&&!photoResult&&<div>
+              <label className="block cursor-pointer">
+                <div className="glass rounded-2xl p-7 text-center" style={{border:'2px dashed rgba(255,255,255,0.12)'}}>
+                  <div className="text-6xl mb-3">📸</div>
+                  <div className="text-white font-black text-lg">Ta bilde av maten</div>
+                  <div className="text-slate-400 text-sm mt-1">Claude analyserer og estimerer makros</div>
+                  <div className="text-slate-500 text-xs mt-3">~$0.001 per analyse · ca. 5 sekunder</div>
+                </div>
+                <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handlePhoto}/>
+              </label>
+              <button onClick={()=>{sv('fc_api_key','');setApiKey('');setApiKeyInput('');}} className="text-slate-600 text-xs mt-3 w-full text-center">Fjern lagret API-nøkkel</button>
+            </div>}
+
+            {analyzing&&<div className="glass rounded-2xl p-10 text-center">
+              <div className="text-5xl mb-4" style={{animation:'spin 1s linear infinite',display:'inline-block'}}>🔄</div>
+              <div className="text-white font-bold text-lg">Claude analyserer...</div>
+              <div className="text-slate-400 text-sm mt-1">Identifiserer mat og estimerer makros</div>
+            </div>}
+
+            {photoError&&!analyzing&&<div className="glass rounded-2xl p-4 text-center border border-red-500 border-opacity-30">
+              <div className="text-red-400 font-bold mb-1">⚠️ Feil</div>
+              <div className="text-slate-300 text-sm">{photoError}</div>
+              <button onClick={()=>setPhotoError('')} className="text-slate-500 text-xs mt-2">Prøv igjen</button>
+            </div>}
+
+            {photoResult&&<div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <div className="text-white font-bold text-sm">Funnet i bildet</div>
+                <div className="text-slate-400 text-xs">{photoResult.reduce((a,i)=>a+(i.protein||0),0)}g P · {photoResult.reduce((a,i)=>a+(i.kcal||0),0)} kcal totalt</div>
+              </div>
+              {photoResult.map((item,i)=>(
+                <div key={i} className="glass rounded-2xl p-3">
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-white font-bold text-sm truncate">{item.name}</div>
+                      <div className="text-slate-400 text-xs">{item.portion}</div>
+                    </div>
+                    <button onClick={()=>setPhotoResult(r=>r.filter((_,j)=>j!==i))} className="text-slate-600 text-lg leading-none flex-shrink-0">×</button>
+                  </div>
+                  <div className="flex gap-3 text-xs mb-2">
+                    <span className="text-green-400 font-bold">💪 {item.protein}g P</span>
+                    <span className="text-blue-400">🍚 {item.carbs}g K</span>
+                    <span className="text-yellow-400">🥑 {item.fat}g F</span>
+                    <span className="text-slate-400">🔥 {item.kcal} kcal</span>
+                  </div>
+                  <button onClick={()=>{addEntry({name:item.name,desc:item.portion,protein:item.protein||0,carbs:item.carbs||0,fat:item.fat||0,kcal:item.kcal||0},modal);setPhotoResult(r=>r.filter((_,j)=>j!==i));}}
+                    className="w-full bg-green-700 text-white py-2 rounded-xl font-bold text-sm">+ Legg til</button>
+                </div>
+              ))}
+              {photoResult.length>1&&<button onClick={()=>{photoResult.forEach(item=>addEntry({name:item.name,desc:item.portion,protein:item.protein||0,carbs:item.carbs||0,fat:item.fat||0,kcal:item.kcal||0},modal));setModal(null);setPhotoResult(null);}}
+                className="w-full bg-green-600 text-white py-3.5 rounded-2xl font-black">✅ Legg til alle ({photoResult.length} matvarer)</button>}
+              <label className="block cursor-pointer">
+                <div className="glass rounded-xl p-3 text-center text-slate-400 text-sm">📸 Ta nytt bilde</div>
+                <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handlePhoto}/>
+              </label>
+            </div>}
           </div>}
         </div>
         {/* Sticky action buttons when food is selected */}
