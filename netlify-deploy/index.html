@@ -591,15 +591,15 @@ function StrengthHistory(){
 }
 
 // ─── WORKOUT SCREEN ───────────────────────────────────────────
-function WorkoutScreen({initialId}){
-  const[view,setView]=useState(initialId?'detail':null);
-  const[sel,setSel]=useState(initialId?(WORKOUTS.find(w=>w.id===initialId)||null):null);
+function WorkoutScreen({initialId,initialEditSession}){
+  const[view,setView]=useState(()=>initialEditSession?'active':initialId?'detail':null);
+  const[sel,setSel]=useState(()=>initialEditSession?WORKOUTS.find(w=>w.id===initialEditSession.workoutId)||null:initialId?WORKOUTS.find(w=>w.id===initialId)||null:null);
   const[subTab,setSubTab]=useState('okter');
   const[retroMode,setRetroMode]=useState(false);
-  const[editSess,setEditSess]=useState(null);
+  const[editSess,setEditSess]=useState(initialEditSession||null);
   const sessions=ld('fc_sessions',[]);
   const lastFor=id=>{const s=[...sessions].reverse().find(s=>s.workoutId===id);return s?new Date(s.date).toLocaleDateString('no-NO',{day:'numeric',month:'short'}):null;};
-  if(view==='active'&&sel)return<ActiveWorkout workout={sel} onBack={()=>setView('detail')} onDone={()=>{setRetroMode(false);setEditSess(null);setView(null);setSubTab('rekorder');}} retroMode={retroMode} editSession={editSess}/>;
+  if(view==='active'&&sel)return<ActiveWorkout workout={sel} onBack={()=>setView(editSess?null:'detail')} onDone={()=>{setRetroMode(false);setEditSess(null);setView(null);setSubTab('rekorder');}} retroMode={retroMode} editSession={editSess}/>;
   if(view==='detail'&&sel)return(
     <div className="min-h-screen safe" style={{background:'#060c18'}}>
       <div className="text-white px-4 pt-12 pb-8 relative" style={{background:`linear-gradient(135deg,${sel.from},${sel.to})`}}>
@@ -1118,11 +1118,124 @@ function WeightChart({progData,startDate}){
   </div>;
 }
 
+// ─── DAY DETAIL SHEET ────────────────────────────────────────
+function DayDetailSheet({session,onClose,onEditSession}){
+  const date=session.date.slice(0,10);
+  const workout=WORKOUTS.find(w=>w.id===session.workoutId);
+  const dayFood=(ld('fc_food_log',{})[date])||[];
+  const water=ld('fc_water',{})[date]||0;
+  const energy=ld('fc_energy',{})[date]||0;
+  const totalP=dayFood.reduce((a,f)=>a+(f.protein||0),0);
+  const totalK=dayFood.reduce((a,f)=>a+(f.kcal||0),0);
+  const mealLabels={frokost:'🌅 Frokost',lunsj:'☀️ Lunsj',mellom:'🍌 Mellom',middag:'🍽 Middag',kveld:'🌙 Kveld'};
+  const energyLabels=['','😴 Utmattet','😐 Trøtt','🙂 OK','💪 Bra','🔥 Topp'];
+  const dateLabel=new Date(date+'T12:00:00').toLocaleDateString('no-NO',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const totalSets=workout?.exercises.reduce((a,e)=>a+e.sets,0)||0;
+  const doneSets=workout?.exercises.reduce((a,e)=>a+(session.log?.[e.id]||[]).filter(s=>s.done).length,0)||0;
+  const from=workout?.from||'#1d4ed8',to=workout?.to||'#7c3aed';
+  return<div className="fixed inset-0 z-50 flex flex-col su" style={{background:'#060c18'}}>
+    {/* Header */}
+    <div className="text-white px-4 pt-10 pb-4 flex-shrink-0" style={{background:`linear-gradient(135deg,${from},${to})`}}>
+      <div className="flex items-center justify-between mb-3">
+        <button onClick={onClose} className="bg-white bg-opacity-20 rounded-xl px-3 py-1.5 text-sm font-medium">← Tilbake</button>
+        <button onClick={()=>onEditSession(session)} className="bg-white bg-opacity-20 rounded-xl px-3 py-1.5 text-sm font-bold">✏️ Rediger økt</button>
+      </div>
+      <div className="text-sm opacity-75 capitalize">{dateLabel}</div>
+      <div className="text-2xl font-black mt-0.5">{session.workoutTitle||workout?.title||session.workoutId}</div>
+      <div className="text-white text-opacity-70 text-sm mt-1">{doneSets}/{totalSets} sett fullført</div>
+    </div>
+    <div className="flex-1 overflow-y-auto px-4 pt-4 space-y-4 pb-10">
+      {/* Quick stats */}
+      <div className="grid grid-cols-4 gap-2">
+        <div className="glass rounded-2xl p-3 text-center">
+          <div className={`font-black text-base ${totalP>=ME.targetProtein?'text-green-400':'text-white'}`}>{totalP}g</div>
+          <div className="text-slate-500 text-xs">Protein</div>
+        </div>
+        <div className="glass rounded-2xl p-3 text-center">
+          <div className="text-white font-black text-base">{totalK||'—'}</div>
+          <div className="text-slate-500 text-xs">Kcal</div>
+        </div>
+        <div className="glass rounded-2xl p-3 text-center">
+          <div className="text-white font-black text-base">{water}/8</div>
+          <div className="text-slate-500 text-xs">Vann</div>
+        </div>
+        <div className="glass rounded-2xl p-3 text-center">
+          <div className="text-base">{energy?energyLabels[energy].split(' ')[0]:'—'}</div>
+          <div className="text-slate-500 text-xs">{energy?energyLabels[energy].split(' ')[1]:'Energi'}</div>
+        </div>
+      </div>
+      {/* Workout sets */}
+      {workout&&<div>
+        <div className="text-slate-400 text-xs font-bold uppercase tracking-wide mb-2 px-1">💪 Treningsøkt</div>
+        <div className="glass rounded-2xl overflow-hidden">
+          {workout.exercises.map((ex,i)=>{
+            const exSets=session.log?.[ex.id]||[];
+            const logged=exSets.filter(s=>s.done&&(s.w||s.r));
+            const allDone=logged.length===ex.sets;
+            const skipped=logged.length===0;
+            return<div key={ex.id} className="px-4 py-3 border-b border-white border-opacity-5 last:border-0">
+              <div className="flex justify-between items-start mb-1">
+                <div className="flex-1 min-w-0 pr-2">
+                  <div className={`text-sm font-bold truncate ${skipped?'text-slate-500':'text-white'}`}>{ex.name}</div>
+                  <div className="text-slate-600 text-xs">{ex.sets}×{ex.reps}{ex.repsNote?' '+ex.repsNote:''}</div>
+                </div>
+                <div className={`text-xs font-bold flex-shrink-0 ${allDone?'text-green-400':logged.length>0?'text-yellow-400':'text-slate-600'}`}>
+                  {allDone?'✓ Ferdig':logged.length>0?`${logged.length}/${ex.sets}`:skipped?'Hoppet over':''}
+                </div>
+              </div>
+              {logged.length>0&&<div className="flex gap-1.5 flex-wrap mt-1">
+                {logged.map((s,j)=>(
+                  <span key={j} className="text-xs rounded-lg px-2 py-1 font-mono text-slate-300" style={{background:'rgba(255,255,255,0.07)'}}>
+                    {s.w?`${s.w}kg`:'?'}×{s.r||'?'}
+                  </span>
+                ))}
+              </div>}
+            </div>;
+          })}
+        </div>
+      </div>}
+      {/* Food log */}
+      <div>
+        <div className="text-slate-400 text-xs font-bold uppercase tracking-wide mb-2 px-1">🥗 Mat denne dagen</div>
+        {dayFood.length>0?<div className="glass rounded-2xl overflow-hidden">
+          {Object.keys(mealLabels).map(type=>{
+            const entries=dayFood.filter(e=>e.mealType===type);
+            if(!entries.length)return null;
+            const mP=entries.reduce((a,e)=>a+(e.protein||0),0);
+            const mK=entries.reduce((a,e)=>a+(e.kcal||0),0);
+            return<div key={type} className="border-b border-white border-opacity-5 last:border-0">
+              <div className="px-4 py-2 flex justify-between items-center" style={{background:'rgba(255,255,255,0.025)'}}>
+                <span className="text-slate-300 text-xs font-bold">{mealLabels[type]}</span>
+                <span className="text-slate-500 text-xs">{mP}g P · {mK} kcal</span>
+              </div>
+              {entries.map((e,i)=>(
+                <div key={i} className="px-4 py-2 flex justify-between items-center">
+                  <div className="text-white text-sm truncate flex-1 pr-2">{e.name}</div>
+                  <div className="text-right flex-shrink-0">
+                    <div className="text-green-400 text-xs font-bold">{e.protein}g P</div>
+                    <div className="text-slate-500 text-xs">{e.kcal} kcal</div>
+                  </div>
+                </div>
+              ))}
+            </div>;
+          })}
+          <div className="px-4 py-3 border-t border-white border-opacity-5 flex justify-between items-center">
+            <span className="text-slate-300 text-sm font-bold">Totalt</span>
+            <span className="text-white font-black text-sm">{totalP}g protein · {totalK} kcal</span>
+          </div>
+        </div>
+        :<div className="glass rounded-2xl p-4 text-center"><div className="text-slate-500 text-sm">Ingen mat logget denne dagen</div></div>}
+      </div>
+    </div>
+  </div>;
+}
+
 // ─── PROGRESS SCREEN ─────────────────────────────────────────
-function ProgressScreen({startDate}){
+function ProgressScreen({startDate,onEditSession}){
   const week=getWeekNum(startDate)||1;
   const[prog,setProg]=useState(()=>ld('fc_progress',{}));
   const[activeWeek,setActiveWeek]=useState(week);
+  const[dayDetail,setDayDetail]=useState(null);
   const[newW,setNewW]=useState('');
   const wk=`w${activeWeek}`;
   const data=prog[wk]||{weights:[],waist:'',arm:'',chest:'',shoulder:'',sleep:0,steps:'',note:''};
@@ -1161,7 +1274,7 @@ function ProgressScreen({startDate}){
 
       {/* Body measurement tabs */}
       <div className="flex gap-2">
-        {[['vekt','⚖️ Vekt'],['mål','📏 Kroppsmål'],['søvn','😴 Søvn/steg']].map(([k,l])=>(
+        {[['vekt','⚖️ Vekt'],['mål','📏 Mål'],['søvn','😴 Søvn'],['historikk','📅 Historikk']].map(([k,l])=>(
           <button key={k} onClick={()=>setBodyTab(k)} className={`flex-1 py-2 rounded-xl text-xs font-bold ${bodyTab===k?'bg-white text-slate-900':'glass text-slate-400'}`}>{l}</button>
         ))}
       </div>
@@ -1260,6 +1373,42 @@ function ProgressScreen({startDate}){
         </div>
       </div>}
 
+      {bodyTab==='historikk'&&<div className="space-y-3 pb-4">
+        {sessions.length===0?<div className="glass rounded-2xl p-8 text-center">
+          <div className="text-4xl mb-3">📅</div>
+          <div className="text-slate-300 font-bold">Ingen økter logget enda</div>
+          <div className="text-slate-500 text-sm mt-1">Fullfør din første økt for å se historikken her</div>
+        </div>:[...sessions].reverse().map(s=>{
+          const wk=WORKOUTS.find(w=>w.id===s.workoutId);
+          const d=s.date.slice(0,10);
+          const dayFood=(ld('fc_food_log',{})[d])||[];
+          const dayP=dayFood.reduce((a,f)=>a+(f.protein||0),0);
+          const dayK=dayFood.reduce((a,f)=>a+(f.kcal||0),0);
+          const done=wk?.exercises.reduce((a,e)=>a+(s.log?.[e.id]||[]).filter(x=>x.done).length,0)||0;
+          const tot=wk?.exercises.reduce((a,e)=>a+e.sets,0)||0;
+          const pct=tot>0?done/tot:0;
+          const dl=new Date(d+'T12:00:00').toLocaleDateString('no-NO',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+          return<button key={s.id} onClick={()=>setDayDetail(s)} className="w-full text-left glass rounded-2xl overflow-hidden">
+            <div className="h-1" style={{background:`linear-gradient(90deg,${wk?.from||'#334155'},${wk?.to||'#475569'})`}}/>
+            <div className="p-4">
+              <div className="flex items-start justify-between mb-2">
+                <div>
+                  <div className="text-white font-black">{s.workoutTitle||wk?.title||s.workoutId}</div>
+                  <div className="text-slate-400 text-sm capitalize">{dl}</div>
+                </div>
+                <div className="text-right flex-shrink-0 ml-3">
+                  <div className={`text-sm font-bold ${pct===1?'text-green-400':pct>0?'text-yellow-400':'text-slate-500'}`}>{done}/{tot} sett</div>
+                  {dayP>0&&<div className="text-green-400 text-xs">{dayP}g P{dayK>0?` · ${dayK}kcal`:''}</div>}
+                </div>
+              </div>
+              {tot>0&&<div className="h-1 rounded-full overflow-hidden" style={{background:'rgba(255,255,255,0.07)'}}>
+                <div className="h-full rounded-full" style={{width:`${pct*100}%`,background:wk?.from||'#3b82f6'}}/>
+              </div>}
+            </div>
+          </button>;
+        })}
+      </div>}
+
       {/* 12-week table */}
       <div className="glass rounded-2xl p-4 mb-4">
         <div className="text-slate-300 font-bold mb-3">📋 12-ukers oversikt</div>
@@ -1298,6 +1447,7 @@ function ProgressScreen({startDate}){
         </div>
       </div>
     </div>
+    {dayDetail&&<DayDetailSheet session={dayDetail} onClose={()=>setDayDetail(null)} onEditSession={s=>{setDayDetail(null);onEditSession(s);}}/>}
   </div>;
 }
 
@@ -1866,14 +2016,15 @@ function App(){
   const[startDate,setStartDate]=useState(()=>ld('fc_start',null));
   const[tab,setTab]=useState('today');
   const[workoutId,setWorkoutId]=useState(null);
+  const[editSession,setEditSession]=useState(null);
   if(!startDate)return<SetupScreen onDone={d=>setStartDate(d)}/>;
   return<div>
     {tab==='today'&&<TodayScreen startDate={startDate} onGoWorkout={id=>{setWorkoutId(id);setTab('workout');}} onGoFood={()=>setTab('food')}/>}
-    {tab==='workout'&&<WorkoutScreen initialId={workoutId}/>}
+    {tab==='workout'&&<WorkoutScreen initialId={workoutId} initialEditSession={editSession}/>}
     {tab==='food'&&<FoodScreen/>}
-    {tab==='progress'&&<ProgressScreen startDate={startDate}/>}
+    {tab==='progress'&&<ProgressScreen startDate={startDate} onEditSession={s=>{setEditSession(s);setWorkoutId(null);setTab('workout');}}/>}
     {tab==='plan'&&<PlanScreen startDate={startDate}/>}
-    <BottomNav active={tab} onChange={t=>{if(t!=='workout')setWorkoutId(null);setTab(t);}}/>
+    <BottomNav active={tab} onChange={t=>{if(t!=='workout'){setWorkoutId(null);setEditSession(null);}setTab(t);}}/>
   </div>;
 }
 
