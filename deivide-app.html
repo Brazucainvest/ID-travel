@@ -10,18 +10,24 @@
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
     *{-webkit-tap-highlight-color:transparent;box-sizing:border-box}
-    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f172a;margin:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#060c18;margin:0}
     ::-webkit-scrollbar{display:none}
     input[type=number]::-webkit-inner-spin-button{opacity:1}
-    @keyframes slideUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-    @keyframes pop{0%{transform:scale(0.9)}60%{transform:scale(1.05)}100%{transform:scale(1)}}
-    .su{animation:slideUp .2s ease}
-    .pop{animation:pop .25s ease}
+    @keyframes slideUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes pop{0%{transform:scale(0.86)}65%{transform:scale(1.07)}100%{transform:scale(1)}}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    .su{animation:slideUp .24s cubic-bezier(0.34,1.4,0.64,1)}
+    .pop{animation:pop .3s cubic-bezier(0.34,1.4,0.64,1)}
+    .fi{animation:fadeIn .18s ease}
     .safe{padding-bottom:calc(80px + env(safe-area-inset-bottom,0px))}
-    .bnav{position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(15,23,42,0.97);backdrop-filter:blur(14px);border-top:1px solid rgba(255,255,255,0.07);padding-bottom:env(safe-area-inset-bottom,0px)}
+    .bnav{position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(6,12,24,0.85);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border-top:1px solid rgba(255,255,255,0.06);padding-bottom:env(safe-area-inset-bottom,0px);box-shadow:0 -12px 48px rgba(0,0,0,0.6),0 -1px 0 rgba(255,255,255,0.04)}
     input,textarea,select{font-size:16px}
-    .ring-bg{stroke:#1e293b}.ring-fg{stroke-linecap:round;transition:stroke-dashoffset .5s ease}
+    .ring-bg{stroke:#0e1d2e}.ring-fg{stroke-linecap:round;transition:stroke-dashoffset .7s cubic-bezier(0.4,0,0.2,1)}
+    .glass{background:rgba(255,255,255,0.05);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.1)}
+    .score-track{background:rgba(255,255,255,0.07)}
+    .grad-text{background:linear-gradient(135deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
     textarea{resize:none}
+    button{-webkit-user-select:none;user-select:none}
   </style>
 </head>
 <body><div id="root"></div>
@@ -260,10 +266,15 @@ const getRunning=w=>{if(!w)return null;return RUNNING.find(r=>w>=r.w[0]&&w<=r.w[
 // ─── UTILITY COMPONENTS ───────────────────────────────────────
 function Ring({value,max,color,size=84,stroke=8,label,sub}){
   const r=(size-stroke*2)/2,c=2*Math.PI*r,pct=Math.min(value/max,1),off=c-pct*c;
+  const glowId=`g${color.replace('#','')}${size}`;
   return<div className="flex flex-col items-center">
     <svg width={size} height={size} style={{transform:'rotate(-90deg)'}}>
+      {pct>0.15&&<defs><filter id={glowId} x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="2.5" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter></defs>}
       <circle className="ring-bg" cx={size/2} cy={size/2} r={r} fill="none" strokeWidth={stroke}/>
-      <circle className="ring-fg" cx={size/2} cy={size/2} r={r} fill="none" strokeWidth={stroke} stroke={color} strokeDasharray={c} strokeDashoffset={off}/>
+      <circle className="ring-fg" cx={size/2} cy={size/2} r={r} fill="none" strokeWidth={stroke} stroke={color} strokeDasharray={c} strokeDashoffset={off} filter={pct>0.15?`url(#${glowId})`:undefined}/>
     </svg>
     <div className="text-center -mt-0.5">
       <div className="text-white font-black text-sm">{label}</div>
@@ -323,17 +334,17 @@ function RestTimer({onClose}){
   const pct=total>0?secs/total*100:0;
   const bar=pct>50?'#3b82f6':pct>20?'#f59e0b':'#ef4444';
   const mm=String(Math.floor(secs/60)).padStart(2,'0'),ss=String(secs%60).padStart(2,'0');
-  return<div className="fixed inset-0 z-50 flex items-center justify-center px-4" style={{background:'rgba(0,0,0,0.75)'}}>
-    <div className="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-md p-6 su">
+  return<div className="fixed inset-0 z-50 flex items-center justify-center px-4" style={{background:'rgba(0,0,0,0.9)'}}>
+    <div className="rounded-3xl w-full max-w-md p-6 su" style={{background:'rgba(8,15,30,0.98)',border:'1px solid rgba(255,255,255,0.1)'}}>
       <div className="flex justify-between items-center mb-4"><span className="font-bold text-white text-lg">⏱ Hviletimer</span><button onClick={onClose} className="text-slate-400 text-2xl">✕</button></div>
       <div className={`text-6xl font-black text-center mb-2 ${secs===0?'text-green-400':'text-blue-400'}`} style={{fontVariantNumeric:'tabular-nums'}}>{secs===0?'✅ GÅ!':`${mm}:${ss}`}</div>
-      <div className="h-2 bg-slate-800 rounded-full mb-5 overflow-hidden"><div className="h-full rounded-full transition-all duration-1000" style={{width:`${pct}%`,background:bar}}/></div>
+      <div className="h-2 rounded-full mb-5 overflow-hidden" style={{background:'rgba(255,255,255,0.07)'}}><div className="h-full rounded-full transition-all duration-1000" style={{width:`${pct}%`,background:bar}}/></div>
       <div className="flex gap-2 justify-center mb-4">
-        {[60,90,120,180].map(t=><button key={t} onClick={()=>preset(t)} className={`px-3 py-2 rounded-xl text-sm font-bold border-2 ${total===t?'border-blue-500 bg-blue-500 bg-opacity-20 text-blue-400':'border-slate-700 text-slate-400'}`}>{t===60?'1min':t===90?'90s':t===120?'2min':'3min'}</button>)}
+        {[60,90,120,180].map(t=><button key={t} onClick={()=>preset(t)} className={`px-3 py-2 rounded-xl text-sm font-bold border-2 ${total===t?'border-blue-500 text-blue-400':'border-white border-opacity-10 text-slate-400'}`} style={total===t?{background:'rgba(59,130,246,0.15)'}:{}}>{t===60?'1min':t===90?'90s':t===120?'2min':'3min'}</button>)}
       </div>
       <div className="flex gap-3">
         <button onClick={()=>{clearInterval(ref.current);setOn(o=>!o);}} className="flex-1 bg-blue-600 text-white py-3 rounded-2xl font-bold">{on?'⏸ Pause':'▶ Start'}</button>
-        <button onClick={()=>{clearInterval(ref.current);setSecs(total);setOn(true);}} className="bg-slate-700 text-white px-5 py-3 rounded-2xl font-bold">↺</button>
+        <button onClick={()=>{clearInterval(ref.current);setSecs(total);setOn(true);}} className="glass text-white px-5 py-3 rounded-2xl font-bold">↺</button>
       </div>
     </div>
   </div>;
@@ -386,7 +397,7 @@ function ActiveWorkout({workout,onBack,onDone,retroMode=false,editSession=null})
     }
     onDone();
   };
-  return<div className="min-h-screen flex flex-col" style={{background:'#0f172a'}}>
+  return<div className="min-h-screen flex flex-col" style={{background:'#060c18'}}>
     <div className="text-white px-4 pt-4 pb-3" style={{background:`linear-gradient(135deg,${workout.from},${workout.to})`}}>
       <div className="flex items-center justify-between mb-2">
         <button onClick={()=>{if(confirm('Avbryte?'))onBack();}} className="bg-white bg-opacity-20 rounded-xl px-3 py-1.5 text-sm font-medium">← Avbryt</button>
@@ -448,20 +459,20 @@ function ActiveWorkout({workout,onBack,onDone,retroMode=false,editSession=null})
       })}
     </div>
     {/* Sticky nav — always visible above home indicator */}
-    <div className="px-4 flex-shrink-0 border-t border-slate-800 flex gap-3" style={{paddingTop:12,paddingBottom:'max(16px,env(safe-area-inset-bottom,16px))',background:'#0f172a'}}>
-      {idx>0&&<button onClick={()=>setIdx(i=>i-1)} className="flex-1 bg-slate-800 border border-slate-700 text-slate-300 py-3.5 rounded-2xl font-bold text-sm">← Forrige</button>}
+    <div className="px-4 flex-shrink-0 flex gap-3" style={{paddingTop:12,paddingBottom:'max(16px,env(safe-area-inset-bottom,16px))',background:'#060c18',borderTop:'1px solid rgba(255,255,255,0.06)'}}>
+      {idx>0&&<button onClick={()=>setIdx(i=>i-1)} className="flex-1 glass text-slate-300 py-3.5 rounded-2xl font-bold text-sm">← Forrige</button>}
       {idx<total-1
         ?<button onClick={()=>setIdx(i=>i+1)} className="flex-1 text-white py-3.5 rounded-2xl font-bold text-sm" style={{background:`linear-gradient(135deg,${workout.from},${workout.to})`}}>Neste →</button>
         :<button onClick={()=>setFinish(true)} className="flex-1 bg-green-600 text-white py-3.5 rounded-2xl font-bold text-sm">🏆 Fullfør</button>}
     </div>
     {timer&&<RestTimer onClose={()=>setTimer(false)}/>}
-    {finish&&<div className="fixed inset-0 z-50 flex items-center justify-center" style={{background:'rgba(0,0,0,0.85)'}}>
-      <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 mx-4 w-full max-w-sm text-center su">
+    {finish&&<div className="fixed inset-0 z-50 flex items-center justify-center" style={{background:'rgba(0,0,0,0.9)'}}>
+      <div className="rounded-3xl p-6 mx-4 w-full max-w-sm text-center su" style={{background:'rgba(8,15,30,0.98)',border:'1px solid rgba(255,255,255,0.1)'}}>
         <div className="text-5xl mb-3">🏆</div>
         <h3 className="text-xl font-black text-white mb-1">Økt fullført!</h3>
         <p className="text-slate-400 text-sm mb-5">Bra jobbet, {ME.name}! PR-er oppdateres automatisk.</p>
         <button onClick={saveSession} className="w-full bg-green-600 text-white py-3.5 rounded-2xl font-black text-lg mb-3">✅ Lagre økt</button>
-        <button onClick={()=>setFinish(false)} className="w-full bg-slate-800 text-slate-300 py-3 rounded-2xl font-semibold">Fortsett trening</button>
+        <button onClick={()=>setFinish(false)} className="w-full glass text-slate-300 py-3 rounded-2xl font-semibold">Fortsett trening</button>
       </div>
     </div>}
   </div>;
@@ -485,7 +496,7 @@ function StrengthHistory(){
   });
   const workoutsWithData=WORKOUTS.filter(wk=>wk.exercises.some(e=>history[e.id]?.length));
   if(!workoutsWithData.length)return(
-    <div className="bg-slate-800 rounded-2xl p-8 text-center">
+    <div className="glass rounded-2xl p-8 text-center">
       <div className="text-4xl mb-3">📊</div>
       <div className="text-slate-300 font-bold">Ingen styrkedata enda</div>
       <div className="text-slate-500 text-sm mt-1">Logg din første økt for å se fremgang</div>
@@ -495,8 +506,8 @@ function StrengthHistory(){
     {WORKOUTS.map(wk=>{
       const exWithData=wk.exercises.filter(e=>history[e.id]?.length);
       if(!exWithData.length)return null;
-      return<div key={wk.id} className="bg-slate-800 rounded-2xl overflow-hidden">
-        <div className="px-4 py-3 border-b border-slate-700 flex items-center gap-2">
+      return<div key={wk.id} className="glass rounded-2xl overflow-hidden">
+        <div className="px-4 py-3 border-b border-white border-opacity-5 flex items-center gap-2">
           <span className="text-xl">{wk.emoji}</span>
           <span className="text-white font-bold text-sm">{wk.title}</span>
         </div>
@@ -506,7 +517,7 @@ function StrengthHistory(){
           const latest=hist[hist.length-1];
           const prev=hist.length>1?hist[hist.length-2]:null;
           const improved=prev&&latest&&parseFloat(latest.w)>parseFloat(prev.w);
-          return<div key={ex.id} className="px-4 py-3 border-b border-slate-700 last:border-0">
+          return<div key={ex.id} className="px-4 py-3 border-b border-white border-opacity-5 last:border-0">
             <div className="flex justify-between items-start mb-1">
               <div className="flex-1 min-w-0 pr-2">
                 <div className="text-white text-sm font-semibold truncate">{ex.name}</div>
@@ -545,7 +556,7 @@ function WorkoutScreen({initialId}){
   const lastFor=id=>{const s=[...sessions].reverse().find(s=>s.workoutId===id);return s?new Date(s.date).toLocaleDateString('no-NO',{day:'numeric',month:'short'}):null;};
   if(view==='active'&&sel)return<ActiveWorkout workout={sel} onBack={()=>setView('detail')} onDone={()=>{setRetroMode(false);setEditSess(null);setView(null);setSubTab('rekorder');}} retroMode={retroMode} editSession={editSess}/>;
   if(view==='detail'&&sel)return(
-    <div className="min-h-screen safe" style={{background:'#0f172a'}}>
+    <div className="min-h-screen safe" style={{background:'#060c18'}}>
       <div className="text-white px-4 pt-12 pb-8 relative" style={{background:`linear-gradient(135deg,${sel.from},${sel.to})`}}>
         <button onClick={()=>setView(null)} className="absolute top-4 left-4 bg-white bg-opacity-20 rounded-xl px-3 py-1.5 text-sm font-medium">← Tilbake</button>
         <div className="text-5xl mb-3 mt-6">{sel.emoji}</div>
@@ -556,7 +567,7 @@ function WorkoutScreen({initialId}){
       <div className="p-4 space-y-2">
         {sel.exercises.map((ex,i)=>{
           const pr=ld('fc_prs',{})[ex.id];
-          return<div key={ex.id} className="bg-slate-800 rounded-2xl overflow-hidden flex su" style={{animationDelay:`${i*0.03}s`}}>
+          return<div key={ex.id} className="glass rounded-2xl overflow-hidden flex su" style={{animationDelay:`${i*0.03}s`}}>
             <div className="w-20 h-16 flex-shrink-0 overflow-hidden" style={{background:'#1e3a5f'}}>
               <img src={ex.img} alt="" className="w-full h-full object-cover" onError={e=>e.target.style.display='none'}/>
             </div>
@@ -581,18 +592,18 @@ function WorkoutScreen({initialId}){
     </div>
   );
   return(
-    <div className="min-h-screen safe" style={{background:'#0f172a'}}>
-      <div className="px-4 pt-12 pb-4" style={{background:'linear-gradient(180deg,#1e293b 0%,#0f172a 100%)'}}>
+    <div className="min-h-screen safe" style={{background:'#060c18'}}>
+      <div className="px-4 pt-12 pb-4" style={{background:'linear-gradient(180deg,#0d1f3c 0%,#060c18 100%)'}}>
         <h1 className="text-2xl font-black text-white">💪 Trening</h1>
       </div>
       <div className="flex px-4 gap-2 mb-4">
         {[['okter','Økter'],['rekorder','🏆 Rekorder']].map(([k,l])=>(
-          <button key={k} onClick={()=>setSubTab(k)} className={`px-4 py-2 rounded-xl text-sm font-bold ${subTab===k?'bg-white text-slate-900':'bg-slate-800 text-slate-400'}`}>{l}</button>
+          <button key={k} onClick={()=>setSubTab(k)} className={`px-4 py-2 rounded-xl text-sm font-bold ${subTab===k?'bg-white text-slate-900':'glass text-slate-400'}`}>{l}</button>
         ))}
       </div>
       {subTab==='okter'&&<div className="px-4 space-y-3">
         {WORKOUTS.map(w=>(
-          <button key={w.id} onClick={()=>{setSel(w);setView('detail');}} className="w-full text-left bg-slate-800 rounded-2xl overflow-hidden">
+          <button key={w.id} onClick={()=>{setSel(w);setView('detail');}} className="w-full text-left glass rounded-2xl overflow-hidden">
             <div className="h-1.5" style={{background:`linear-gradient(90deg,${w.from},${w.to})`}}/>
             <div className="p-4 flex items-center gap-4">
               <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0" style={{background:`linear-gradient(135deg,${w.from}33,${w.to}55)`}}>{w.emoji}</div>
@@ -613,7 +624,7 @@ function WorkoutScreen({initialId}){
           <div className="text-slate-400 text-xs font-bold uppercase tracking-wide px-1">Tidligere økter</div>
           {[...sessions].reverse().slice(0,30).map(s=>{
             const wk=WORKOUTS.find(w=>w.id===s.workoutId);
-            return<div key={s.id} className="bg-slate-800 rounded-2xl flex items-center gap-3 px-4 py-3">
+            return<div key={s.id} className="glass rounded-2xl flex items-center gap-3 px-4 py-3">
               <div className="flex-1 min-w-0">
                 <div className="text-white text-sm font-bold truncate">{s.workoutTitle||s.workoutId}</div>
                 <div className="text-slate-400 text-xs">{new Date(s.date).toLocaleDateString('no-NO',{weekday:'short',day:'numeric',month:'short',year:'numeric'})}</div>
@@ -636,7 +647,7 @@ function WaterTracker(){
   const goal=8;
   const upd=n=>{const v=Math.max(0,Math.min(n,goal+2));const w={...water,[today]:v};setWater(w);sv('fc_water',w);};
   const pct=Math.min(count/goal*100,100);
-  return<div className="bg-slate-800 rounded-2xl p-4">
+  return<div className="glass rounded-2xl p-4">
     <div className="flex justify-between items-center mb-3">
       <div>
         <div className="text-white font-bold text-sm">💧 Vann i dag</div>
@@ -647,19 +658,19 @@ function WaterTracker(){
         {count>=goal&&<div className="text-blue-400 text-xs font-bold">✅ Mål nådd!</div>}
       </div>
     </div>
-    <div className="h-2 bg-slate-700 rounded-full mb-4 overflow-hidden">
+    <div className="h-2 rounded-full mb-4 overflow-hidden" style={{background:'rgba(255,255,255,0.07)'}}>
       <div className="h-full rounded-full transition-all duration-300" style={{width:`${pct}%`,background:'linear-gradient(90deg,#3b82f6,#60a5fa)'}}/>
     </div>
     <div className="flex gap-2">
       {Array.from({length:goal},(_, i)=>(
         <button key={i} onClick={()=>upd(count<=i?i+1:i)}
-          className={`flex-1 h-8 rounded-lg transition-all ${i<count?'bg-blue-500':'bg-slate-700'}`}>
+          className={`flex-1 h-8 rounded-lg transition-all ${i<count?'bg-blue-500':'bg-white bg-opacity-5'}`}>
           {i<count&&<span className="text-white text-xs">💧</span>}
         </button>
       ))}
     </div>
     <div className="flex gap-2 mt-3">
-      <button onClick={()=>upd(count-1)} className="flex-1 bg-slate-700 text-slate-300 py-2 rounded-xl font-bold text-lg">－</button>
+      <button onClick={()=>upd(count-1)} className="flex-1 bg-white bg-opacity-5 text-slate-300 py-2 rounded-xl font-bold text-lg">－</button>
       <button onClick={()=>upd(count+1)} className="flex-1 bg-blue-600 text-white py-2 rounded-xl font-bold text-lg">＋ Glass</button>
     </div>
   </div>;
@@ -672,13 +683,13 @@ function EnergyLog(){
   const level=energy[today]||0;
   const levels=[{v:1,e:'😴',l:'Utmattet'},{v:2,e:'😐',l:'Trøtt'},{v:3,e:'🙂',l:'OK'},{v:4,e:'💪',l:'Bra'},{v:5,e:'🔥',l:'Topp'}];
   const set=v=>{const n={...energy,[today]:v};setEnergy(n);sv('fc_energy',n);};
-  return<div className="bg-slate-800 rounded-2xl p-4">
+  return<div className="glass rounded-2xl p-4">
     <div className="text-white font-bold text-sm mb-1">⚡ Energi i dag</div>
     <div className="text-slate-400 text-xs mb-3">Logg dette daglig – se mønsteret etter 2 uker</div>
     <div className="flex gap-2">
       {levels.map(l=>(
         <button key={l.v} onClick={()=>set(l.v)}
-          className={`flex-1 flex flex-col items-center py-2 rounded-xl transition-all ${level===l.v?'bg-yellow-500 bg-opacity-20 border border-yellow-500':'bg-slate-700 border border-transparent'}`}>
+          className={`flex-1 flex flex-col items-center py-2 rounded-xl transition-all ${level===l.v?'border border-yellow-500':'border border-transparent bg-white bg-opacity-5'}`} style={level===l.v?{background:'rgba(234,179,8,0.15)'}:{}}>
           <span className="text-2xl">{l.e}</span>
           <span className={`text-xs mt-0.5 font-bold ${level===l.v?'text-yellow-400':'text-slate-500'}`}>{l.l}</span>
         </button>
@@ -820,25 +831,25 @@ function FoodScreen(){
     const p=(foodLog[k]||[]).reduce((a,f)=>a+(f.protein||0),0);
     if(p>=ME.targetProtein)streak++;else break;
   }
-  return<div className="min-h-screen safe" style={{background:'#0f172a'}}>
-    <div className="px-4 pt-12 pb-5" style={{background:'linear-gradient(180deg,#14532d 0%,#0f172a 100%)'}}>
+  return<div className="min-h-screen safe" style={{background:'#060c18'}}>
+    <div className="px-4 pt-12 pb-5" style={{background:'linear-gradient(180deg,#0a2218 0%,#060c18 100%)'}}>
       <div className="flex justify-between items-start mb-3">
         <div><h1 className="text-2xl font-black text-white">🥗 Mat</h1><p className="text-slate-400 text-sm">{isTrain?'Treningsdag':'Hviledag'} · mål {kcalTarget} kcal</p></div>
-        {streak>0&&<div className="bg-orange-900 bg-opacity-50 border border-orange-700 border-opacity-50 rounded-xl px-3 py-2 text-center">
+        {streak>0&&<div className="rounded-xl px-3 py-2 text-center" style={{background:'rgba(120,53,15,0.4)',border:'1px solid rgba(180,83,9,0.4)'}}>
           <div className="text-orange-400 font-black text-lg">{streak}🔥</div>
           <div className="text-orange-300 text-xs">protein streak</div>
         </div>}
       </div>
       <div className="grid grid-cols-2 gap-3">
-        <div className="bg-green-900 bg-opacity-40 rounded-2xl p-3">
+        <div className="rounded-2xl p-3" style={{background:'rgba(21,128,61,0.25)',border:'1px solid rgba(34,197,94,0.2)'}}>
           <div className="flex justify-between items-center mb-1"><span className="text-green-400 text-xs font-bold">Protein</span><span className="text-green-300 text-xs">{Math.round(proteinPct)}%</span></div>
           <div className="text-white font-black text-xl">{totalP}g <span className="text-slate-500 text-sm font-normal">/ {ME.targetProtein}g</span></div>
-          <div className="h-1.5 bg-slate-700 rounded-full mt-2 overflow-hidden"><div className="h-full bg-green-500 rounded-full transition-all" style={{width:`${proteinPct}%`}}/></div>
+          <div className="h-1.5 rounded-full mt-2 overflow-hidden" style={{background:'rgba(255,255,255,0.07)'}}><div className="h-full bg-green-500 rounded-full transition-all" style={{width:`${proteinPct}%`}}/></div>
         </div>
-        <div className="bg-blue-900 bg-opacity-40 rounded-2xl p-3">
+        <div className="rounded-2xl p-3" style={{background:'rgba(30,58,138,0.25)',border:'1px solid rgba(59,130,246,0.2)'}}>
           <div className="flex justify-between items-center mb-1"><span className="text-blue-400 text-xs font-bold">Kalorier</span><span className="text-blue-300 text-xs">{Math.round(kcalPct)}%</span></div>
           <div className="text-white font-black text-xl">{totalK} <span className="text-slate-500 text-sm font-normal">/ {kcalTarget}</span></div>
-          <div className="h-1.5 bg-slate-700 rounded-full mt-2 overflow-hidden"><div className="h-full bg-blue-500 rounded-full transition-all" style={{width:`${kcalPct}%`}}/></div>
+          <div className="h-1.5 rounded-full mt-2 overflow-hidden" style={{background:'rgba(255,255,255,0.07)'}}><div className="h-full bg-blue-500 rounded-full transition-all" style={{width:`${kcalPct}%`}}/></div>
           {totalK>0&&<div className={`text-xs font-bold mt-1 ${totalK<=kcalTarget?'text-green-400':'text-red-400'}`}>{totalK<=kcalTarget?`${kcalTarget-totalK} kcal igjen`:`${totalK-kcalTarget} over mål ⚠️`}</div>}
         </div>
       </div>
@@ -859,22 +870,22 @@ function FoodScreen(){
     </div>
     <div className="flex px-4 gap-2 my-3">
       {[['logger','📋 Logger'],['guide','📚 Kostguide']].map(([k,l])=>(
-        <button key={k} onClick={()=>setFoodTab(k)} className={`px-4 py-2 rounded-xl text-sm font-bold ${foodTab===k?'bg-white text-slate-900':'bg-slate-800 text-slate-400'}`}>{l}</button>
+        <button key={k} onClick={()=>setFoodTab(k)} className={`px-4 py-2 rounded-xl text-sm font-bold ${foodTab===k?'bg-white text-slate-900':'glass text-slate-400'}`}>{l}</button>
       ))}
     </div>
     {foodTab==='guide'&&<div className="px-4"><NutritionGuide/></div>}
     {foodTab==='logger'&&<div className="px-4 space-y-3">
       {Object.keys(mealLabels).map(type=>{
         const entries=todayLog.filter(e=>e.mealType===type);
-        return<div key={type} className="bg-slate-800 rounded-2xl overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
+        return<div key={type} className="glass rounded-2xl overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-white border-opacity-5">
             <div><span className="text-white font-bold text-sm">{mealLabels[type]}</span>
               {entries.length>0&&<span className="text-slate-400 text-xs ml-2">{entries.reduce((a,e)=>a+e.protein,0)}g · {entries.reduce((a,e)=>a+e.kcal,0)} kcal</span>}
             </div>
-            <button onClick={()=>{setModal(type);setModalTab('søk');setBasket([]);setSelFood(null);setQuery('');}} className="bg-slate-700 text-slate-300 text-xs px-3 py-1.5 rounded-lg font-bold">+ Legg til</button>
+            <button onClick={()=>{setModal(type);setModalTab('søk');setBasket([]);setSelFood(null);setQuery('');}} className="bg-white bg-opacity-10 text-slate-300 text-xs px-3 py-1.5 rounded-lg font-bold">+ Legg til</button>
           </div>
           {entries.map(e=>(
-            <div key={e.id} className="flex items-center justify-between px-4 py-2.5 border-b border-slate-700 last:border-0">
+            <div key={e.id} className="flex items-center justify-between px-4 py-2.5 border-b border-white border-opacity-5 last:border-0">
               <div className="flex-1 min-w-0"><div className="text-white text-sm font-semibold truncate">{e.name}</div><div className="text-slate-500 text-xs">{e.time}</div></div>
               <div className="flex items-center gap-3 flex-shrink-0">
                 <div className="text-right">
@@ -910,8 +921,8 @@ function FoodScreen(){
       const combined={name:basket.length===1?basket[0].name:`Måltid (${basket.length} matvarer)`,desc:basket.map(b=>b.name).join(', '),protein:basketTotals.p,carbs:basketTotals.c,fat:basketTotals.fat,kcal:basketTotals.k};
       addMeal(combined,modal);setBasket([]);setQuery('');setSelFood(null);
     };
-    return<div className="fixed inset-0 z-50 flex items-center justify-center px-4" style={{background:'rgba(0,0,0,0.85)'}}>
-      <div className="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-md flex flex-col su" style={{maxHeight:'88vh'}}>
+    return<div className="fixed inset-0 z-50 flex items-center justify-center px-4" style={{background:'rgba(0,0,0,0.9)'}}>
+      <div className="rounded-3xl w-full max-w-md flex flex-col su" style={{maxHeight:'88vh',background:'rgba(8,15,30,0.98)',border:'1px solid rgba(255,255,255,0.1)'}}>
         {/* Header */}
         <div className="flex justify-between items-center p-5 pb-3 flex-shrink-0">
           <div className="text-white font-bold">{mealLabels[modal]}</div>
@@ -1024,7 +1035,7 @@ function WeightChart({progData,startDate}){
     points.push({w,avg});
   }
   const withData=points.filter(p=>p.avg);
-  if(withData.length<2)return<div className="bg-slate-800 rounded-2xl p-6 text-center"><div className="text-slate-400 text-sm">Logg vekt i minst 2 uker for å se grafen</div></div>;
+  if(withData.length<2)return<div className="glass rounded-2xl p-6 text-center"><div className="text-slate-400 text-sm">Logg vekt i minst 2 uker for å se grafen</div></div>;
   const vals=withData.map(p=>p.avg);
   const minV=Math.min(...vals)-0.5, maxV=Math.max(ME.startWeight,...vals)+0.5;
   const range=maxV-minV||1;
@@ -1033,7 +1044,7 @@ function WeightChart({progData,startDate}){
   const y=v=>H-pad-(v-minV)/range*(H-pad*2);
   const pathData=withData.map((p,i)=>`${i===0?'M':'L'}${x(p.w-1).toFixed(1)},${y(p.avg).toFixed(1)}`).join(' ');
   const current=withData[withData.length-1];
-  return<div className="bg-slate-800 rounded-2xl p-4">
+  return<div className="glass rounded-2xl p-4">
     <div className="text-slate-300 font-bold mb-3">📈 Vekttrend – 12 uker</div>
     <div className="flex justify-between text-xs text-slate-500 mb-1">
       <span>Uke 1</span><span>Uke 12</span>
@@ -1049,9 +1060,9 @@ function WeightChart({progData,startDate}){
       {/* Path */}
       <path d={pathData} fill="none" stroke="#3b82f6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
       {/* Dots */}
-      {withData.map((p,i)=><circle key={i} cx={x(p.w-1)} cy={y(p.avg)} r="3.5" fill="#3b82f6" stroke="#0f172a" strokeWidth="1.5"/>)}
+      {withData.map((p,i)=><circle key={i} cx={x(p.w-1)} cy={y(p.avg)} r="3.5" fill="#3b82f6" stroke="#060c18" strokeWidth="1.5"/>)}
       {/* Current dot highlight */}
-      {current&&<circle cx={x(current.w-1)} cy={y(current.avg)} r="5" fill="#60a5fa" stroke="#0f172a" strokeWidth="2"/>}
+      {current&&<circle cx={x(current.w-1)} cy={y(current.avg)} r="5" fill="#60a5fa" stroke="#060c18" strokeWidth="2"/>}
     </svg>
     <div className="flex justify-between text-xs mt-2">
       <div><span className="text-slate-500">Start: </span><span className="text-white font-bold">{ME.startWeight}kg</span></div>
@@ -1081,8 +1092,8 @@ function ProgressScreen({startDate}){
     return sessions.filter(s=>new Date(s.date)>=start&&new Date(s.date)<end);
   };
   const[bodyTab,setBodyTab]=useState('vekt');
-  return<div className="min-h-screen safe" style={{background:'#0f172a'}}>
-    <div className="px-4 pt-12 pb-4" style={{background:'linear-gradient(180deg,#1e1b4b 0%,#0f172a 100%)'}}>
+  return<div className="min-h-screen safe" style={{background:'#060c18'}}>
+    <div className="px-4 pt-12 pb-4" style={{background:'linear-gradient(180deg,#130a2e 0%,#060c18 100%)'}}>
       <h1 className="text-2xl font-black text-white">📊 Fremgang</h1>
       <p className="text-slate-400 text-sm">Start: {ME.startWeight}kg · Mål: ~{ME.goalWeight}kg</p>
     </div>
@@ -1092,7 +1103,7 @@ function ProgressScreen({startDate}){
         {Array.from({length:12},(_,i)=>i+1).map(w=>{
           const ws=weekSessions(w);
           return<button key={w} onClick={()=>setActiveWeek(w)}
-            className={`flex-shrink-0 w-10 h-10 rounded-xl text-sm font-black relative ${w===activeWeek?'bg-purple-600 text-white':'bg-slate-800 text-slate-400'} ${w===week?'ring-2 ring-purple-400':''}`}>
+            className={`flex-shrink-0 w-10 h-10 rounded-xl text-sm font-black relative ${w===activeWeek?'bg-purple-600 text-white':'glass text-slate-400'} ${w===week?'ring-2 ring-purple-400':''}`}>
             {w}
             {ws.length>0&&<div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full"/>}
           </button>;
@@ -1106,11 +1117,11 @@ function ProgressScreen({startDate}){
       {/* Body measurement tabs */}
       <div className="flex gap-2">
         {[['vekt','⚖️ Vekt'],['mål','📏 Kroppsmål'],['søvn','😴 Søvn/steg']].map(([k,l])=>(
-          <button key={k} onClick={()=>setBodyTab(k)} className={`flex-1 py-2 rounded-xl text-xs font-bold ${bodyTab===k?'bg-white text-slate-900':'bg-slate-800 text-slate-400'}`}>{l}</button>
+          <button key={k} onClick={()=>setBodyTab(k)} className={`flex-1 py-2 rounded-xl text-xs font-bold ${bodyTab===k?'bg-white text-slate-900':'glass text-slate-400'}`}>{l}</button>
         ))}
       </div>
 
-      {bodyTab==='vekt'&&<div className="bg-slate-800 rounded-2xl p-4">
+      {bodyTab==='vekt'&&<div className="glass rounded-2xl p-4">
         <div className="text-slate-300 font-bold mb-3">⚖️ Vekt – Uke {activeWeek}</div>
         <div className="text-slate-400 text-xs mb-3">Vei deg 3 morgener (etter toalett). Snitt brukes.</div>
         <div className="flex gap-2 mb-3 flex-wrap">
@@ -1137,7 +1148,7 @@ function ProgressScreen({startDate}){
         </div>}
       </div>}
 
-      {bodyTab==='mål'&&<div className="bg-slate-800 rounded-2xl p-4 space-y-3">
+      {bodyTab==='mål'&&<div className="glass rounded-2xl p-4 space-y-3">
         <div className="text-slate-300 font-bold">📏 Kroppsmål – Uke {activeWeek}</div>
         <div className="text-slate-400 text-xs">Mål disse jevnlig for å se muskelbygging selv om vekten ikke endres mye.</div>
         {[
@@ -1168,7 +1179,7 @@ function ProgressScreen({startDate}){
       </div>}
 
       {bodyTab==='søvn'&&<div className="space-y-3">
-        <div className="bg-slate-800 rounded-2xl p-4">
+        <div className="glass rounded-2xl p-4">
           <div className="text-slate-300 font-bold mb-2">😴 Søvn 7+ timer – Uke {activeWeek}</div>
           <div className="text-slate-400 text-xs mb-3">Dårlig søvn = mer sult + dårligere resultater. Mål: 5-7 netter</div>
           <div className="flex gap-1.5 justify-between">
@@ -1181,7 +1192,7 @@ function ProgressScreen({startDate}){
           </div>
           {(data.sleep||0)>=5&&<div className="mt-3 bg-purple-900 bg-opacity-30 rounded-xl p-2 text-center text-purple-400 text-sm font-bold">😴 Bra søvnuke!</div>}
         </div>
-        <div className="bg-slate-800 rounded-2xl p-4">
+        <div className="glass rounded-2xl p-4">
           <div className="text-slate-300 font-bold mb-2">🚶 Gjennomsnittlig steg/dag</div>
           <div className="flex items-center gap-3">
             <input type="number" placeholder="antall steg" value={data.steps||''} onChange={e=>upd({steps:e.target.value})}
@@ -1197,7 +1208,7 @@ function ProgressScreen({startDate}){
             </div>
           </div>}
         </div>
-        <div className="bg-slate-800 rounded-2xl p-4">
+        <div className="glass rounded-2xl p-4">
           <div className="text-slate-300 text-sm font-bold mb-2">📝 Kommentar uke {activeWeek}</div>
           <textarea rows={2} placeholder="Energi, søvn, kosthold, motivasjon..." value={data.note||''} onChange={e=>upd({note:e.target.value})}
             className="w-full bg-slate-700 border border-slate-600 text-white rounded-xl p-3 text-sm"/>
@@ -1205,7 +1216,7 @@ function ProgressScreen({startDate}){
       </div>}
 
       {/* 12-week table */}
-      <div className="bg-slate-800 rounded-2xl p-4 mb-4">
+      <div className="glass rounded-2xl p-4 mb-4">
         <div className="text-slate-300 font-bold mb-3">📋 12-ukers oversikt</div>
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
@@ -1278,12 +1289,12 @@ function WeeklyRapport({week,startDate}){
   if(!wData.waist)tips.push('Husk å måle midje mandag morgen');
   if((wData.sleep||0)<5)tips.push('Prioriter mer søvn – kritisk for resultater');
   if(tips.length===0)tips.push('Bra uke! Hold trykket oppe neste uke 💪');
-  return<div className="bg-slate-800 rounded-2xl overflow-hidden mb-4">
-    <div className="px-4 py-3 border-b border-slate-700" style={{background:`${phase?.color}22`}}>
+  return<div className="glass rounded-2xl overflow-hidden mb-4">
+    <div className="px-4 py-3 border-b border-white border-opacity-5" style={{background:`${phase?.color}22`}}>
       <div className="text-white font-black">📋 Ukesrapport – Uke {week}</div>
       <div className="text-slate-400 text-xs">{phase?.name}</div>
     </div>
-    <div className="px-4 py-3 grid grid-cols-3 gap-3 border-b border-slate-700">
+    <div className="px-4 py-3 grid grid-cols-3 gap-3 border-b border-white border-opacity-5">
       <div className="text-center">
         <div className={`text-2xl font-black ${weekSess.length>=3?'text-green-400':'text-yellow-400'}`}>{weekSess.length}/3</div>
         <div className="text-slate-400 text-xs">Økter</div>
@@ -1395,20 +1406,20 @@ function TodayScreen({startDate,onGoWorkout,onGoFood}){
   if(week&&week%2===0) reminders.push({icon:'📸',text:`Uke ${week}: ta fremgangsbilde (front, side, bak)`,color:'text-pink-400',bold:false});
   if(totalP>=ME.targetProtein) reminders.push({icon:'🎯',text:'Proteinmål nådd i dag!',color:'text-green-400',bold:false});
 
-  return<div className="min-h-screen safe" style={{background:'#0f172a'}}>
+  return<div className="min-h-screen safe" style={{background:'#060c18'}}>
     {/* Header */}
-    <div className="px-4 pt-12 pb-4" style={{background:'linear-gradient(180deg,#1e3a5f 0%,#0f172a 100%)'}}>
+    <div className="px-4 pt-12 pb-4" style={{background:'linear-gradient(180deg,#0d1f3c 0%,#060c18 100%)'}}>
       <div className="flex justify-between items-start mb-3">
         <div>
           <div className="text-slate-400 text-xs capitalize">{dayName}</div>
           <h1 className="text-xl font-black text-white">Hei, {ME.name} 👋</h1>
         </div>
         <div className="flex gap-2 items-start">
-          {week&&<div className="bg-white bg-opacity-10 rounded-xl px-3 py-1.5 text-right">
+          {week&&<div className="glass rounded-xl px-3 py-1.5 text-right">
             <div className="text-white font-black text-sm">Uke {week}/12</div>
             <div className="text-slate-400 text-xs">{phase?.name}</div>
           </div>}
-          {streak>=2&&<div className="bg-orange-900 bg-opacity-50 border border-orange-700 border-opacity-50 rounded-xl px-2.5 py-1.5 text-center">
+          {streak>=2&&<div className="rounded-xl px-2.5 py-1.5 text-center" style={{background:'rgba(120,53,15,0.4)',border:'1px solid rgba(180,83,9,0.4)'}}>
             <div className="text-orange-400 font-black text-sm">{streak}🔥</div>
             <div className="text-orange-300 text-xs">streak</div>
           </div>}
@@ -1416,7 +1427,7 @@ function TodayScreen({startDate,onGoWorkout,onGoFood}){
       </div>
 
       {/* Daily Score */}
-      <div className="bg-white bg-opacity-5 rounded-2xl p-4 mb-3">
+      <div className="glass rounded-2xl p-4 mb-3">
         <div className="flex items-center justify-between mb-2">
           <div>
             <div className="text-white font-black text-3xl">{score}<span className="text-base text-slate-400 font-normal">%</span></div>
@@ -1430,7 +1441,7 @@ function TodayScreen({startDate,onGoWorkout,onGoFood}){
             ))}
           </div>
         </div>
-        <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+        <div className="h-2 score-track rounded-full overflow-hidden">
           <div className="h-full rounded-full transition-all duration-700" style={{width:`${score}%`,background:`linear-gradient(90deg,${scoreColor},${scoreColor}bb)`}}/>
         </div>
       </div>
@@ -1444,7 +1455,7 @@ function TodayScreen({startDate,onGoWorkout,onGoFood}){
           <Ring value={todaySteps} max={ME.stepGoal} color="#f59e0b" size={80} label={todaySteps>0?`${Math.round(todaySteps/1000*10)/10}k`:'+'} sub="steg"/>
         </button>
       </div>
-      {stepEdit&&<div className="bg-slate-800 rounded-2xl p-3 flex gap-2 items-center su mt-2">
+      {stepEdit&&<div className="glass rounded-2xl p-3 flex gap-2 items-center su mt-2">
         <span className="text-xl">👟</span>
         <input type="number" inputMode="numeric" placeholder="Antall steg" value={stepInput} onChange={e=>setStepInput(e.target.value)}
           className="flex-1 bg-slate-700 border border-slate-600 text-white rounded-xl p-2.5 text-sm font-bold"/>
@@ -1457,18 +1468,18 @@ function TodayScreen({startDate,onGoWorkout,onGoFood}){
 
       {/* Progress cards: program + weight */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="bg-slate-800 rounded-2xl p-3">
+        <div className="glass rounded-2xl p-3">
           <div className="text-slate-400 text-xs mb-1">🗓 Program</div>
           <div className="text-white font-black text-lg">{week?`Uke ${week}/12`:'—'}</div>
-          <div className="h-1.5 bg-slate-700 rounded-full mt-2 mb-1 overflow-hidden">
+          <div className="h-1.5 rounded-full mt-2 mb-1 overflow-hidden" style={{background:'rgba(255,255,255,0.07)'}}>
             <div className="h-full rounded-full" style={{width:`${programPct}%`,background:'linear-gradient(90deg,#a855f7,#ec4899)'}}/>
           </div>
           <div className="text-slate-500 text-xs">{weeksLeft} uker igjen</div>
         </div>
-        <div className="bg-slate-800 rounded-2xl p-3">
+        <div className="glass rounded-2xl p-3">
           <div className="text-slate-400 text-xs mb-1">⚖️ Mål-fremgang</div>
           <div className="text-white font-black text-lg">{latestWeight?`${latestWeight} kg`:'—'}</div>
-          <div className="h-1.5 bg-slate-700 rounded-full mt-2 mb-1 overflow-hidden">
+          <div className="h-1.5 rounded-full mt-2 mb-1 overflow-hidden" style={{background:'rgba(255,255,255,0.07)'}}>
             <div className="h-full rounded-full" style={{width:`${weightPct}%`,background:'linear-gradient(90deg,#22c55e,#84cc16)'}}/>
           </div>
           <div className="text-slate-500 text-xs">{weightToGo>0?`${weightToGo} kg til mål`:'🎯 Mål nådd!'}</div>
@@ -1478,16 +1489,16 @@ function TodayScreen({startDate,onGoWorkout,onGoFood}){
 
       {/* Body stats mini */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="bg-slate-800 rounded-2xl p-3 text-center">
+        <div className="glass rounded-2xl p-3 text-center">
           <div className="text-slate-400 text-xs mb-1">⚖️ Vekt</div>
           <div className="text-white font-black">{avgWeight?`${avgWeight}kg`:'—'}</div>
           <div className="text-slate-500 text-xs">start {ME.startWeight}</div>
         </div>
-        <div className="bg-slate-800 rounded-2xl p-3 text-center">
+        <div className="glass rounded-2xl p-3 text-center">
           <div className="text-slate-400 text-xs mb-1">📏 Midje</div>
           <div className="text-white font-black">{thisWeek.waist?`${thisWeek.waist}cm`:'—'}</div>
         </div>
-        <div className="bg-slate-800 rounded-2xl p-3 text-center">
+        <div className="glass rounded-2xl p-3 text-center">
           <div className="text-slate-400 text-xs mb-1">🦾 Arm</div>
           <div className="text-white font-black">{thisWeek.arm?`${thisWeek.arm}cm`:'—'}</div>
         </div>
@@ -1520,7 +1531,7 @@ function TodayScreen({startDate,onGoWorkout,onGoFood}){
       </div>}
 
       {/* Smart reminders */}
-      {reminders.length>0&&<div className="bg-slate-800 rounded-2xl p-4">
+      {reminders.length>0&&<div className="glass rounded-2xl p-4">
         <div className="text-slate-300 text-sm font-bold mb-2">📌 Viktig nå</div>
         <div className="space-y-2">
           {reminders.map((r,i)=>(
@@ -1533,7 +1544,7 @@ function TodayScreen({startDate,onGoWorkout,onGoFood}){
       </div>}
 
       {/* Food quick action */}
-      <button onClick={onGoFood} className="w-full bg-slate-800 rounded-2xl p-4 flex items-center justify-between">
+      <button onClick={onGoFood} className="w-full glass rounded-2xl p-4 flex items-center justify-between">
         <div className="text-left">
           <div className="text-slate-400 text-xs">Protein i dag</div>
           <div className="text-white font-bold">{totalP}g / {ME.targetProtein}g</div>
@@ -1641,14 +1652,14 @@ function PlanScreen({startDate}){
   const run=getRunning(week);
   const[tab,setTab]=useState('uke');
   const dayNames=['Søn','Man','Tir','Ons','Tor','Fre','Lør'];
-  return<div className="min-h-screen safe" style={{background:'#0f172a'}}>
-    <div className="px-4 pt-12 pb-4" style={{background:'linear-gradient(180deg,#1c1917 0%,#0f172a 100%)'}}>
+  return<div className="min-h-screen safe" style={{background:'#060c18'}}>
+    <div className="px-4 pt-12 pb-4" style={{background:'linear-gradient(180deg,#140f0a 0%,#060c18 100%)'}}>
       <h1 className="text-2xl font-black text-white">📋 Plan</h1>
       <p className="text-slate-400 text-sm">12 ukers Fight Club{week?` · Uke ${week}`:''}</p>
     </div>
     <div className="flex px-4 gap-2 mb-4 overflow-x-auto pb-1">
       {[['uke','Uke'],['løp','🏃 Løp'],['mat','🥗 Mat'],['oppskrifter','🍳 Oppskrifter'],['supp','💊 Tilskudd']].map(([k,l])=>(
-        <button key={k} onClick={()=>setTab(k)} className={`flex-shrink-0 px-4 py-2 rounded-xl text-sm font-bold ${tab===k?'bg-white text-slate-900':'bg-slate-800 text-slate-400'}`}>{l}</button>
+        <button key={k} onClick={()=>setTab(k)} className={`flex-shrink-0 px-4 py-2 rounded-xl text-sm font-bold ${tab===k?'bg-white text-slate-900':'glass text-slate-400'}`}>{l}</button>
       ))}
     </div>
     <div className="px-4 space-y-3">
@@ -1658,7 +1669,7 @@ function PlanScreen({startDate}){
           <div className="text-slate-300 text-sm mt-1">{phase.rpe} · Uke {phase.range[0]}-{phase.range[1]}</div>
           <div className="text-slate-400 text-sm mt-1">{phase.tip}</div>
         </div>}
-        <div className="bg-slate-800 rounded-2xl p-4">
+        <div className="glass rounded-2xl p-4">
           <div className="text-slate-300 font-bold mb-2">📈 Progresjonsregel</div>
           <div className="space-y-1 text-sm text-slate-300">
             <div>• <span className="text-blue-400">Maskiner/bein:</span> +2-5 kg</div>
@@ -1666,12 +1677,12 @@ function PlanScreen({startDate}){
             <div>• <span className="text-blue-400">Alternativ:</span> +1-2 reps hvis du ikke kan øke vekt</div>
           </div>
         </div>
-        <div className="bg-slate-800 rounded-2xl overflow-hidden">
-          <div className="px-4 py-3 border-b border-slate-700 text-slate-300 font-bold">Ukeoppsett</div>
+        <div className="glass rounded-2xl overflow-hidden">
+          <div className="px-4 py-3 border-b border-white border-opacity-5 text-slate-300 font-bold">Ukeoppsett</div>
           {[1,2,3,4,5,6,0].map(d=>{
             const p=WEEK_SCHEDULE[d];
             const isW=p.type==='workout';
-            return<div key={d} className={`flex items-center gap-3 px-4 py-3 border-b border-slate-700 last:border-0 ${isW?'bg-blue-900 bg-opacity-10':''}`}>
+            return<div key={d} className={`flex items-center gap-3 px-4 py-3 border-b border-white border-opacity-5 last:border-0 ${isW?'bg-blue-900 bg-opacity-10':''}`}>
               <div className="w-8 text-slate-400 text-sm font-bold">{dayNames[d]}</div>
               <div className="flex-1"><div className="text-white text-sm font-semibold">{p.label}</div><div className="text-slate-500 text-xs">{p.sub}</div></div>
               {isW&&<div className="bg-blue-600 bg-opacity-20 text-blue-400 text-xs font-bold px-2 py-1 rounded-lg">GYM</div>}
@@ -1692,9 +1703,9 @@ function PlanScreen({startDate}){
             <div><span className="text-slate-400 text-xs">LØRDAG:</span><div className="text-white text-sm">{run.sat}</div></div>
           </div>
         </div>}
-        <div className="bg-slate-800 rounded-2xl overflow-hidden">
+        <div className="glass rounded-2xl overflow-hidden">
           {RUNNING.map((r,i)=>(
-            <div key={i} className={`px-4 py-3 border-b border-slate-700 last:border-0 ${week>=r.w[0]&&week<=r.w[1]?'bg-teal-900 bg-opacity-20':''}`}>
+            <div key={i} className={`px-4 py-3 border-b border-white border-opacity-5 last:border-0 ${week>=r.w[0]&&week<=r.w[1]?'bg-teal-900 bg-opacity-20':''}`}>
               <div className="text-slate-300 font-bold text-sm mb-1">Uke {r.w[0]}-{r.w[1]} {week>=r.w[0]&&week<=r.w[1]?'← nå':''}</div>
               <div className="text-slate-400 text-xs space-y-0.5"><div>Man: {r.mon}</div><div>Ons: {r.wed}</div><div>Lør: {r.sat}</div></div>
             </div>
@@ -1793,9 +1804,12 @@ function BottomNav({active,onChange}){
   return<nav className="bnav">
     <div className="flex">
       {tabs.map(([id,icon,label])=>(
-        <button key={id} onClick={()=>onChange(id)} className={`flex-1 flex flex-col items-center py-3 gap-0.5 transition-all ${active===id?'text-blue-400':'text-slate-500'}`}>
-          <span className="text-xl leading-none">{icon}</span>
-          <span className="text-xs font-medium">{label}</span>
+        <button key={id} onClick={()=>onChange(id)} className={`flex-1 flex flex-col items-center py-3 gap-0.5 transition-all ${active===id?'':'text-slate-500'}`}>
+          <span className={`text-xl leading-none transition-transform ${active===id?'scale-110':''}`}>{icon}</span>
+          {active===id
+            ?<span className="text-xs font-bold grad-text">{label}</span>
+            :<span className="text-xs font-medium">{label}</span>}
+          {active===id&&<span className="w-1 h-1 rounded-full bg-blue-400 -mt-0.5"/>}
         </button>
       ))}
     </div>
