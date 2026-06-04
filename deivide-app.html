@@ -373,7 +373,7 @@ function ActiveWorkout({workout,onBack,onDone,retroMode=false,editSession=null})
   const upd=(i,f,v)=>setLog(p=>({...p,[ex.id]:p[ex.id].map((s,j)=>j===i?{...s,[f]:v}:s)}));
   const toggle=i=>setLog(p=>{
     const u=p[ex.id].map((s,j)=>j===i?{...s,done:!s.done}:s);
-    if(!p[ex.id][i].done)setTimeout(()=>setTimer(true),300);
+    if(!p[ex.id][i].done&&!retroMode&&!editSession)setTimeout(()=>setTimer(true),300);
     return{...p,[ex.id]:u};
   });
   const saveSession=()=>{
