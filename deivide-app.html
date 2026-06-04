@@ -640,6 +640,7 @@ function WorkoutScreen({initialId,initialEditSession}){
     <div className="min-h-screen safe" style={{background:'#060c18'}}>
       <div className="px-4 pt-12 pb-4" style={{background:'linear-gradient(180deg,#0d1f3c 0%,#060c18 100%)'}}>
         <h1 className="text-2xl font-black text-white">💪 Trening</h1>
+        <div className="text-slate-400 text-xs mt-0.5 capitalize">{new Date().toLocaleDateString('no-NO',{weekday:'long',day:'numeric',month:'long'})}</div>
       </div>
       <div className="flex px-4 gap-2 mb-4">
         {[['okter','Økter'],['rekorder','🏆 Rekorder']].map(([k,l])=>(
@@ -879,7 +880,11 @@ function FoodScreen(){
   return<div className="min-h-screen safe" style={{background:'#060c18'}}>
     <div className="px-4 pt-12 pb-5" style={{background:'linear-gradient(180deg,#0a2218 0%,#060c18 100%)'}}>
       <div className="flex justify-between items-start mb-3">
-        <div><h1 className="text-2xl font-black text-white">🥗 Mat</h1><p className="text-slate-400 text-sm">{isTrain?'Treningsdag':'Hviledag'} · mål {kcalTarget} kcal</p></div>
+        <div>
+          <h1 className="text-2xl font-black text-white">🥗 Mat</h1>
+          <p className="text-slate-400 text-xs capitalize">{new Date().toLocaleDateString('no-NO',{weekday:'long',day:'numeric',month:'long'})}</p>
+          <p className="text-slate-400 text-xs mt-0.5">{isTrain?'Treningsdag':'Hviledag'} · mål {kcalTarget} kcal</p>
+        </div>
         {streak>0&&<div className="rounded-xl px-3 py-2 text-center" style={{background:'rgba(120,53,15,0.4)',border:'1px solid rgba(180,83,9,0.4)'}}>
           <div className="text-orange-400 font-black text-lg">{streak}🔥</div>
           <div className="text-orange-300 text-xs">protein streak</div>
@@ -1253,7 +1258,8 @@ function ProgressScreen({startDate,onEditSession}){
   return<div className="min-h-screen safe" style={{background:'#060c18'}}>
     <div className="px-4 pt-12 pb-4" style={{background:'linear-gradient(180deg,#130a2e 0%,#060c18 100%)'}}>
       <h1 className="text-2xl font-black text-white">📊 Fremgang</h1>
-      <p className="text-slate-400 text-sm">Start: {ME.startWeight}kg · Mål: ~{ME.goalWeight}kg</p>
+      <p className="text-slate-400 text-xs capitalize mt-0.5">{new Date().toLocaleDateString('no-NO',{weekday:'long',day:'numeric',month:'long'})}</p>
+      <p className="text-slate-400 text-xs mt-0.5">Start: {ME.startWeight}kg · Mål: ~{ME.goalWeight}kg</p>
     </div>
     <div className="px-4 space-y-4">
       {/* Week selector */}
@@ -1606,7 +1612,7 @@ function TodayScreen({startDate,onGoWorkout,onGoFood}){
     <div className="px-4 pt-12 pb-4" style={{background:'linear-gradient(180deg,#0d1f3c 0%,#060c18 100%)'}}>
       <div className="flex justify-between items-start mb-3">
         <div>
-          <div className="text-slate-400 text-xs capitalize">{dayName}</div>
+          <div className="text-slate-300 text-xs font-medium capitalize">{dayName}</div>
           <h1 className="text-xl font-black text-white">Hei, {ME.name} 👋</h1>
         </div>
         <div className="flex gap-2 items-start">
@@ -1850,7 +1856,8 @@ function PlanScreen({startDate}){
   return<div className="min-h-screen safe" style={{background:'#060c18'}}>
     <div className="px-4 pt-12 pb-4" style={{background:'linear-gradient(180deg,#140f0a 0%,#060c18 100%)'}}>
       <h1 className="text-2xl font-black text-white">📋 Plan</h1>
-      <p className="text-slate-400 text-sm">12 ukers Fight Club{week?` · Uke ${week}`:''}</p>
+      <p className="text-slate-400 text-xs capitalize mt-0.5">{new Date().toLocaleDateString('no-NO',{weekday:'long',day:'numeric',month:'long'})}</p>
+      <p className="text-slate-400 text-xs mt-0.5">12 ukers Fight Club{week?` · Uke ${week}`:''}</p>
     </div>
     <div className="flex px-4 gap-2 mb-4 overflow-x-auto pb-1">
       {[['uke','Uke'],['løp','🏃 Løp'],['mat','🥗 Mat'],['oppskrifter','🍳 Oppskrifter'],['supp','💊 Tilskudd']].map(([k,l])=>(
