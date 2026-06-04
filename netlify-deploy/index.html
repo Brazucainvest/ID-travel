@@ -359,6 +359,7 @@ function ActiveWorkout({workout,onBack,onDone,retroMode=false,editSession=null})
   });
   const[timer,setTimer]=useState(false);
   const[finish,setFinish]=useState(false);
+  const[showNav,setShowNav]=useState(false);
   const[retroDate,setRetroDate]=useState(()=>editSession?.date?.slice(0,10)||todayStr());
   const prevSession=useMemo(()=>{const sess=ld('fc_sessions',[]);const f=editSession?sess.filter(s=>s.id!==editSession.id):sess;return[...f].reverse().find(s=>s.workoutId===workout.id)||null;},[workout.id]);
   const ex=workout.exercises[idx];
@@ -366,7 +367,9 @@ function ActiveWorkout({workout,onBack,onDone,retroMode=false,editSession=null})
   const done=sets.filter(s=>s.done).length;
   const prevSets=(prevSession?.log?.[ex.id]||[]).filter(s=>s.done&&s.w&&s.r);
   const total=workout.exercises.length;
-  const prog=(idx/total*100)+(done/ex.sets/total*100);
+  const totalDoneSets=workout.exercises.reduce((a,e)=>(log[e.id]||[]).filter(s=>s.done).length+a,0);
+  const totalSets=workout.exercises.reduce((a,e)=>a+e.sets,0);
+  const prog=totalDoneSets/totalSets*100;
   const upd=(i,f,v)=>setLog(p=>({...p,[ex.id]:p[ex.id].map((s,j)=>j===i?{...s,[f]:v}:s)}));
   const toggle=i=>setLog(p=>{
     const u=p[ex.id].map((s,j)=>j===i?{...s,done:!s.done}:s);
@@ -375,7 +378,6 @@ function ActiveWorkout({workout,onBack,onDone,retroMode=false,editSession=null})
   });
   const saveSession=()=>{
     const sess=ld('fc_sessions',[]);
-    // Update PRs
     const prs=ld('fc_prs',{});
     Object.entries(log).forEach(([exId,sets])=>{
       sets.forEach(s=>{
@@ -401,8 +403,12 @@ function ActiveWorkout({workout,onBack,onDone,retroMode=false,editSession=null})
     <div className="text-white px-4 pt-4 pb-3" style={{background:`linear-gradient(135deg,${workout.from},${workout.to})`}}>
       <div className="flex items-center justify-between mb-2">
         <button onClick={()=>{if(confirm('Avbryte?'))onBack();}} className="bg-white bg-opacity-20 rounded-xl px-3 py-1.5 text-sm font-medium">← Avbryt</button>
-        <div className="text-sm font-semibold opacity-90">{idx+1}/{total} øvelser</div>
-        <button onClick={()=>setFinish(true)} className="bg-white bg-opacity-20 rounded-xl px-3 py-1.5 text-sm font-medium">Fullfør</button>
+        {/* Tappable exercise nav trigger */}
+        <button onClick={()=>setShowNav(true)} className="flex items-center gap-1.5 bg-white bg-opacity-20 rounded-xl px-3 py-1.5">
+          <span className="text-sm font-black">{idx+1}/{total}</span>
+          <span className="text-xs opacity-80">øvelser ▾</span>
+        </button>
+        <button onClick={()=>setFinish(true)} className="bg-white bg-opacity-20 rounded-xl px-3 py-1.5 text-sm font-medium">Lagre</button>
       </div>
       <div className="h-1.5 bg-white bg-opacity-20 rounded-full overflow-hidden"><div className="h-full bg-white rounded-full transition-all duration-500" style={{width:`${prog}%`}}/></div>
       {(retroMode||editSession)&&<div className="flex items-center gap-2 mt-2 bg-white bg-opacity-10 rounded-xl px-3 py-2">
@@ -458,19 +464,58 @@ function ActiveWorkout({workout,onBack,onDone,retroMode=false,editSession=null})
         </React.Fragment>;
       })}
     </div>
-    {/* Sticky nav — always visible above home indicator */}
+    {/* Sticky nav */}
     <div className="px-4 flex-shrink-0 flex gap-3" style={{paddingTop:12,paddingBottom:'max(16px,env(safe-area-inset-bottom,16px))',background:'#060c18',borderTop:'1px solid rgba(255,255,255,0.06)'}}>
-      {idx>0&&<button onClick={()=>setIdx(i=>i-1)} className="flex-1 glass text-slate-300 py-3.5 rounded-2xl font-bold text-sm">← Forrige</button>}
+      {idx>0
+        ?<button onClick={()=>setIdx(i=>i-1)} className="flex-1 glass text-slate-300 py-3.5 rounded-2xl font-bold text-sm">← Forrige</button>
+        :<div className="flex-1"/>}
       {idx<total-1
         ?<button onClick={()=>setIdx(i=>i+1)} className="flex-1 text-white py-3.5 rounded-2xl font-bold text-sm" style={{background:`linear-gradient(135deg,${workout.from},${workout.to})`}}>Neste →</button>
-        :<button onClick={()=>setFinish(true)} className="flex-1 bg-green-600 text-white py-3.5 rounded-2xl font-bold text-sm">🏆 Fullfør</button>}
+        :<button onClick={()=>setFinish(true)} className="flex-1 bg-green-600 text-white py-3.5 rounded-2xl font-bold text-sm">🏆 Fullfør og lagre</button>}
     </div>
     {timer&&<RestTimer onClose={()=>setTimer(false)}/>}
+    {/* Exercise jump overlay */}
+    {showNav&&<div className="fixed inset-0 z-50 flex items-end" style={{background:'rgba(0,0,0,0.7)'}} onClick={()=>setShowNav(false)}>
+      <div className="w-full rounded-t-3xl p-5 su" style={{background:'rgba(8,15,30,0.98)',border:'1px solid rgba(255,255,255,0.1)'}} onClick={e=>e.stopPropagation()}>
+        <div className="flex justify-between items-center mb-4">
+          <div>
+            <div className="text-white font-black text-lg">{workout.title}</div>
+            <div className="text-slate-400 text-xs">{totalDoneSets}/{totalSets} sett fullført · trykk for å hoppe</div>
+          </div>
+          <button onClick={()=>setShowNav(false)} className="text-slate-400 text-2xl w-9 h-9 flex items-center justify-center">✕</button>
+        </div>
+        <div className="space-y-2 max-h-80 overflow-y-auto">
+          {workout.exercises.map((e,i)=>{
+            const exSets=log[e.id]||[];
+            const exDone=exSets.filter(s=>s.done).length;
+            const exHasData=exSets.some(s=>s.w||s.r);
+            const isCurrent=i===idx;
+            return<button key={e.id} onClick={()=>{setIdx(i);setShowNav(false);}}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left transition-all ${isCurrent?'border-2':'border border-white border-opacity-5'}`}
+              style={isCurrent?{background:`${workout.from}33`,borderColor:workout.from}:{background:'rgba(255,255,255,0.04)'}}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black flex-shrink-0 ${exDone===e.sets?'bg-green-500 text-white':isCurrent?'bg-white text-slate-900':'bg-white bg-opacity-10 text-slate-300'}`}>
+                {exDone===e.sets?'✓':i+1}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className={`font-bold text-sm truncate ${isCurrent?'text-white':'text-slate-300'}`}>{e.name}</div>
+                <div className="text-slate-500 text-xs">{e.sets}×{e.reps}{e.repsNote?' '+e.repsNote:''}</div>
+              </div>
+              <div className="text-right flex-shrink-0">
+                {exDone>0&&<div className={`text-xs font-bold ${exDone===e.sets?'text-green-400':'text-yellow-400'}`}>{exDone}/{e.sets} sett</div>}
+                {exHasData&&exDone<e.sets&&<div className="text-slate-500 text-xs">data inne</div>}
+              </div>
+            </button>;
+          })}
+        </div>
+        <button onClick={()=>{setShowNav(false);setFinish(true);}} className="w-full mt-4 bg-green-600 text-white py-3.5 rounded-2xl font-black">🏆 Fullfør og lagre økt</button>
+      </div>
+    </div>}
     {finish&&<div className="fixed inset-0 z-50 flex items-center justify-center" style={{background:'rgba(0,0,0,0.9)'}}>
       <div className="rounded-3xl p-6 mx-4 w-full max-w-sm text-center su" style={{background:'rgba(8,15,30,0.98)',border:'1px solid rgba(255,255,255,0.1)'}}>
         <div className="text-5xl mb-3">🏆</div>
         <h3 className="text-xl font-black text-white mb-1">Økt fullført!</h3>
-        <p className="text-slate-400 text-sm mb-5">Bra jobbet, {ME.name}! PR-er oppdateres automatisk.</p>
+        <p className="text-slate-400 text-sm mb-1">Bra jobbet, {ME.name}!</p>
+        <p className="text-slate-500 text-xs mb-5">{totalDoneSets}/{totalSets} sett logget · PR-er oppdateres automatisk</p>
         <button onClick={saveSession} className="w-full bg-green-600 text-white py-3.5 rounded-2xl font-black text-lg mb-3">✅ Lagre økt</button>
         <button onClick={()=>setFinish(false)} className="w-full glass text-slate-300 py-3 rounded-2xl font-semibold">Fortsett trening</button>
       </div>
