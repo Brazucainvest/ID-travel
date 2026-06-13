@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VM 2026 | AI Betting</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#070c18;color:#e2e8f0;min-height:100vh;font-size:14px}
+a{color:inherit;text-decoration:none}
+
+/* LAYOUT */
+.wrap{max-width:480px;margin:0 auto;padding:0 12px 60px}
+
+/* HEADER */
+.header{background:linear-gradient(160deg,#0d1a0d,#0a1428,#0d1a0d);border-bottom:1px solid #1a2d3d;padding:16px 16px 12px}
+.header-inner{max-width:480px;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-start}
+.header-title{font-size:22px;font-weight:800;color:#fff;line-height:1}
+.header-sub{font-size:11px;color:#475569;margin-top:3px}
+.header-right{text-align:right}
+.live-label{color:#34d399;font-size:12px;font-weight:700}
+.live-dot{display:inline-block;width:7px;height:7px;background:#34d399;border-radius:50%;margin-right:4px;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* TABS */
+.tabs{display:flex;gap:8px;padding:12px 0 4px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;transition:background .2s,color .2s}
+.tab.active{background:#059669;color:#fff}
+.tab.inactive{background:#1f2937;color:#9ca3af}
+.tab.inactive:hover{background:#2d3748;color:#d1d5db}
+
+/* TAB PANES */
+.pane{display:none}
+.pane.show{display:block}
+
+/* CARDS */
+.card{background:#0f1825;border:1px solid #1a2d3d;border-radius:14px;margin-bottom:12px;overflow:hidden}
+.card-highlight{border-color:#059669}
+.card-gold{border-color:#d97706}
+.card-purple{border-color:#7c3aed}
+.card-pad{padding:14px}
+.inner-card{background:#111e30;border:1px solid #1e3248;border-radius:10px;padding:12px}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.3px}
+.b-green{background:#053d20;color:#34d399;border:1px solid #059669}
+.b-gold{background:#451a03;color:#fcd34d;border:1px solid #d97706}
+.b-red{background:#450a0a;color:#fca5a5;border:1px solid #991b1b}
+.b-blue{background:#0c1a4d;color:#93c5fd;border:1px solid #2563eb}
+.b-gray{background:#1f2937;color:#9ca3af;border:1px solid #374151}
+.b-purple{background:#2e1065;color:#c4b5fd;border:1px solid #7c3aed}
+
+/* FORM CIRCLES */
+.fc{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;font-size:10px;font-weight:800;margin:0 1px}
+.fw{background:#059669;color:#fff}
+.fd{background:#d97706;color:#fff}
+.fl{background:#dc2626;color:#fff}
+
+/* MATCH LAYOUT */
+.match-row{display:flex;align-items:center;justify-content:space-between;margin:10px 0}
+.team{flex:1;text-align:center}
+.team-flag{font-size:2em;line-height:1;display:block}
+.team-name{font-weight:700;font-size:14px;margin-top:4px}
+.team-rank{display:inline-block;background:#1f2937;color:#9ca3af;padding:1px 6px;border-radius:4px;font-size:10px;margin-top:4px}
+.match-mid{text-align:center;padding:0 8px}
+.vs-text{color:#475569;font-size:18px;font-weight:800}
+.match-time{color:#34d399;font-size:13px;font-weight:700;margin-top:2px}
+.match-venue{color:#475569;font-size:10px;margin-top:2px}
+.score-box{display:inline-block;background:#111e30;border:1px solid #1e3248;border-radius:8px;padding:4px 10px;font-size:22px;font-weight:800;min-width:36px;text-align:center}
+.score-row{display:flex;gap:8px;align-items:center;justify-content:center}
+
+/* ODDS ROW */
+.odds-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:10px 0}
+.odd-box{background:#111e30;border:1px solid #1e3248;border-radius:8px;padding:7px;text-align:center;cursor:pointer}
+.odd-box.pick{background:#053d20;border-color:#059669}
+.odd-box.pick2{background:#451a03;border-color:#d97706}
+.odd-label{font-size:9px;font-weight:600;color:#6b7280;text-transform:uppercase;margin-bottom:2px}
+.odd-val{font-size:18px;font-weight:800;color:#e2e8f0}
+.odd-box.pick .odd-label{color:#34d399}
+.odd-box.pick .odd-val{color:#34d399}
+.odd-box.pick2 .odd-label{color:#fcd34d}
+.odd-box.pick2 .odd-val{color:#fcd34d}
+
+/* TIPS */
+.tip-row{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-radius:8px;margin-bottom:6px}
+.t-high{background:#063d20;border-left:3px solid #10b981}
+.t-med{background:#451a03;border-left:3px solid #f59e0b}
+.t-low{background:#1f2937;border-left:3px solid #475569}
+.tip-name{font-size:13px;font-weight:700;color:#fff}
+.tip-sub{font-size:11px;color:#6b7280;margin-top:2px}
+.tip-odds{font-size:17px;font-weight:800;text-align:right}
+.tip-conf{font-size:10px;text-align:right;margin-top:2px}
+.conf-green{color:#34d399}
+.conf-yellow{color:#fcd34d}
+.conf-bar{height:5px;background:#1f2937;border-radius:3px;margin-top:3px;width:60px}
+.conf-fill{height:100%;border-radius:3px}
+.fill-g{background:linear-gradient(90deg,#059669,#34d399)}
+.fill-y{background:linear-gradient(90deg,#d97706,#fcd34d)}
+
+/* BEST TIP BOX */
+.best-tip{background:#063d20;border:1px solid #059669;border-radius:10px;padding:12px;margin-bottom:10px}
+.best-tip-title{font-size:11px;font-weight:700;color:#34d399;letter-spacing:.5px;margin-bottom:6px}
+.best-tip-main{font-size:15px;font-weight:700;color:#fff;margin-bottom:4px}
+.best-tip-sub{font-size:12px;color:#94a3b8}
+
+/* EXPAND */
+.expand-btn{width:100%;background:#111e30;border:1px solid #1e3248;border-radius:8px;color:#64748b;font-size:12px;font-weight:600;padding:8px;cursor:pointer;margin-top:8px;transition:background .2s}
+.expand-btn:hover{background:#1e3248;color:#94a3b8}
+.expand-section{display:none;border-top:1px solid #1a2d3d;padding:14px}
+
+/* INJURY ALERT */
+.injury-alert{background:#2d0a0a;border:1px solid #991b1b;border-radius:8px;padding:8px 12px;margin:8px 0;display:flex;align-items:center;gap:8px}
+
+/* DIVIDER */
+.div{height:1px;background:#1a2d3d;margin:10px 0}
+.section-label{font-size:10px;font-weight:700;letter-spacing:1.5px;color:#475569;text-transform:uppercase;margin:12px 0 8px}
+
+/* KOMBI BOX */
+.kombi-row{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid #1e3248}
+.kombi-row:last-child{border-bottom:none}
+
+/* GROUP GRID */
+.group-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.group-card{background:#111e30;border:1px solid #1e3248;border-radius:10px;padding:10px}
+.group-name{font-size:11px;font-weight:700;color:#fcd34d;margin-bottom:6px}
+.group-team{font-size:12px;color:#94a3b8;line-height:1.9}
+
+/* FAVORITES TABLE */
+.fav-row{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:#111e30;border-radius:6px;margin-bottom:4px}
+
+/* DISCLAIMER */
+.disclaimer{background:#1a1a0a;border:1px solid #451a03;border-radius:10px;padding:12px;margin-top:16px}
+.disclaimer-title{font-size:11px;color:#92400e;font-weight:700;margin-bottom:4px}
+.disclaimer-text{font-size:11px;color:#78350f;line-height:1.6}
+
+/* FOOTER */
+.footer{text-align:center;padding:16px;border-top:1px solid #1a2d3d;background:#070c18;font-size:11px;color:#374151}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-inner">
+    <div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:1.6em">🏆</span>
+        <div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="header-title">VM 2026</span>
+            <span class="badge b-green">AI ANALYSE</span>
+          </div>
+          <div class="header-sub">FIFA World Cup · USA / Canada / Mexico</div>
+        </div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="live-label"><span class="live-dot"></span>LIVE</div>
+      <div style="color:#475569;font-size:11px;margin-top:2px">Lør 13. juni 2026</div>
+      <div style="color:#475569;font-size:10px">ComeOn tips</div>
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="wrap">
+<div class="tabs">
+  <button class="tab active" id="t-today" onclick="switchTab('today')">📅 I dag</button>
+  <button class="tab inactive" id="t-tomorrow" onclick="switchTab('tomorrow')">🗓 I morgen</button>
+  <button class="tab inactive" id="t-groups" onclick="switchTab('groups')">📊 Grupper</button>
+  <button class="tab inactive" id="t-mytips" onclick="switchTab('mytips')">⭐ Mine tips</button>
+</div>
+
+<!-- ========== TODAY ========== -->
+<div id="pane-today" class="pane show">
+
+  <!-- AI Summary -->
+  <div class="card card-highlight">
+    <div class="card-pad">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="font-size:1.2em">🤖</span>
+        <span style="font-weight:800;color:#34d399;font-size:14px">AI DAGENS ANALYSE</span>
+        <span class="badge b-gold">3 KAMPER</span>
+      </div>
+      <p style="color:#94a3b8;font-size:12px;line-height:1.7">
+        Sveits er kveldens sikreste spill (1.18) — Qatar har ikke scoret i 4 av 5 siste. <span style="color:#fca5a5">Neymar er ute</span> for Brasil. Beste verdi: <span style="color:#fcd34d">Under 2.5 mål Qatar/Sveits (~1.70)</span> og <span style="color:#34d399">Sveits over 6.5 cornere (2.13)</span>.
+      </p>
+    </div>
+  </div>
+
+  <!-- MATCH 1: USA vs Paraguay FINISHED -->
+  <div class="card">
+    <div class="card-pad">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="display:flex;gap:6px;align-items:center">
+          <span class="badge b-gray">GRUPPE D</span>
+          <span class="badge b-gray">✅ FERDIG</span>
+        </div>
+        <span style="color:#475569;font-size:11px">18:00 CET</span>
+      </div>
+      <div class="match-row">
+        <div class="team">
+          <span class="team-flag">🇺🇸</span>
+          <div class="team-name">USA</div>
+          <span class="team-rank">FIFA #11</span>
+        </div>
+        <div class="match-mid">
+          <div class="score-row">
+            <div class="score-box" style="color:#34d399">4</div>
+            <span style="color:#475569;font-size:14px">–</span>
+            <div class="score-box">1</div>
+          </div>
+          <div style="color:#475569;font-size:10px;margin-top:4px;text-align:center">FULLTIME</div>
+        </div>
+        <div class="team">
+          <span class="team-flag">🇵🇾</span>
+          <div class="team-name">Paraguay</div>
+          <span class="team-rank">FIFA #55</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+        <span class="badge b-green">✅ USA vinner TREFF</span>
+        <span class="badge b-green">✅ Over 2.5 TREFF</span>
+        <span class="badge b-green">✅ BTTS Ja TREFF</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MATCH 2: Qatar vs Switzerland -->
+  <div class="card">
+    <div class="card-pad">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="display:flex;gap:6px;align-items:center">
+          <span class="badge b-blue">GRUPPE B</span>
+          <span class="badge b-green"><span class="live-dot"></span>KAMPDAG</span>
+        </div>
+        <span style="color:#34d399;font-size:13px;font-weight:700">21:00 CET</span>
+      </div>
+
+      <div class="match-row">
+        <div class="team">
+          <span class="team-flag">🇶🇦</span>
+          <div class="team-name">Qatar</div>
+          <span class="team-rank">FIFA #56</span>
+          <div style="margin-top:6px">
+            <span class="fc fl">L</span><span class="fc fl">L</span><span class="fc fd">D</span><span class="fc fl">L</span><span class="fc fl">L</span>
+          </div>
+        </div>
+        <div class="match-mid">
+          <div class="match-venue">Levi's Stadium, SF</div>
+          <div class="vs-text">vs</div>
+          <div class="match-time">21:00</div>
+        </div>
+        <div class="team">
+          <span class="team-flag">🇨🇭</span>
+          <div class="team-name">Sveits</div>
+          <span class="team-rank">FIFA #19</span>
+          <div style="margin-top:6px">
+            <span class="fc fw">W</span><span class="fc fw">W</span><span class="fc fw">W</span><span class="fc fd">D</span><span class="fc fw">W</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="odds-row">
+        <div class="odd-box"><div class="odd-label">Qatar</div><div class="odd-val">15.00</div></div>
+        <div class="odd-box"><div class="odd-label">Uavgjort</div><div class="odd-val">7.50</div></div>
+        <div class="odd-box pick"><div class="odd-label">Sveits ✓</div><div class="odd-val">1.18</div></div>
+      </div>
+
+      <div class="best-tip">
+        <div class="best-tip-title">🤖 BESTE TIP (ComeOn)</div>
+        <div class="best-tip-main">Under 2.5 mål + BTTS Nei ⭐⭐</div>
+        <div class="best-tip-sub">Qatar scoret 0 mål i 4 av 5 siste kamper · est. kombi ~2.80</div>
+      </div>
+
+      <button class="expand-btn" id="btn-qat-sui" onclick="toggleExpand('qat-sui')">🔍 Full analyse + alle ComeOn markets ▼</button>
+    </div>
+
+    <div class="expand-section" id="exp-qat-sui">
+
+      <div class="section-label">📊 NØKKELSTATISTIKK</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+        <div class="inner-card">
+          <div style="color:#fca5a5;font-size:11px;margin-bottom:6px;font-weight:700">🇶🇦 QATAR</div>
+          <div style="font-size:11px;color:#94a3b8;line-height:1.9">🔴 6 kamper uten seier<br>🔴 0 mål i 4 av 5 siste<br>🔴 28 innslupne i kvalik<br>🟡 Tap 1-0 mot Irland<br>🟡 1-1 mot El Salvador</div>
+        </div>
+        <div class="inner-card">
+          <div style="color:#34d399;font-size:11px;margin-bottom:6px;font-weight:700">🇨🇭 SVEITS</div>
+          <div style="font-size:11px;color:#94a3b8;line-height:1.9">🟢 4 seiere + 2 uavgjort<br>🟢 14 scoret / 2 innslupne<br>🟢 Xhaka kaptein (4. VM)<br>🟢 Embolo: 8 mål Ligue 1<br>🟢 Ingen skader</div>
+        </div>
+      </div>
+
+      <div class="section-label">⚔️ H2H</div>
+      <div class="inner-card" style="margin-bottom:12px">
+        <div style="font-size:12px;color:#94a3b8">Nov 2018 (Vennskapskamp, Genève): <span style="color:#fcd34d;font-weight:700">Qatar 1–0 Sveits</span></div>
+        <div style="font-size:11px;color:#475569;margin-top:4px">Eneste møtet — Sveits ikke motivert (vennskapskamp)</div>
+      </div>
+
+      <div class="section-label">🏥 TROPP &amp; SKADER</div>
+      <div class="inner-card" style="margin-bottom:12px">
+        <span class="badge b-green" style="margin-bottom:8px;display:inline-block">✅ Begge lag — full tropp</span>
+        <div style="font-size:11px;color:#94a3b8;line-height:1.9">
+          <b style="color:#e2e8f0">Sveits:</b> Granit Xhaka (kaptein, Arsenal), Breel Embolo (spiss), Yann Sommer (keeper)<br>
+          <b style="color:#e2e8f0">Qatar:</b> Akram Afif (best spiller), Almoez Ali (spiss)
+        </div>
+      </div>
+
+      <div class="section-label">🎯 ALLE COMEОН MARKETS</div>
+
+      <div class="tip-row t-high">
+        <div><div class="tip-name">1X2 — Sveits vinner</div><div class="tip-sub">Klart beste lag, Qatar ingen form</div></div>
+        <div style="text-align:right"><div class="tip-odds conf-green">1.18</div><div class="tip-conf conf-green">90%</div><div class="conf-bar"><div class="conf-fill fill-g" style="width:90%"></div></div></div>
+      </div>
+
+      <div class="tip-row t-high">
+        <div><div class="tip-name">Under 2.5 mål ⭐⭐ BESTE VERDI</div><div class="tip-sub">Qatar scorer ikke · Sveits vinner kontrollert</div></div>
+        <div style="text-align:right"><div class="tip-odds conf-yellow">~1.70</div><div class="tip-conf conf-yellow">73%</div><div class="conf-bar"><div class="conf-fill fill-y" style="width:73%"></div></div></div>
+      </div>
+
+      <div class="tip-row t-high">
+        <div><div class="tip-name">BTTS Nei ⭐⭐</div><div class="tip-sub">Qatar 0 mål i 4 av 5 siste</div></div>
+        <div style="text-align:right"><div class="tip-odds conf-yellow">~1.65</div><div class="tip-conf conf-yellow">76%</div><div class="conf-bar"><div class="conf-fill fill-y" style="width:76%"></div></div></div>
+      </div>
+
+      <div class="tip-row t-med">
+        <div><div class="tip-name">Halvtid — Sveits leder</div><div class="tip-sub">Kontrollert kamp fra start</div></div>
+        <div style="text-align:right"><div class="tip-odds conf-yellow">~1.60</div><div class="tip-conf conf-yellow">67%</div><div class="conf-bar"><div class="conf-fill fill-y" style="width:67%"></div></div></div>
+      </div>
+
+      <div class="tip-row t-med">
+        <div><div class="tip-name">HT/FT — Sveits/Sveits</div><div class="tip-sub">Leder hele kampen</div></div>
+        <div style="text-align:right"><div class="tip-odds conf-yellow">~1.80</div><div class="tip-conf conf-yellow">64%</div></div>
+      </div>
+
+      <div class="tip-row t-med">
+        <div><div class="tip-name">Asiatisk handikap Sveits -1</div><div class="tip-sub">Sveits vinner + over 1 mål margin</div></div>
+        <div style="text-align:right"><div class="tip-odds conf-yellow">~1.65</div><div class="tip-conf conf-yellow">63%</div></div>
+      </div>
+
+      <div class="section-label" style="margin-top:12px">📐 CORNERE (Pinnacle/ComeOn)</div>
+
+      <div class="tip-row t-high">
+        <div><div class="tip-name">Sveits over 6.5 cornere ⭐ VERDI</div><div class="tip-sub">Sveits dominerer ballen, presser fremover</div></div>
+        <div style="text-align:right"><div class="tip-odds conf-yellow">2.13</div><div class="tip-conf conf-yellow">52%</div></div>
+      </div>
+
+      <div class="tip-row t-med">
+        <div><div class="tip-name">Over 9 cornere totalt</div><div class="tip-sub">Ruben Vargas er cornertaker for Sveits</div></div>
+        <div style="text-align:right"><div class="tip-odds conf-yellow">1.91</div><div class="tip-conf conf-yellow">55%</div></div>
+      </div>
+
+      <div class="tip-row t-low">
+        <div><div class="tip-name">Under 9 cornere totalt</div><div class="tip-sub">Qatar gir lite offensiv motstand</div></div>
+        <div style="text-align:right"><div class="tip-odds" style="color:#94a3b8">1.89</div><div class="tip-conf" style="color:#94a3b8">45%</div></div>
+      </div>
+
+      <div class="section-label" style="margin-top:12px">⚽ MÅLSCORER — ANYTIME</div>
+
+      <div class="tip-row t-med">
+        <div><div class="tip-name">Breel Embolo scorer</div><div class="tip-sub">Sveits spiss · 8 mål i Ligue 1 denne sesongen</div></div>
+        <div style="text-align:right"><div class="tip-odds conf-yellow">~2.20</div><div class="tip-conf conf-yellow">60%</div></div>
+      </div>
+
+      <div class="tip-row t-med">
+        <div><div class="tip-name">Granit Xhaka scorer</div><div class="tip-sub">6 assists Arsenal · kraftige langskudd</div></div>
+        <div style="text-align:right"><div class="tip-odds conf-yellow">~4.50</div></div>
+      </div>
+
+      <div class="section-label" style="margin-top:12px">🎯 RIKTIG RESULTAT</div>
+      <div class="inner-card">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#94a3b8;gap:8px;flex-wrap:wrap">
+          <span>Sveits 2-0: <b style="color:#fcd34d">~6.00</b></span>
+          <span>Sveits 1-0: <b style="color:#fcd34d">~7.00</b></span>
+          <span>Sveits 2-1: <b style="color:#fcd34d">~12.00</b></span>
+          <span>Sveits 3-0: <b style="color:#fcd34d">~8.00</b></span>
+        </div>
+      </div>
+
+      <div style="background:#063d20;border:1px solid #059669;border-radius:10px;padding:12px;margin-top:12px">
+        <div style="font-size:11px;font-weight:700;color:#fcd34d;margin-bottom:8px">⭐ ANBEFALT KOMBI PÅ COMEОН</div>
+        <div style="font-size:12px;color:#94a3b8;line-height:2">
+          <b style="color:#fff">Kombi 1 (Trygg):</b> Sveits vinner (1.18) + Under 2.5 (~1.70) = <span style="color:#34d399;font-weight:700">~2.00</span><br>
+          <b style="color:#fff">Kombi 2 (Verdi):</b> Under 2.5 (~1.70) + BTTS Nei (~1.65) = <span style="color:#fcd34d;font-weight:700">~2.80</span><br>
+          <b style="color:#fff">Kombi 3 (Spiss):</b> Sveits -1 AHC + BTTS Nei + Embolo scorer = <span style="color:#f59e0b;font-weight:700">~5.95</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MATCH 3: Brazil vs Morocco -->
+  <div class="card card-purple">
+    <div class="card-pad">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="display:flex;gap:6px;align-items:center">
+          <span class="badge b-purple">GRUPPE C</span>
+          <span class="badge b-green"><span class="live-dot"></span>KAMPDAG</span>
+        </div>
+        <span style="color:#34d399;font-size:13px;font-weight:700">00:00 CET</span>
+      </div>
+
+      <div class="match-row">
+        <div class="team">
+          <span class="team-flag">🇧🇷</span>
+          <div class="team-name">Brasil</div>
+          <span class="team-rank">FIFA #5</span>
+          <div style="margin-top:6px">
+            <span class="fc fw">W</span><span class="fc fw">W</span><span class="fc fw">W</span><span class="fc fw">W</span><span class="fc fw">W</span>
+          </div>
+        </div>
+        <div class="match-mid">
+          <div class="match-venue">MetLife Stadium, NY</div>
+          <div class="vs-text">vs</div>
+          <div class="match-time">00:00</div>
+        </div>
+        <div class="team">
+          <span class="team-flag">🇲🇦</span>
+          <div class="team-name">Marokko</div>
+          <span class="team-rank">FIFA #14</span>
+          <div style="margin-top:6px">
+            <span class="fc fw">W</span><span class="fc fw">W</span><span class="fc fd">D</span><span class="fc fw">W</span><span class="fc fd">D</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="odds-row">
+        <div class="odd-box pick"><div class="odd-label">Brasil ✓</div><div class="odd-val">1.57</div></div>
+        <div class="odd-box"><div class="odd-label">Uavgjort</div><div class="odd-val">4.00</div></div>
+        <div class="odd-box"><div class="odd-label">Marokko</div><div class="odd-val">5.25</div></div>
+      </div>
+
+      <div class="injury-alert">
+        <span style="font-size:1.3em">🚑</span>
+        <div>
+          <div style="color:#fca5a5;font-size:12px;font-weight:700">SKADE: Neymar OUT</div>
+          <div style="color:#94a3b8;font-size:11px">Lyskeskade — Brasil uten sin stjerne</div>
+        </div>
+      </div>
+
+      <div class="best-tip">
+        <div class="best-tip-title">🤖 BESTE TIP (ComeOn)</div>
+        <div class="best-tip-main">Brasil vinner + Under 2.5 mål ⭐</div>
+        <div class="best-tip-sub">Marokko spiller ekstremt defensivt · Brasil vinner tett · est. kombi ~2.67</div>
+      </div>
+
+      <button class="expand-btn" id="btn-bra-mar" onclick="toggleExpand('bra-mar')">🔍 Full analyse + alle ComeOn markets ▼</button>
+    </div>
+
+    <div class="expand-section" id="exp-bra-mar">
+
+      <div class="section-label">📊 NØKKELSTATISTIKK</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+        <div class="inner-card">
+          <div style="color:#34d399;font-size:11px;font-weight:700;margin-bottom:6px">🇧🇷 BRASIL</div>
+          <div style="font-size:11px;color:#94a3b8;line-height:1.9">🟢 5-ganger verdensmester<br>🟢 Vinicius Jr, Raphinha<br>🔴 Neymar OUT (lyske)<br>🟡 Tap 2-3 mot Marokko (2023)<br>🟢 FIFA #5</div>
+        </div>
+        <div class="inner-card">
+          <div style="color:#c4b5fd;font-size:11px;font-weight:700;margin-bottom:6px">🇲🇦 MAROKKO</div>
+          <div style="font-size:11px;color:#94a3b8;line-height:1.9">🟢 VM2022 semifinalister<br>🟢 Hakimi, Amrabat, Ziyech<br>🟢 Defensivt meget sterkt<br>🟢 Slo Brasil 3-2 (2023)<br>🟢 FIFA #14</div>
+        </div>
+      </div>
+
+      <div class="section-label">⚔️ H2H</div>
+      <div class="inner-card" style="margin-bottom:12px">
+        <div style="font-size:12px;color:#94a3b8;line-height:2">
+          2023 vennskapskamp: <span style="color:#fca5a5;font-weight:700">Marokko 3–2 Brasil</span><br>
+          1998 VM (gruppespill): <span style="color:#34d399;font-weight:700">Brasil 3–1 Marokko</span>
+        </div>
+      </div>
+
+      <div class="section-label">🎯 ALLE COMEОН MARKETS</div>
+
+      <div class="tip-row t-high">
+        <div><div class="tip-name">1X2 — Brasil vinner</div><div class="tip-sub">Klart favoritt tross Neymar-skade</div></div>
+        <div style="text-align:right"><div class="tip-odds conf-green">1.57</div><div class="tip-conf conf-green">65%</div><div class="conf-bar"><div class="conf-fill fill-g" style="width:65%"></div></div></div>
+      </div>
+
+      <div class="tip-row t-high">
+        <div><div class="tip-name">Under 2.5 mål ⭐ BESTE VERDI</div><div class="tip-sub">Marokko forsvarer ekstremt lavt og tett</div></div>
+        <div style="text-align:right"><div class="tip-odds conf-yellow">~1.70</div><div class="tip-conf conf-yellow">62%</div><div class="conf-bar"><div class="conf-fill fill-y" style="width:62%"></div></div></div>
+      </div>
+
+      <div class="tip-row t-med">
+        <div><div class="tip-name">BTTS Nei</div><div class="tip-sub">Marokko holder på null mot Brasil uten Neymar</div></div>
+        <div style="text-align:right"><div class="tip-odds conf-yellow">~1.60</div><div class="tip-conf conf-yellow">58%</div></div>
+      </div>
+
+      <div class="tip-row t-med">
+        <div><div class="tip-name">Halvtid — Under 0.5 mål</div><div class="tip-sub">Tett første omgang forventes</div></div>
+        <div style="text-align:right"><div class="tip-odds conf-yellow">~1.70</div><div class="tip-conf conf-yellow">55%</div></div>
+      </div>
+
+      <div class="section-label" style="margin-top:12px">⚽ MÅLSCORER — ANYTIME</div>
+
+      <div class="tip-row t-med">
+        <div><div class="tip-name">Vinicius Jr scorer</div><div class="tip-sub">Brasils beste spiller, Ballon d'Or kandidat</div></div>
+        <div style="text-align:right"><div class="tip-odds conf-yellow">~2.50</div></div>
+      </div>
+
+      <div class="tip-row t-med">
+        <div><div class="tip-name">Youssef En-Nesyri scorer</div><div class="tip-sub">Marokkos spiss, farlig på heading</div></div>
+        <div style="text-align:right"><div class="tip-odds conf-yellow">~4.50</div></div>
+      </div>
+
+      <div style="background:#063d20;border:1px solid #059669;border-radius:10px;padding:12px;margin-top:12px">
+        <div style="font-size:11px;font-weight:700;color:#fcd34d;margin-bottom:8px">⭐ ANBEFALT KOMBI PÅ COMEОН</div>
+        <div style="font-size:12px;color:#94a3b8;line-height:2">
+          <b style="color:#fff">Kombi 1:</b> Brasil vinner (1.57) + Under 2.5 (~1.70) = <span style="color:#34d399;font-weight:700">~2.67</span><br>
+          <b style="color:#fff">Kombi 2:</b> Brasil vinner (1.57) + BTTS Nei (~1.60) = <span style="color:#fcd34d;font-weight:700">~2.51</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- DAGENS KOMBIKUPONG -->
+  <div class="card card-gold">
+    <div class="card-pad">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <span style="font-size:1.1em">🎰</span>
+        <span style="font-weight:800;font-size:15px;color:#fcd34d">DAGENS KOMBIKUPONG</span>
+        <span class="badge b-gold">COMEON</span>
+      </div>
+      <div class="inner-card" style="padding:0;overflow:hidden;margin-bottom:12px">
+        <div class="kombi-row"><span style="color:#94a3b8;font-size:12px">🇨🇭 Sveits vinner</span><span style="font-weight:700;color:#34d399">1.18</span></div>
+        <div class="kombi-row"><span style="color:#94a3b8;font-size:12px">🇶🇦🇨🇭 Under 2.5 mål</span><span style="font-weight:700;color:#fcd34d">~1.70</span></div>
+        <div class="kombi-row"><span style="color:#94a3b8;font-size:12px">🇧🇷 Brasil vinner</span><span style="font-weight:700;color:#34d399">1.57</span></div>
+        <div class="kombi-row"><span style="color:#94a3b8;font-size:12px">🇧🇷🇲🇦 Under 2.5 mål</span><span style="font-weight:700;color:#fcd34d">~1.70</span></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><div style="font-size:10px;color:#6b7280">TOTAL ODDS (EST.)</div><div style="font-size:28px;font-weight:800;color:#fcd34d">~5.33</div></div>
+        <div style="text-align:right"><div style="font-size:10px;color:#6b7280">KONFIDENS</div><div style="font-size:16px;font-weight:700;color:#34d399">Middels-Høy</div></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /today -->
+
+<!-- ========== TOMORROW ========== -->
+<div id="pane-tomorrow" class="pane">
+
+  <div style="color:#475569;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px">Søndag 14. juni 2026</div>
+
+  <!-- Germany vs Curacao -->
+  <div class="card">
+    <div class="card-pad">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span class="badge b-gold">GRUPPE E</span>
+        <span style="color:#94a3b8;font-size:11px">19:00 CET · Houston</span>
+      </div>
+      <div class="match-row">
+        <div class="team"><span class="team-flag">🇩🇪</span><div class="team-name">Tyskland</div><span class="team-rank">FIFA #3</span></div>
+        <div class="match-mid"><div class="vs-text">vs</div></div>
+        <div class="team"><span class="team-flag">🇨🇼</span><div class="team-name">Curaçao</div><span class="team-rank">FIFA #74</span></div>
+      </div>
+      <div class="odds-row">
+        <div class="odd-box pick"><div class="odd-label">Tyskland ✓</div><div class="odd-val">1.02</div></div>
+        <div class="odd-box"><div class="odd-label">Uavgjort</div><div class="odd-val">21.00</div></div>
+        <div class="odd-box"><div class="odd-label">Curaçao</div><div class="odd-val">55.00</div></div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <span class="badge b-green">✅ Tyskland vinner 95%</span>
+        <span class="badge b-gold">⭐⭐ Over 4.5 mål ~2.20</span>
+      </div>
+      <button class="expand-btn" id="btn-ger-cur" onclick="toggleExpand('ger-cur')">🔍 Se analyse ▼</button>
+    </div>
+    <div class="expand-section" id="exp-ger-cur">
+      <div class="tip-row t-high"><div><div class="tip-name">Tyskland vinner</div><div class="tip-sub">Topplaget mot historisk debutant</div></div><div style="text-align:right"><div class="tip-odds conf-green">1.02</div><div class="tip-conf conf-green">95%</div></div></div>
+      <div class="tip-row t-high"><div><div class="tip-name">Over 4.5 mål ⭐⭐ BESTE VERDI</div><div class="tip-sub">Wirtz + Musiala + Havertz mot svakt forsvar</div></div><div style="text-align:right"><div class="tip-odds conf-yellow">~2.20</div><div class="tip-conf conf-yellow">62%</div></div></div>
+      <div class="tip-row t-med"><div><div class="tip-name">Over 3.5 mål</div><div class="tip-sub">Konservativ variant</div></div><div style="text-align:right"><div class="tip-odds conf-yellow">~1.45</div><div class="tip-conf conf-yellow">75%</div></div></div>
+      <div class="tip-row t-med"><div><div class="tip-name">Florian Wirtz scorer</div><div class="tip-sub">Tysklands best spiller</div></div><div style="text-align:right"><div class="tip-odds conf-yellow">~1.60</div></div></div>
+      <div class="tip-row t-med"><div><div class="tip-name">Jamal Musiala scorer</div><div class="tip-sub">Bayern München, farlig og kreativ</div></div><div style="text-align:right"><div class="tip-odds conf-yellow">~1.65</div></div></div>
+      <div class="tip-row t-low"><div><div class="tip-name">BTTS Nei</div><div class="tip-sub">Curaçao scorer neppe</div></div><div style="text-align:right"><div class="tip-odds" style="color:#94a3b8">~1.45</div><div class="tip-conf" style="color:#94a3b8">75%</div></div></div>
+    </div>
+  </div>
+
+  <!-- Netherlands vs Japan -->
+  <div class="card">
+    <div class="card-pad">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span class="badge b-blue">GRUPPE F</span>
+        <span style="color:#94a3b8;font-size:11px">22:00 CET · Arlington, TX</span>
+      </div>
+      <div class="match-row">
+        <div class="team"><span class="team-flag">🇳🇱</span><div class="team-name">Nederland</div><span class="team-rank">FIFA #7</span></div>
+        <div class="match-mid"><div class="vs-text">vs</div></div>
+        <div class="team"><span class="team-flag">🇯🇵</span><div class="team-name">Japan</div><span class="team-rank">FIFA #17</span></div>
+      </div>
+      <div class="odds-row">
+        <div class="odd-box pick"><div class="odd-label">Nederland ✓</div><div class="odd-val">1.70</div></div>
+        <div class="odd-box"><div class="odd-label">Uavgjort</div><div class="odd-val">3.80</div></div>
+        <div class="odd-box"><div class="odd-label">Japan</div><div class="odd-val">4.50</div></div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <span class="badge b-gold">⚠️ Japan slo Ger+ESP i 2022</span>
+        <span class="badge b-green">Over 2.5 mål 60%</span>
+      </div>
+      <button class="expand-btn" id="btn-ned-jpn" onclick="toggleExpand('ned-jpn')">🔍 Se analyse ▼</button>
+    </div>
+    <div class="expand-section" id="exp-ned-jpn">
+      <div class="tip-row t-med"><div><div class="tip-name">Nederland vinner</div><div class="tip-sub">Gakpo, Depay, van Dijk — sterk lag</div></div><div style="text-align:right"><div class="tip-odds conf-yellow">1.70</div><div class="tip-conf conf-yellow">58%</div></div></div>
+      <div class="tip-row t-med"><div><div class="tip-name">Over 2.5 mål ⭐</div><div class="tip-sub">Japan scorer mot topplag (Minamino, Mitoma)</div></div><div style="text-align:right"><div class="tip-odds conf-yellow">~1.80</div><div class="tip-conf conf-yellow">55%</div></div></div>
+      <div class="tip-row t-med"><div><div class="tip-name">BTTS Ja</div><div class="tip-sub">Japan scorer alltid mot topplag</div></div><div style="text-align:right"><div class="tip-odds conf-yellow">~1.90</div><div class="tip-conf conf-yellow">52%</div></div></div>
+      <div class="tip-row t-med"><div><div class="tip-name">Cody Gakpo scorer</div><div class="tip-sub">Liverpool-spiss, Nederlanders beste</div></div><div style="text-align:right"><div class="tip-odds conf-yellow">~2.40</div></div></div>
+    </div>
+  </div>
+
+  <!-- Australia vs Turkey -->
+  <div class="card">
+    <div class="card-pad">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span class="badge b-gray">GRUPPE D</span>
+        <span style="color:#94a3b8;font-size:11px">06:00 CET · Kansas City</span>
+      </div>
+      <div class="match-row">
+        <div class="team"><span class="team-flag">🇦🇺</span><div class="team-name">Australia</div><span class="team-rank">FIFA #23</span></div>
+        <div class="match-mid"><div class="vs-text">vs</div></div>
+        <div class="team"><span class="team-flag">🇹🇷</span><div class="team-name">Tyrkia</div><span class="team-rank">FIFA #28</span></div>
+      </div>
+      <div class="odds-row">
+        <div class="odd-box"><div class="odd-label">Australia</div><div class="odd-val">3.10</div></div>
+        <div class="odd-box"><div class="odd-label">Uavgjort</div><div class="odd-val">3.20</div></div>
+        <div class="odd-box pick2"><div class="odd-label">Tyrkia ✓</div><div class="odd-val">2.20</div></div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <span class="badge b-gold">⭐ Tyrkia favoritt · Over 2.5 mål 60%</span>
+        <span class="badge b-blue">Güler + Calhanoglu farlig</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ivory Coast vs Ecuador -->
+  <div class="card">
+    <div class="card-pad">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span class="badge b-gold">GRUPPE E</span>
+        <span style="color:#94a3b8;font-size:11px">01:00 CET · Atlanta</span>
+      </div>
+      <div class="match-row">
+        <div class="team"><span class="team-flag">🇨🇮</span><div class="team-name">Elfenbenskysten</div><span class="team-rank">FIFA #25</span></div>
+        <div class="match-mid"><div class="vs-text">vs</div></div>
+        <div class="team"><span class="team-flag">🇪🇨</span><div class="team-name">Ecuador</div><span class="team-rank">FIFA #38</span></div>
+      </div>
+      <div class="odds-row">
+        <div class="odd-box pick2"><div class="odd-label">Elfenbenskysten ✓</div><div class="odd-val">2.00</div></div>
+        <div class="odd-box"><div class="odd-label">Uavgjort</div><div class="odd-val">3.20</div></div>
+        <div class="odd-box"><div class="odd-label">Ecuador</div><div class="odd-val">3.50</div></div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <span class="badge b-gold">⭐ BTTS Ja 65%</span>
+        <span class="badge b-green">Over 2.5 mål 60%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sweden vs Tunisia -->
+  <div class="card">
+    <div class="card-pad">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span class="badge b-blue">GRUPPE F</span>
+        <span style="color:#94a3b8;font-size:11px">04:00 CET · Seattle</span>
+      </div>
+      <div class="match-row">
+        <div class="team"><span class="team-flag">🇸🇪</span><div class="team-name">Sverige</div><span class="team-rank">FIFA #22</span></div>
+        <div class="match-mid"><div class="vs-text">vs</div></div>
+        <div class="team"><span class="team-flag">🇹🇳</span><div class="team-name">Tunisia</div><span class="team-rank">FIFA #29</span></div>
+      </div>
+      <div class="odds-row">
+        <div class="odd-box pick2"><div class="odd-label">Sverige ✓</div><div class="odd-val">1.85</div></div>
+        <div class="odd-box"><div class="odd-label">Uavgjort</div><div class="odd-val">3.40</div></div>
+        <div class="odd-box"><div class="odd-label">Tunisia</div><div class="odd-val">4.20</div></div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <span class="badge b-gold">⭐ Sverige 62% · Isak/Gyökeres farlig</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- I morgen kombi -->
+  <div class="card card-gold">
+    <div class="card-pad">
+      <div style="font-weight:800;font-size:14px;color:#fcd34d;margin-bottom:10px">⭐ I MORGEN KOMBINASJON</div>
+      <div class="inner-card" style="padding:0;overflow:hidden;margin-bottom:10px">
+        <div class="kombi-row"><span style="color:#94a3b8;font-size:12px">🇩🇪 Tyskland vinner</span><span style="font-weight:700;color:#34d399">1.02</span></div>
+        <div class="kombi-row"><span style="color:#94a3b8;font-size:12px">🇩🇪 Over 4.5 mål (Ger/Cur)</span><span style="font-weight:700;color:#fcd34d">~2.20</span></div>
+        <div class="kombi-row"><span style="color:#94a3b8;font-size:12px">🇳🇱 Nederland vinner</span><span style="font-weight:700;color:#fcd34d">1.70</span></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><div style="font-size:10px;color:#6b7280">TOTAL ODDS</div><div style="font-size:26px;font-weight:800;color:#fcd34d">~3.77</div></div>
+        <div style="text-align:right"><div style="font-size:10px;color:#6b7280">KONFIDENS</div><div style="font-size:15px;font-weight:700;color:#fcd34d">Middels</div></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /tomorrow -->
+
+<!-- ========== GROUPS ========== -->
+<div id="pane-groups" class="pane">
+  <div style="color:#475569;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px">Alle 12 Grupper — VM 2026</div>
+  <div class="group-grid">
+    <div class="group-card"><div class="group-name">GRUPPE A</div><div class="group-team">🇲🇽 Mexico<br>🇿🇦 Sør-Afrika<br>🇰🇷 Sør-Korea<br>🇨🇿 Tsjekkia</div></div>
+    <div class="group-card" style="border-color:#059669"><div class="group-name" style="color:#34d399">GRUPPE B 🔥</div><div class="group-team">🇨🇦 Canada<br>🇧🇦 Bosnia-Hgv.<br>🇶🇦 Qatar<br>🇨🇭 <b style="color:#fff">Sveits</b></div></div>
+    <div class="group-card" style="border-color:#7c3aed"><div class="group-name" style="color:#c4b5fd">GRUPPE C 🔥</div><div class="group-team">🇧🇷 <b style="color:#fff">Brasil</b><br>🇲🇦 Marokko<br>🇭🇹 Haiti<br>🏴󠁧󠁢󠁳󠁣󠁴󠁿 Skottland</div></div>
+    <div class="group-card"><div class="group-name">GRUPPE D</div><div class="group-team">🇺🇸 USA ✅4-1<br>🇵🇾 Paraguay<br>🇦🇺 Australia<br>🇹🇷 Tyrkia</div></div>
+    <div class="group-card"><div class="group-name">GRUPPE E</div><div class="group-team">🇩🇪 <b style="color:#fff">Tyskland</b><br>🇨🇼 Curaçao<br>🇨🇮 Elfenbenskysten<br>🇪🇨 Ecuador</div></div>
+    <div class="group-card"><div class="group-name">GRUPPE F</div><div class="group-team">🇳🇱 Nederland<br>🇯🇵 Japan<br>🇸🇪 Sverige<br>🇹🇳 Tunisia</div></div>
+    <div class="group-card"><div class="group-name">GRUPPE G</div><div class="group-team">🇧🇪 Belgia<br>🇪🇬 Egypt<br>🇮🇷 Iran<br>🇳🇿 New Zealand</div></div>
+    <div class="group-card"><div class="group-name">GRUPPE H</div><div class="group-team">🇪🇸 Spania<br>🇨🇻 Kapp Verde<br>🇸🇦 Saudi-Arabia<br>🇺🇾 Uruguay</div></div>
+    <div class="group-card"><div class="group-name">GRUPPE I</div><div class="group-team">🇫🇷 Frankrike<br>🇸🇳 Senegal<br>🇮🇶 Irak<br>🇳🇴 <b style="color:#fff">Norge</b></div></div>
+    <div class="group-card"><div class="group-name">GRUPPE J</div><div class="group-team">🇦🇷 Argentina 🏆<br>🇩🇿 Algerie<br>🇦🇹 Østerrike<br>🇯🇴 Jordan</div></div>
+    <div class="group-card"><div class="group-name">GRUPPE K</div><div class="group-team">🇵🇹 Portugal<br>🇨🇩 DR Kongo<br>🇺🇿 Usbekistan<br>🇨🇴 Colombia</div></div>
+    <div class="group-card"><div class="group-name">GRUPPE L</div><div class="group-team">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England<br>🇭🇷 Kroatia<br>🇬🇭 Ghana<br>🇵🇦 Panama</div></div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-pad">
+      <div style="font-weight:700;color:#fcd34d;font-size:14px;margin-bottom:10px">🏆 VM-FAVORITTER (Odds til å vinne)</div>
+      <div class="fav-row"><span>🇫🇷 Frankrike</span><span style="font-weight:700;color:#34d399">5.00</span></div>
+      <div class="fav-row"><span>🇧🇷 Brasil</span><span style="font-weight:700;color:#34d399">6.00</span></div>
+      <div class="fav-row"><span>🇦🇷 Argentina</span><span style="font-weight:700;color:#34d399">6.50</span></div>
+      <div class="fav-row"><span>🇩🇪 Tyskland</span><span style="font-weight:700;color:#fcd34d">7.00</span></div>
+      <div class="fav-row"><span>🇪🇸 Spania</span><span style="font-weight:700;color:#fcd34d">8.00</span></div>
+      <div class="fav-row"><span>🇵🇹 Portugal</span><span style="font-weight:700;color:#fcd34d">9.00</span></div>
+      <div class="fav-row"><span>🇳🇱 Nederland</span><span style="font-weight:700;color:#fcd34d">12.00</span></div>
+      <div class="fav-row"><span>🏴󠁧󠁢󠁥󠁮󠁧󠁿 England</span><span style="font-weight:700;color:#fcd34d">13.00</span></div>
+    </div>
+  </div>
+</div><!-- /groups -->
+
+<!-- ========== MY TIPS ========== -->
+<div id="pane-mytips" class="pane">
+  <div style="text-align:center;padding:40px 20px;color:#475569">
+    <div style="font-size:2.5em;margin-bottom:10px">📋</div>
+    <div style="font-size:15px;font-weight:600">Mine lagrede tips</div>
+    <div style="font-size:12px;margin-top:6px;color:#374151">Kommende funksjon — lagre tips direkte fra kampkortene</div>
+  </div>
+  <div class="disclaimer">
+    <div class="disclaimer-title">⚠️ ANSVARSFRASKRIVELSE</div>
+    <div class="disclaimer-text">Denne appen er kun for underholdning. AI-analyse er basert på statistikk og historikk — ingen garantert utfall. Spill ansvarlig. Alltid sjekk odds direkte på ComeOn.com. 18+</div>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<!-- FOOTER -->
+<div class="footer">
+  VM 2026 AI Betting Analyst · Kun underholdning · Spill ansvarlig 18+<br>
+  <span style="color:#1f2937">Data: Flashscore · Pinnacle · CBS Sports · ESPN</span>
+</div>
+
+<script>
+function switchTab(name) {
+  var tabs = ['today', 'tomorrow', 'groups', 'mytips'];
+  for (var i = 0; i < tabs.length; i++) {
+    var pane = document.getElementById('pane-' + tabs[i]);
+    var btn  = document.getElementById('t-' + tabs[i]);
+    if (tabs[i] === name) {
+      pane.style.display = 'block';
+      btn.className = 'tab active';
+    } else {
+      pane.style.display = 'none';
+      btn.className = 'tab inactive';
+    }
+  }
+}
+
+function toggleExpand(id) {
+  var sec = document.getElementById('exp-' + id);
+  var btn = document.getElementById('btn-' + id);
+  if (sec.style.display === 'block') {
+    sec.style.display = 'none';
+    btn.innerHTML = btn.innerHTML.replace('▲', '▼');
+  } else {
+    sec.style.display = 'block';
+    btn.innerHTML = btn.innerHTML.replace('▼', '▲');
+  }
+}
+</script>
+</body>
+</html>
