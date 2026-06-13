@@ -220,7 +220,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       </div>
 
       <!-- EXPAND BUTTON -->
-      <button class="expand-btn" onclick="toggleExpand('qat-sui')">
+      <button class="expand-btn" onclick="toggleExpand('qat-sui',this)">
         🔍 Full analyse + alle ComeOn markets ▼
       </button>
     </div>
@@ -610,7 +610,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <div style="color:#94a3b8;font-size:12px">Marokko er ekstremt defensivt. Uten Neymar scorer Brasil kontrollert. Dimers: 0-1 Brasil mest sannsynlig.</div>
       </div>
 
-      <button class="expand-btn" onclick="toggleExpand('bra-mar')">
+      <button class="expand-btn" onclick="toggleExpand('bra-mar',this)">
         🔍 Full analyse + alle ComeOn markets ▼
       </button>
     </div>
@@ -840,7 +840,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <span class="badge badge-gold">⭐ Over 4.5 mål @ ~2.20</span>
         <span class="badge badge-blue">AHC -3.5 verdi</span>
       </div>
-      <button class="expand-btn mt-3" onclick="toggleExpand('ger-cur')">🔍 Se analyse ▼</button>
+      <button class="expand-btn mt-3" onclick="toggleExpand('ger-cur',this)">🔍 Se analyse ▼</button>
     </div>
     <div id="expand-ger-cur" class="expand-section">
       <div class="divider" style="margin:0"></div>
@@ -909,7 +909,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <span class="badge badge-gold">⚠️ Japan slo Tyskland+Spania i 2022</span>
         <span class="badge badge-green">Over 2.5 mål 65%</span>
       </div>
-      <button class="expand-btn mt-3" onclick="toggleExpand('ned-jpn')">🔍 Se analyse ▼</button>
+      <button class="expand-btn mt-3" onclick="toggleExpand('ned-jpn',this)">🔍 Se analyse ▼</button>
     </div>
     <div id="expand-ned-jpn" class="expand-section">
       <div class="divider" style="margin:0"></div>
@@ -1149,16 +1149,17 @@ function showTab(tab) {
   ['today','tomorrow','groups','mytips'].forEach(t => {
     document.getElementById('tab-'+t+'-content').style.display = 'none';
     const btn = document.getElementById('tab-'+t);
-    btn.className = btn.className.replace('tab-active','tab-inactive');
+    btn.classList.remove('tab-active');
+    btn.classList.add('tab-inactive');
   });
   document.getElementById('tab-'+tab+'-content').style.display = 'block';
   const activeBtn = document.getElementById('tab-'+tab);
-  activeBtn.className = activeBtn.className.replace('tab-inactive','tab-active');
+  activeBtn.classList.remove('tab-inactive');
+  activeBtn.classList.add('tab-active');
 }
 
-function toggleExpand(id) {
+function toggleExpand(id, btn) {
   const el = document.getElementById('expand-'+id);
-  const btn = el.previousElementSibling;
   if (el.classList.contains('open')) {
     el.classList.remove('open');
     btn.innerHTML = btn.innerHTML.replace('▲','▼');
