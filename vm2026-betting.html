@@ -22,13 +22,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .tab.active{background:#3b82f6;color:#fff}
 .tab.inactive{background:#1c1c2e;color:#64748b}
 .pane{display:none}.pane.show{display:block}
-/* Cards */
 .mc{background:#0e0e1c;border:1px solid #1c1c2e;border-radius:16px;margin-bottom:12px;overflow:hidden}
 .card{background:#0e0e1c;border:1px solid #1c1c2e;border-radius:14px;margin-bottom:10px;overflow:hidden}
 .cp{padding:14px}
 .mc-head{padding:10px 14px 8px;border-bottom:1px solid #1c1c2e;display:flex;justify-content:space-between;align-items:center}
 .ai-label{font-size:10px;font-weight:700;color:#f59e0b;letter-spacing:.5px}
-/* Score block */
 .score-block{display:flex;align-items:center;justify-content:space-between;padding:16px 14px 10px}
 .score-team{text-align:center;flex:1}
 .score-flag{font-size:2.6em;line-height:1;display:block}
@@ -43,33 +41,27 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .fw{width:16px;height:16px;border-radius:50%;background:#22c55e;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff}
 .fd{width:16px;height:16px;border-radius:50%;background:#eab308;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#000}
 .fl{width:16px;height:16px;border-radius:50%;background:#ef4444;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff}
-/* Win button */
 .win-btn{display:block;width:calc(100% - 28px);margin:0 14px 12px;background:#3b82f6;color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:700;letter-spacing:.5px;text-align:center;cursor:default}
 .win-btn-gold{background:linear-gradient(135deg,#b45309,#f59e0b)}
-/* Probability bar */
 .prob-wrap{padding:0 14px 12px}
 .prob-lbl{font-size:9px;font-weight:700;color:#475569;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
 .prob-bar{height:10px;border-radius:5px;overflow:hidden;display:flex}
 .pb-h{background:#22c55e}.pb-d{background:#eab308}.pb-a{background:#ef4444}
 .prob-pcts{display:flex;justify-content:space-between;font-size:10px;font-weight:700;margin-top:5px}
-/* Predicted scoreboard */
 .psb-wrap{padding:0 14px 12px}
 .psb{width:100%;border-collapse:collapse;font-size:11px;background:#0a0a18;border-radius:8px;overflow:hidden}
 .psb th{background:#131326;padding:5px 6px;text-align:center;font-size:9px;font-weight:700;color:#475569;letter-spacing:.5px}
 .psb th:first-child{text-align:left;padding-left:10px}
 .psb td{padding:7px 6px;text-align:center;font-weight:700;color:#e2e8f0}
 .psb td:first-child{text-align:left;padding-left:10px;color:#94a3b8}
-/* Props grid */
 .props-wrap{padding:0 14px 14px}
 .props-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
 .prop-c{background:#141428;border:1px solid #1e1e38;border-radius:10px;padding:9px;text-align:center}
 .prop-l{font-size:9px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.3px;margin-bottom:4px}
 .prop-v{font-size:14px;font-weight:800;color:#e2e8f0}
 .pv-g{color:#22c55e}.pv-y{color:#eab308}.pv-r{color:#ef4444}.pv-b{color:#3b82f6}
-/* Expand */
 .exbtn{width:calc(100% - 28px);margin:0 14px 14px;background:#141428;border:1px solid #1e1e38;border-radius:8px;color:#64748b;font-size:12px;font-weight:600;padding:8px;cursor:pointer;display:block}
 .exsec{display:none;border-top:1px solid #1c1c2e;padding:14px}
-/* Tip rows inside expand */
 .trow{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-radius:8px;margin-bottom:6px}
 .tg{background:#0d2010;border-left:3px solid #22c55e}
 .ty{background:#1a1200;border-left:3px solid #f59e0b}
@@ -77,32 +69,27 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .trow-name{font-size:13px;font-weight:700;color:#fff}
 .trow-sub{font-size:11px;color:#475569;margin-top:2px}
 .trow-odds{font-size:17px;font-weight:800}
-/* Injury */
 .sl{font-size:9px;font-weight:700;letter-spacing:1.5px;color:#475569;text-transform:uppercase;margin:12px 0 8px}
 .inj-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #131326;font-size:12px}
 .inj-row:last-child{border-bottom:none}
 .inj-ok{background:#0d2010;color:#22c55e;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;flex-shrink:0}
 .inj-doubt{background:#1a1200;color:#eab308;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;flex-shrink:0}
 .inj-out{background:#1a0808;color:#ef4444;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;flex-shrink:0}
-/* Badges */
 .bg{background:#0d2010;color:#22c55e;border:1px solid #166534;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700;display:inline-flex;align-items:center}
 .br{background:#1a0808;color:#ef4444;border:1px solid #7f1d1d;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700;display:inline-flex;align-items:center}
 .bb{background:#0c1a3d;color:#3b82f6;border:1px solid #1e3a6e;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700;display:inline-flex;align-items:center}
 .bo{background:#1a1200;color:#eab308;border:1px solid #713f12;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700;display:inline-flex;align-items:center}
 .bn{background:#1c1c2e;color:#64748b;border:1px solid #2a2a3e;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700;display:inline-flex;align-items:center}
 .bp{background:#1a0f30;color:#c4b5fd;border:1px solid #4c1d95;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700;display:inline-flex;align-items:center}
-/* Yesterday result */
 .res-draw{background:#1a1200;border:1px solid #713f12;color:#eab308;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
 .tip-result-row{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;border-radius:8px;margin-bottom:5px}
 .tip-hit{background:#0d2010}.tip-miss{background:#1a0808}
-/* Confidence bars */
 .conf-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .conf-lbl{font-size:11px;color:#94a3b8;flex:1}
 .conf-track{width:90px;background:#1c1c2e;border-radius:4px;height:7px;flex-shrink:0}
 .conf-g{height:100%;border-radius:4px;background:linear-gradient(90deg,#16a34a,#22c55e)}
 .conf-y{height:100%;border-radius:4px;background:linear-gradient(90deg,#d97706,#eab308)}
 .alarm{display:inline-flex;align-items:center;background:#0c1a3d;border:1px solid #1e3a6e;border-radius:6px;padding:3px 8px;font-size:10px;color:#3b82f6;font-weight:700;margin:3px 3px 3px 0}
-/* Standings */
 .stand-t{width:100%;border-collapse:collapse;font-size:11px}
 .stand-t th{background:#0a0a18;color:#475569;padding:5px 3px;text-align:center;font-size:9px;font-weight:700;letter-spacing:.5px}
 .stand-t td{padding:5px 3px;text-align:center;border-bottom:1px solid #0e0e1c;color:#94a3b8}
@@ -110,11 +97,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .tdn{text-align:left!important;padding-left:6px!important;color:#e2e8f0;font-weight:600}
 .pts-col{font-weight:800;color:#fff!important}
 .qrow td{color:#22c55e!important}.qrow .tdn{color:#22c55e!important}
-/* Kombo */
 .krow{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid #141428}
 .krow:last-child{border-bottom:none}
 .frow{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:#141428;border-radius:6px;margin-bottom:4px}
-/* Bet logger */
 .inp{width:100%;background:#141428;border:1px solid #1e1e38;border-radius:8px;color:#f1f5f9;padding:9px 10px;font-size:13px;margin-top:4px;outline:none;-webkit-appearance:none}
 .inp:focus{border-color:#3b82f6}
 .inp-label{font-size:11px;color:#64748b;margin-top:8px;display:block}
@@ -131,7 +116,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 </style>
 </head>
 <body>
-
 <div class="header">
   <div class="header-inner">
     <div style="display:flex;align-items:center;gap:8px">
@@ -146,12 +130,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     </div>
     <div style="text-align:right">
       <div style="color:#22c55e;font-size:12px;font-weight:700"><span class="live-dot"></span>LIVE</div>
-      <div style="color:#475569;font-size:11px;margin-top:2px">Søn 14. juni 2026</div>
+      <div style="color:#475569;font-size:11px;margin-top:2px">Man 15. juni 2026</div>
       <div style="color:#f59e0b;font-size:10px;font-weight:600">ComeOn tips</div>
     </div>
   </div>
 </div>
-
 <div class="wrap">
 <div class="tabs">
   <button class="tab active" id="t-today" onclick="switchTab('today')">📅 I dag</button>
@@ -160,246 +143,281 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <button class="tab inactive" id="t-mytips" onclick="switchTab('mytips')">📈 Mine tips</button>
 </div>
 
-<!-- ======== I DAG ======== -->
+<!-- I DAG -->
 <div id="pane-today" class="pane show">
 
-  <!-- Konfidens oversikt -->
-  <div class="card">
-    <div class="cp">
-      <div style="font-size:9px;font-weight:700;color:#475569;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">📊 AI Konfidens — I dag</div>
-      <div class="conf-row"><span class="conf-lbl">🇳🇱 Nederland vinner</span><div class="conf-track"><div class="conf-g" style="width:62%"></div></div><span style="font-size:11px;font-weight:700;width:32px;text-align:right;flex-shrink:0;color:#22c55e">62%</span></div>
-      <div class="conf-row"><span class="conf-lbl">⚽ Over 2.5 Ned/Jpn</span><div class="conf-track"><div class="conf-y" style="width:56%"></div></div><span style="font-size:11px;font-weight:700;width:32px;text-align:right;flex-shrink:0;color:#eab308">56%</span></div>
-      <div class="conf-row"><span class="conf-lbl">🔁 BTTS Ja Elf./Ecu.</span><div class="conf-track"><div class="conf-g" style="width:62%"></div></div><span style="font-size:11px;font-weight:700;width:32px;text-align:right;flex-shrink:0;color:#22c55e">62%</span></div>
-      <div class="conf-row"><span class="conf-lbl">🇨🇮 Elfenbenskysten</span><div class="conf-track"><div class="conf-y" style="width:52%"></div></div><span style="font-size:11px;font-weight:700;width:32px;text-align:right;flex-shrink:0;color:#eab308">52%</span></div>
-      <div class="conf-row" style="margin-bottom:0"><span class="conf-lbl">🇸🇪 Sverige vinner</span><div class="conf-track"><div class="conf-g" style="width:62%"></div></div><span style="font-size:11px;font-weight:700;width:32px;text-align:right;flex-shrink:0;color:#22c55e">62%</span></div>
-      <div style="border-top:1px solid #1c1c2e;margin-top:10px;padding-top:10px">
-        <div style="font-size:9px;font-weight:700;color:#475569;margin-bottom:6px">⚡ ODDS-ALARM — SPILL KUN OVER:</div>
-        <span class="alarm">Ned. vinner &gt; 1.65</span><span class="alarm">Over 2.5 &gt; 1.75</span><span class="alarm">Sverige &gt; 1.75</span>
-      </div>
+  <div class="card"><div class="cp">
+    <div style="font-size:9px;font-weight:700;color:#475569;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">📊 AI Konfidens — 15. Juni</div>
+    <div class="conf-row"><span class="conf-lbl">🇪🇸 Spania vinner</span><div class="conf-track"><div class="conf-g" style="width:72%"></div></div><span style="font-size:11px;font-weight:700;width:32px;text-align:right;flex-shrink:0;color:#22c55e">72%</span></div>
+    <div class="conf-row"><span class="conf-lbl">🇧🇪 Belgia vinner</span><div class="conf-track"><div class="conf-g" style="width:65%"></div></div><span style="font-size:11px;font-weight:700;width:32px;text-align:right;flex-shrink:0;color:#22c55e">65%</span></div>
+    <div class="conf-row"><span class="conf-lbl">🇺🇾 Uruguay vinner</span><div class="conf-track"><div class="conf-g" style="width:58%"></div></div><span style="font-size:11px;font-weight:700;width:32px;text-align:right;flex-shrink:0;color:#22c55e">58%</span></div>
+    <div class="conf-row" style="margin-bottom:0"><span class="conf-lbl">⚽ Over 2.5 Spa/KV</span><div class="conf-track"><div class="conf-y" style="width:68%"></div></div><span style="font-size:11px;font-weight:700;width:32px;text-align:right;flex-shrink:0;color:#eab308">68%</span></div>
+    <div style="border-top:1px solid #1c1c2e;margin-top:10px;padding-top:10px">
+      <div style="font-size:9px;font-weight:700;color:#475569;margin-bottom:6px">⚡ ODDS-ALARM — SPILL KUN OVER:</div>
+      <span class="alarm">Spania &gt; 1.40</span><span class="alarm">Belgia &gt; 1.55</span><span class="alarm">Over 2.5 Spa &gt; 1.65</span>
     </div>
-  </div>
+  </div></div>
 
-  <!-- Kombo -->
   <div style="background:#0e0e1c;border:2px solid #f59e0b;border-radius:16px;padding:16px;margin-bottom:12px">
     <div style="font-size:10px;font-weight:700;color:#f59e0b;letter-spacing:1px;margin-bottom:10px">🎰 DAGENS KOMBO — COMEON</div>
     <div style="background:#0a0a18;border-radius:8px;overflow:hidden;margin-bottom:10px">
-      <div class="krow"><span style="font-size:12px;color:#94a3b8">🇳🇱 Nederland vinner</span><span style="font-weight:700;color:#22c55e">1.70</span></div>
-      <div class="krow"><span style="font-size:12px;color:#94a3b8">🇳🇱🇯🇵 BTTS Ja</span><span style="font-weight:700;color:#eab308">~1.90</span></div>
-      <div class="krow"><span style="font-size:12px;color:#94a3b8">🇸🇪 Sverige vinner</span><span style="font-weight:700;color:#eab308">1.85</span></div>
+      <div class="krow"><span style="font-size:12px;color:#94a3b8">🇪🇸 Spania vinner</span><span style="font-weight:700;color:#22c55e">1.40</span></div>
+      <div class="krow"><span style="font-size:12px;color:#94a3b8">🇧🇪 Belgia vinner</span><span style="font-weight:700;color:#22c55e">1.60</span></div>
+      <div class="krow"><span style="font-size:12px;color:#94a3b8">🇪🇸 Over 2.5 mål</span><span style="font-weight:700;color:#eab308">~1.70</span></div>
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center">
-      <div><div style="font-size:10px;color:#64748b">TOTAL ODDS</div><div style="font-size:32px;font-weight:900;color:#f59e0b">~5.97</div></div>
+      <div><div style="font-size:10px;color:#64748b">TOTAL ODDS</div><div style="font-size:32px;font-weight:900;color:#f59e0b">~3.81</div></div>
       <div style="background:#0d2010;border:1px solid #166534;border-radius:8px;padding:8px 12px;text-align:center">
         <div style="font-size:10px;color:#64748b">TRYGG VARIANT</div>
-        <div style="font-size:12px;font-weight:700;color:#fff;margin-top:2px">Nederland + Sverige</div>
-        <div style="font-size:20px;font-weight:800;color:#22c55e;margin-top:2px">~3.15</div>
+        <div style="font-size:12px;font-weight:700;color:#fff;margin-top:2px">Spania + Belgia</div>
+        <div style="font-size:20px;font-weight:800;color:#22c55e;margin-top:2px">~2.24</div>
       </div>
     </div>
   </div>
 
-  <!-- FERDIG: Germany 7-1 Curacao -->
+  <!-- Gjårde nattresultater -->
+  <div class="mc" style="border-color:#713f12">
+    <div class="mc-head"><div style="display:flex;gap:6px"><span class="bn">✅ FULLTIME</span><span class="bb">GRUPPE F</span><span class="res-draw">2-2 UAVGJORT</span></div><span style="color:#475569;font-size:11px">22:00 · Dallas</span></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px">
+      <div style="text-align:center;flex:1"><span style="font-size:2.2em">🇳🇱</span><div style="font-size:11px;font-weight:800;margin-top:5px">NEDERLAND</div></div>
+      <div style="text-align:center;padding:0 10px"><div style="font-size:38px;font-weight:900;letter-spacing:3px">2<span style="color:#3b82f6"> : </span>2</div><div style="font-size:10px;color:#475569;margin-top:3px">FULLTIME</div></div>
+      <div style="text-align:center;flex:1"><span style="font-size:2.2em">🇯🇵</span><div style="font-size:11px;font-weight:800;margin-top:5px">JAPAN</div></div>
+    </div>
+    <div style="padding:0 14px 8px;font-size:11px;color:#94a3b8;text-align:center">🇳🇱 Van Dijk 50' · Summerville 64'<br>🇯🇵 Nakamura 57' · Kamada 89'</div>
+    <div style="padding:4px 14px 12px"><div style="display:flex;gap:5px;flex-wrap:wrap"><span class="br">❌ Nederland vinner</span><span class="bg">✅ Over 2.5</span><span class="bg">✅ BTTS Ja</span><span class="br">❌ Gakpo scorer</span></div></div>
+  </div>
+
   <div class="mc">
-    <div class="mc-head"><div style="display:flex;gap:6px"><span class="bn">✅ FULLTIME</span><span class="bo">GRUPPE E</span></div><span style="color:#475569;font-size:11px">19:00 · Houston</span></div>
+    <div class="mc-head"><div style="display:flex;gap:6px"><span class="bn">✅ FULLTIME</span><span class="bo">GRUPPE E</span></div><span style="color:#475569;font-size:11px">01:00 CET · Philadelphia</span></div>
     <div style="display:flex;align-items:center;justify-content:space-between;padding:14px">
-      <div style="text-align:center;flex:1"><span style="font-size:2.2em">🇩🇪</span><div style="font-size:11px;font-weight:800;margin-top:5px">TYSKLAND</div><div style="font-size:10px;color:#475569">FIFA #3</div></div>
-      <div style="text-align:center;padding:0 10px"><div style="font-size:38px;font-weight:900;letter-spacing:3px"><span style="color:#22c55e">7</span><span style="color:#3b82f6"> : </span><span>1</span></div><div style="font-size:10px;color:#475569;margin-top:3px">FULLTIME</div></div>
-      <div style="text-align:center;flex:1"><span style="font-size:2.2em">🇨🇼</span><div style="font-size:11px;font-weight:800;margin-top:5px">CURAÇAO</div><div style="font-size:10px;color:#475569">FIFA #74</div></div>
+      <div style="text-align:center;flex:1"><span style="font-size:2.2em">🇨🇮</span><div style="font-size:11px;font-weight:800;margin-top:5px">ELFENBENSKYSTEN</div></div>
+      <div style="text-align:center;padding:0 10px"><div style="font-size:38px;font-weight:900;letter-spacing:3px"><span style="color:#22c55e">1</span><span style="color:#3b82f6"> : </span>0</div><div style="font-size:10px;color:#475569;margin-top:3px">FULLTIME</div></div>
+      <div style="text-align:center;flex:1"><span style="font-size:2.2em">🇪🇨</span><div style="font-size:11px;font-weight:800;margin-top:5px">ECUADOR</div></div>
     </div>
-    <div style="padding:0 14px 8px;font-size:11px;color:#94a3b8;text-align:center">🇩🇪 Nmecha · Schlotterbeck · Havertz (pen) · Musiala · N.Brown · Undav · Havertz<br>🇨🇼 Comenencia</div>
-    <div style="padding:4px 14px 12px"><div style="display:flex;gap:5px;flex-wrap:wrap"><span class="bg">✅ Ger. vinner</span><span class="bg">✅ Over 3.5</span><span class="bg">✅ Over 4.5</span><span class="br">❌ BTTS Nei (CUR scoret)</span><span class="br">❌ Wirtz scorer</span></div></div>
+    <div style="padding:0 14px 8px;font-size:11px;color:#94a3b8;text-align:center">⚽ Amad Diallo 90' (CIV) · Ecuador traff tverrliggeren 2x</div>
+    <div style="padding:4px 14px 12px"><div style="display:flex;gap:5px;flex-wrap:wrap"><span class="bg">✅ Elfenbenskysten vinner</span><span class="br">❌ BTTS Ja</span><span class="br">❌ Over 2.5</span></div></div>
   </div>
 
-  <!-- FERDIG: Australia 2-0 Turkey -->
-  <div class="mc" style="border-color:#7f1d1d">
-    <div class="mc-head"><div style="display:flex;gap:6px"><span class="bn">✅ FULLTIME</span><span class="br">⚠️ OVERRASKELSE</span></div><span style="color:#475569;font-size:11px">06:00 CET</span></div>
+  <div class="mc">
+    <div class="mc-head"><div style="display:flex;gap:6px"><span class="bn">✅ FULLTIME</span><span class="bb">GRUPPE F</span></div><span style="color:#475569;font-size:11px">04:00 CET · Monterrey</span></div>
     <div style="display:flex;align-items:center;justify-content:space-between;padding:14px">
-      <div style="text-align:center;flex:1"><span style="font-size:2.2em">🇦🇺</span><div style="font-size:11px;font-weight:800;margin-top:5px">AUSTRALIA</div><div style="font-size:10px;color:#475569">FIFA #23</div></div>
-      <div style="text-align:center;padding:0 10px"><div style="font-size:38px;font-weight:900;letter-spacing:3px"><span style="color:#22c55e">2</span><span style="color:#3b82f6"> : </span><span>0</span></div><div style="font-size:10px;color:#475569;margin-top:3px">FULLTIME</div></div>
-      <div style="text-align:center;flex:1"><span style="font-size:2.2em">🇹🇷</span><div style="font-size:11px;font-weight:800;margin-top:5px">TYRKIA</div><div style="font-size:10px;color:#475569">FIFA #28</div></div>
+      <div style="text-align:center;flex:1"><span style="font-size:2.2em">🇸🇪</span><div style="font-size:11px;font-weight:800;margin-top:5px">SVERIGE</div></div>
+      <div style="text-align:center;padding:0 10px"><div style="font-size:38px;font-weight:900;letter-spacing:3px"><span style="color:#22c55e">5</span><span style="color:#3b82f6"> : </span>1</div><div style="font-size:10px;color:#475569;margin-top:3px">FULLTIME</div></div>
+      <div style="text-align:center;flex:1"><span style="font-size:2.2em">🇹🇳</span><div style="font-size:11px;font-weight:800;margin-top:5px">TUNISIA</div></div>
     </div>
-    <div style="padding:0 14px 12px"><div style="font-size:11px;color:#94a3b8;text-align:center;margin-bottom:8px">⚽ Irankunda · Metcalfe</div><div style="display:flex;gap:5px;flex-wrap:wrap"><span class="br">❌ Tyrkia vinner</span><span class="bg">✅ Under 2.5</span></div></div>
+    <div style="padding:0 14px 8px;font-size:11px;color:#94a3b8;text-align:center">🇸🇪 Ayari 7' · Isak 30' · Gyökeres · Svanberg · Ayari 90+'<br>🇹🇳 Rekik</div>
+    <div style="padding:4px 14px 12px"><div style="display:flex;gap:5px;flex-wrap:wrap"><span class="bg">✅ Sverige vinner</span><span class="br">❌ Under 2.5</span><span class="bg">✅ Isak scorer</span></div></div>
   </div>
 
-  <!-- UPCOMING: Netherlands vs Japan -->
+  <!-- Spain vs Cape Verde -->
   <div class="mc" style="border-color:#1e3a6e">
-    <div class="mc-head">
-      <span class="ai-label">⚡ AI PREDICTION · 14 JUN</span>
-      <span class="bb">GRUPPE F · 22:00</span>
-    </div>
+    <div class="mc-head"><span class="ai-label">⚡ AI PREDICTION · 15 JUN</span><span class="bb">GRUPPE H · 18:00</span></div>
     <div class="score-block">
-      <div class="score-team">
-        <span class="score-flag">🇳🇱</span>
-        <div class="score-name">NEDERLAND</div>
-        <div class="score-rank">FIFA #7</div>
-        <div class="form-row"><span class="fw">W</span><span class="fw">W</span><span class="fd">D</span><span class="fw">W</span><span class="fw">W</span></div>
-      </div>
-      <div class="score-center">
-        <div class="score-num">2<span class="score-sep"> : </span>1</div>
-        <div class="score-sub">Forutsagt resultat</div>
-        <div class="score-time">AT&amp;T Stadium, TX</div>
-      </div>
-      <div class="score-team">
-        <span class="score-flag">🇯🇵</span>
-        <div class="score-name">JAPAN</div>
-        <div class="score-rank">FIFA #17</div>
-        <div class="form-row"><span class="fw">W</span><span class="fw">W</span><span class="fw">W</span><span class="fd">D</span><span class="fw">W</span></div>
-      </div>
+      <div class="score-team"><span class="score-flag">🇪🇸</span><div class="score-name">SPANIA</div><div class="score-rank">FIFA #8</div><div class="form-row"><span class="fw">W</span><span class="fw">W</span><span class="fw">W</span><span class="fw">W</span><span class="fd">D</span></div></div>
+      <div class="score-center"><div class="score-num">3<span class="score-sep"> : </span>0</div><div class="score-sub">Forutsagt resultat</div><div class="score-time">Miami</div></div>
+      <div class="score-team"><span class="score-flag">🇨🇻</span><div class="score-name">KAPP VERDE</div><div class="score-rank">FIFA #89</div><div class="form-row"><span class="fw">W</span><span class="fl">L</span><span class="fd">D</span><span class="fw">W</span><span class="fl">L</span></div></div>
     </div>
-    <div class="win-btn">🇳🇱 NEDERLAND VINNER · 62% KONFIDENS</div>
+    <div class="win-btn">🇪🇸 SPANIA VINNER · 72% KONFIDENS</div>
     <div class="prob-wrap">
       <div class="prob-lbl">SANNSYNLIGHET</div>
-      <div class="prob-bar"><div class="pb-h" style="width:52%"></div><div class="pb-d" style="width:28%"></div><div class="pb-a" style="width:20%"></div></div>
-      <div class="prob-pcts"><span style="color:#22c55e">52% Nederland</span><span style="color:#eab308">28% Uavgjort</span><span style="color:#ef4444">20% Japan</span></div>
-    </div>
-    <div class="psb-wrap">
-      <div class="prob-lbl">FORUTSAGT STILLINGSKART</div>
-      <table class="psb">
-        <tr><th>Lag</th><th>1. OMGANG</th><th>2. OMGANG</th><th>FULLTID</th></tr>
-        <tr><td>🇳🇱 NED</td><td>1</td><td>1</td><td style="color:#22c55e;font-size:14px">2</td></tr>
-        <tr><td>🇯🇵 JPN</td><td>0</td><td>1</td><td style="color:#ef4444;font-size:14px">1</td></tr>
-      </table>
+      <div class="prob-bar"><div class="pb-h" style="width:70%"></div><div class="pb-d" style="width:20%"></div><div class="pb-a" style="width:10%"></div></div>
+      <div class="prob-pcts"><span style="color:#22c55e">70% Spania</span><span style="color:#eab308">20% Uavgjort</span><span style="color:#ef4444">10% Kapp Verde</span></div>
     </div>
     <div class="props-wrap">
       <div class="prob-lbl">MATCH PROPS</div>
       <div class="props-grid">
-        <div class="prop-c"><div class="prop-l">Over 2.5</div><div class="prop-v pv-y">56%</div></div>
-        <div class="prop-c"><div class="prop-l">BTTS</div><div class="prop-v">Ja</div></div>
-        <div class="prop-c"><div class="prop-l">Første mål</div><div class="prop-v pv-b">NED</div></div>
-        <div class="prop-c"><div class="prop-l">Clean sheet</div><div class="prop-v pv-r">Nei</div></div>
+        <div class="prop-c"><div class="prop-l">Over 2.5</div><div class="prop-v pv-g">68%</div></div>
+        <div class="prop-c"><div class="prop-l">BTTS</div><div class="prop-v pv-r">Nei</div></div>
+        <div class="prop-c"><div class="prop-l">Første mål</div><div class="prop-v pv-b">ESP</div></div>
+        <div class="prop-c"><div class="prop-l">Clean sheet</div><div class="prop-v pv-g">ESP</div></div>
+        <div class="prop-c"><div class="prop-l">Cornere</div><div class="prop-v">~12</div></div>
+        <div class="prop-c"><div class="prop-l">Gule kort</div><div class="prop-v">~4</div></div>
+      </div>
+    </div>
+    <button class="exbtn" id="btn-esp-cpv" onclick="toggleExpand('esp-cpv')">🔍 Skader + alle ComeOn markets ▼</button>
+    <div class="exsec" id="exp-esp-cpv">
+      <div class="sl">🏥 SKADER &amp; TROPP</div>
+      <div class="inj-row"><span class="inj-ok">KLAR</span><span style="color:#e2e8f0;font-weight:600">Pedri</span><span style="color:#475569;font-size:11px;margin-left:auto">🇪🇸 Barcelona</span></div>
+      <div class="inj-row"><span class="inj-ok">KLAR</span><span style="color:#e2e8f0;font-weight:600">Rodri</span><span style="color:#475569;font-size:11px;margin-left:auto">🇪🇸 Man City · tilbake</span></div>
+      <div class="inj-row"><span class="inj-ok">KLAR</span><span style="color:#e2e8f0;font-weight:600">Lamine Yamal</span><span style="color:#475569;font-size:11px;margin-left:auto">🇪🇸 Barcelona</span></div>
+      <div class="inj-row"><span class="inj-ok">KLAR</span><span style="color:#e2e8f0;font-weight:600">Morata</span><span style="color:#475569;font-size:11px;margin-left:auto">🇪🇸 Spiss</span></div>
+      <div class="sl" style="margin-top:10px">🎯 ALLE COMEОН MARKETS</div>
+      <div class="trow tg"><div><div class="trow-name">Spania vinner ⭐⭐</div><div class="trow-sub">Yamal + Pedri dominerer</div></div><div style="text-align:right"><div class="trow-odds" style="color:#22c55e">1.40</div><div style="font-size:10px;color:#22c55e">72%</div></div></div>
+      <div class="trow tg"><div><div class="trow-name">Over 2.5 mål ⭐</div><div class="trow-sub">Spania scorer mye mot svakere lag</div></div><div style="text-align:right"><div class="trow-odds" style="color:#eab308">~1.70</div><div style="font-size:10px;color:#eab308">68%</div></div></div>
+      <div class="trow ty"><div><div class="trow-name">Spania -1.5 AH</div></div><div style="text-align:right"><div class="trow-odds" style="color:#eab308">~1.75</div></div></div>
+      <div class="trow ty"><div><div class="trow-name">Yamal scorer/assist ⭐</div></div><div style="text-align:right"><div class="trow-odds" style="color:#eab308">~1.80</div></div></div>
+      <div class="trow tn"><div><div class="trow-name">HT Spania leder</div></div><div style="text-align:right"><div class="trow-odds" style="color:#64748b">~1.55</div></div></div>
+    </div>
+  </div>
+
+  <!-- Belgium vs Egypt -->
+  <div class="mc">
+    <div class="mc-head"><span class="ai-label">⚡ AI PREDICTION · 15 JUN</span><span class="bo">GRUPPE G · 21:00</span></div>
+    <div class="score-block">
+      <div class="score-team"><span class="score-flag">🇧🇪</span><div class="score-name">BELGIA</div><div class="score-rank">FIFA #3</div><div class="form-row"><span class="fw">W</span><span class="fw">W</span><span class="fd">D</span><span class="fw">W</span><span class="fw">W</span></div></div>
+      <div class="score-center"><div class="score-num">2<span class="score-sep"> : </span>0</div><div class="score-sub">Forutsagt resultat</div><div class="score-time">Kansas City</div></div>
+      <div class="score-team"><span class="score-flag">🇪🇬</span><div class="score-name">EGYPT</div><div class="score-rank">FIFA #36</div><div class="form-row"><span class="fw">W</span><span class="fd">D</span><span class="fw">W</span><span class="fl">L</span><span class="fd">D</span></div></div>
+    </div>
+    <div class="win-btn">🇧🇪 BELGIA VINNER · 65% KONFIDENS</div>
+    <div class="prob-wrap">
+      <div class="prob-lbl">SANNSYNLIGHET</div>
+      <div class="prob-bar"><div class="pb-h" style="width:60%"></div><div class="pb-d" style="width:25%"></div><div class="pb-a" style="width:15%"></div></div>
+      <div class="prob-pcts"><span style="color:#22c55e">60% Belgia</span><span style="color:#eab308">25% Uavgjort</span><span style="color:#ef4444">15% Egypt</span></div>
+    </div>
+    <div class="props-wrap">
+      <div class="prob-lbl">MATCH PROPS</div>
+      <div class="props-grid">
+        <div class="prop-c"><div class="prop-l">Over 2.5</div><div class="prop-v pv-y">52%</div></div>
+        <div class="prop-c"><div class="prop-l">BTTS</div><div class="prop-v pv-r">Nei</div></div>
+        <div class="prop-c"><div class="prop-l">Første mål</div><div class="prop-v pv-b">BEL</div></div>
+        <div class="prop-c"><div class="prop-l">Clean sheet</div><div class="prop-v pv-g">BEL</div></div>
         <div class="prop-c"><div class="prop-l">Cornere</div><div class="prop-v">~10</div></div>
         <div class="prop-c"><div class="prop-l">Gule kort</div><div class="prop-v">~4</div></div>
       </div>
     </div>
-    <button class="exbtn" id="btn-ned-jpn" onclick="toggleExpand('ned-jpn')">🔍 Skader + alle ComeOn markets ▼</button>
-    <div class="exsec" id="exp-ned-jpn">
+    <button class="exbtn" id="btn-bel-egy" onclick="toggleExpand('bel-egy')">🔍 Skader + alle markets ▼</button>
+    <div class="exsec" id="exp-bel-egy">
       <div class="sl">🏥 SKADER &amp; TROPP</div>
-      <div class="inj-row"><span class="inj-ok">KLAR</span><span style="color:#e2e8f0;font-weight:600">Cody Gakpo</span><span style="color:#475569;font-size:11px;margin-left:auto">🇳🇱 Spiss · Liverpool</span></div>
-      <div class="inj-row"><span class="inj-ok">KLAR</span><span style="color:#e2e8f0;font-weight:600">Virgil van Dijk</span><span style="color:#475569;font-size:11px;margin-left:auto">🇳🇱 Kaptein</span></div>
-      <div class="inj-row"><span class="inj-doubt">TVIL</span><span style="color:#eab308;font-weight:600">Memphis Depay</span><span style="color:#475569;font-size:11px;margin-left:auto">🇳🇱 Lårproblemer</span></div>
-      <div class="inj-row"><span class="inj-ok">KLAR</span><span style="color:#e2e8f0;font-weight:600">Takumi Minamino</span><span style="color:#475569;font-size:11px;margin-left:auto">🇯🇵 Spiss</span></div>
-      <div class="inj-row"><span class="inj-ok">KLAR</span><span style="color:#e2e8f0;font-weight:600">Kaoru Mitoma</span><span style="color:#475569;font-size:11px;margin-left:auto">🇯🇵 Brighton</span></div>
-      <div class="inj-row"><span class="inj-doubt">TVIL</span><span style="color:#eab308;font-weight:600">Wataru Endo</span><span style="color:#475569;font-size:11px;margin-left:auto">🇯🇵 Karantene</span></div>
-      <div class="sl" style="margin-top:10px">🎯 ALLE COMEОН MARKETS</div>
-      <div class="trow tg"><div><div class="trow-name">Nederland vinner ⭐</div><div class="trow-sub">van Dijk + Gakpo sterk</div></div><div style="text-align:right"><div class="trow-odds" style="color:#22c55e">1.70</div><div style="font-size:10px;color:#22c55e">62%</div></div></div>
-      <div class="trow tg"><div><div class="trow-name">Over 2.5 mål ⭐⭐</div><div class="trow-sub">Japan scorer mot topplag</div></div><div style="text-align:right"><div class="trow-odds" style="color:#eab308">~1.80</div><div style="font-size:10px;color:#eab308">56%</div></div></div>
-      <div class="trow ty"><div><div class="trow-name">BTTS Ja</div><div class="trow-sub">Minamino + Mitoma offensive</div></div><div style="text-align:right"><div class="trow-odds" style="color:#eab308">~1.90</div></div></div>
-      <div class="trow ty"><div><div class="trow-name">HT Under 1.5 mål</div><div class="trow-sub">Tett åpning forventes</div></div><div style="text-align:right"><div class="trow-odds" style="color:#eab308">~1.65</div></div></div>
-      <div class="trow ty"><div><div class="trow-name">Over 9.5 cornere ⭐</div><div class="trow-sub">Japan angriper bredt</div></div><div style="text-align:right"><div class="trow-odds" style="color:#eab308">~1.90</div></div></div>
-      <div class="trow tn"><div><div class="trow-name">Gakpo scorer</div></div><div style="text-align:right"><div class="trow-odds" style="color:#64748b">~2.40</div></div></div>
-      <div class="trow tn"><div><div class="trow-name">Nederland AH -1</div></div><div style="text-align:right"><div class="trow-odds" style="color:#64748b">~2.10</div></div></div>
+      <div class="inj-row"><span class="inj-ok">KLAR</span><span style="color:#e2e8f0;font-weight:600">Kevin De Bruyne</span><span style="color:#475569;font-size:11px;margin-left:auto">🇧🇪 Kaptein</span></div>
+      <div class="inj-row"><span class="inj-ok">KLAR</span><span style="color:#e2e8f0;font-weight:600">Romelu Lukaku</span><span style="color:#475569;font-size:11px;margin-left:auto">🇧🇪 Spiss</span></div>
+      <div class="inj-row"><span class="inj-ok">KLAR</span><span style="color:#e2e8f0;font-weight:600">Mohamed Salah</span><span style="color:#475569;font-size:11px;margin-left:auto">🇪🇬 Liverpool</span></div>
+      <div class="sl" style="margin-top:10px">🎯 MARKETS</div>
+      <div class="trow tg"><div><div class="trow-name">Belgia vinner ⭐</div><div class="trow-sub">De Bruyne + Lukaku vs Egypt</div></div><div style="text-align:right"><div class="trow-odds" style="color:#22c55e">1.60</div><div style="font-size:10px;color:#22c55e">65%</div></div></div>
+      <div class="trow ty"><div><div class="trow-name">Lukaku scorer</div></div><div style="text-align:right"><div class="trow-odds" style="color:#eab308">~2.00</div></div></div>
+      <div class="trow tn"><div><div class="trow-name">Salah scorer</div></div><div style="text-align:right"><div class="trow-odds" style="color:#64748b">~2.80</div></div></div>
     </div>
   </div>
 
-  <!-- UPCOMING: Ivory Coast vs Ecuador -->
+  <!-- Saudi Arabia vs Uruguay -->
   <div class="mc">
-    <div class="mc-head">
-      <span class="ai-label">⚡ AI PREDICTION · 15 JUN 01:00</span>
-      <span class="bo">GRUPPE E</span>
-    </div>
+    <div class="mc-head"><span class="ai-label">⚡ AI PREDICTION · 16 JUN 00:00</span><span class="bo">GRUPPE H</span></div>
     <div class="score-block">
-      <div class="score-team"><span class="score-flag">🇨🇮</span><div class="score-name">ELFENBENSKYSTEN</div><div class="score-rank">FIFA #25</div></div>
-      <div class="score-center"><div class="score-num">2<span class="score-sep"> : </span>1</div><div class="score-sub">Forutsagt resultat</div><div class="score-time">Atlanta</div></div>
-      <div class="score-team"><span class="score-flag">🇪🇨</span><div class="score-name">ECUADOR</div><div class="score-rank">FIFA #38</div></div>
+      <div class="score-team"><span class="score-flag">🇸🇦</span><div class="score-name">SAUDI-ARABIA</div><div class="score-rank">FIFA #56</div></div>
+      <div class="score-center"><div class="score-num">1<span class="score-sep"> : </span>2</div><div class="score-sub">Forutsagt resultat</div><div class="score-time">Dallas</div></div>
+      <div class="score-team"><span class="score-flag">🇺🇾</span><div class="score-name">URUGUAY</div><div class="score-rank">FIFA #14</div></div>
     </div>
-    <div class="win-btn win-btn-gold">🇨🇮 ELFENBENSKYSTEN VINNER · 52% KONFIDENS</div>
+    <div class="win-btn">🇺🇾 URUGUAY VINNER · 58% KONFIDENS</div>
     <div class="prob-wrap">
       <div class="prob-lbl">SANNSYNLIGHET</div>
-      <div class="prob-bar"><div class="pb-h" style="width:42%"></div><div class="pb-d" style="width:30%"></div><div class="pb-a" style="width:28%"></div></div>
-      <div class="prob-pcts"><span style="color:#22c55e">42% CIV</span><span style="color:#eab308">30% Uavgjort</span><span style="color:#ef4444">28% ECU</span></div>
+      <div class="prob-bar"><div class="pb-h" style="width:22%"></div><div class="pb-d" style="width:26%"></div><div class="pb-a" style="width:52%"></div></div>
+      <div class="prob-pcts"><span style="color:#22c55e">22% Saudi</span><span style="color:#eab308">26% Uavgjort</span><span style="color:#ef4444">52% Uruguay</span></div>
     </div>
     <div class="props-wrap">
       <div class="prob-lbl">MATCH PROPS</div>
       <div class="props-grid">
-        <div class="prop-c"><div class="prop-l">Over 2.5</div><div class="prop-v pv-y">54%</div></div>
-        <div class="prop-c"><div class="prop-l">BTTS</div><div class="prop-v pv-g">Ja ⭐</div></div>
-        <div class="prop-c"><div class="prop-l">Første mål</div><div class="prop-v pv-b">CIV</div></div>
-        <div class="prop-c"><div class="prop-l">Clean sheet</div><div class="prop-v pv-r">Nei</div></div>
+        <div class="prop-c"><div class="prop-l">Over 2.5</div><div class="prop-v pv-y">48%</div></div>
+        <div class="prop-c"><div class="prop-l">BTTS</div><div class="prop-v pv-y">Ja</div></div>
+        <div class="prop-c"><div class="prop-l">Første mål</div><div class="prop-v pv-b">URU</div></div>
         <div class="prop-c"><div class="prop-l">Cornere</div><div class="prop-v">~9</div></div>
+        <div class="prop-c"><div class="prop-l">Gule kort</div><div class="prop-v">~5</div></div>
+        <div class="prop-c"><div class="prop-l">Nuñez</div><div class="prop-v pv-g">scorer</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Iran vs New Zealand -->
+  <div class="mc">
+    <div class="mc-head"><span class="ai-label">⚡ AI PREDICTION · 16 JUN 03:00</span><span class="bb">GRUPPE G</span></div>
+    <div class="score-block">
+      <div class="score-team"><span class="score-flag">🇮🇷</span><div class="score-name">IRAN</div><div class="score-rank">FIFA #21</div></div>
+      <div class="score-center"><div class="score-num">2<span class="score-sep"> : </span>0</div><div class="score-sub">Forutsagt resultat</div><div class="score-time">Houston</div></div>
+      <div class="score-team"><span class="score-flag">🇳🇿</span><div class="score-name">NEW ZEALAND</div><div class="score-rank">FIFA #97</div></div>
+    </div>
+    <div class="win-btn">🇮🇷 IRAN VINNER · 60% KONFIDENS</div>
+    <div class="prob-wrap">
+      <div class="prob-lbl">SANNSYNLIGHET</div>
+      <div class="prob-bar"><div class="pb-h" style="width:58%"></div><div class="pb-d" style="width:26%"></div><div class="pb-a" style="width:16%"></div></div>
+      <div class="prob-pcts"><span style="color:#22c55e">58% Iran</span><span style="color:#eab308">26% Uavgjort</span><span style="color:#ef4444">16% New Zealand</span></div>
+    </div>
+    <div class="props-wrap">
+      <div class="prob-lbl">MATCH PROPS</div>
+      <div class="props-grid">
+        <div class="prop-c"><div class="prop-l">Over 2.5</div><div class="prop-v pv-y">42%</div></div>
+        <div class="prop-c"><div class="prop-l">BTTS</div><div class="prop-v pv-r">Nei</div></div>
+        <div class="prop-c"><div class="prop-l">Første mål</div><div class="prop-v pv-b">IRN</div></div>
+        <div class="prop-c"><div class="prop-l">Clean sheet</div><div class="prop-v pv-g">IRN</div></div>
+        <div class="prop-c"><div class="prop-l">Cornere</div><div class="prop-v">~8</div></div>
         <div class="prop-c"><div class="prop-l">Gule kort</div><div class="prop-v">~4</div></div>
       </div>
-    </div>
-    <button class="exbtn" id="btn-civ-ecu" onclick="toggleExpand('civ-ecu')">🔍 Skader + alle markets ▼</button>
-    <div class="exsec" id="exp-civ-ecu">
-      <div class="sl">🏥 SKADER &amp; TROPP</div>
-      <div class="inj-row"><span class="inj-ok">KLAR</span><span style="color:#e2e8f0;font-weight:600">Sébastien Haller</span><span style="color:#475569;font-size:11px;margin-left:auto">🇨🇮 BVB</span></div>
-      <div class="inj-row"><span class="inj-doubt">TVIL</span><span style="color:#eab308;font-weight:600">Wilfried Zaha</span><span style="color:#475569;font-size:11px;margin-left:auto">🇨🇮 Ving</span></div>
-      <div class="inj-row"><span class="inj-ok">KLAR</span><span style="color:#e2e8f0;font-weight:600">Enner Valencia</span><span style="color:#475569;font-size:11px;margin-left:auto">🇪🇨 Kaptein</span></div>
-      <div class="inj-row"><span class="inj-ok">KLAR</span><span style="color:#e2e8f0;font-weight:600">Moisés Caicedo</span><span style="color:#475569;font-size:11px;margin-left:auto">🇪🇨 Chelsea</span></div>
-      <div class="sl" style="margin-top:10px">🎯 MARKETS</div>
-      <div class="trow tg"><div><div class="trow-name">BTTS Ja ⭐⭐</div><div class="trow-sub">Begge offensive, åpen midtbane</div></div><div style="text-align:right"><div class="trow-odds" style="color:#22c55e">~1.70</div><div style="font-size:10px;color:#22c55e">62%</div></div></div>
-      <div class="trow ty"><div><div class="trow-name">Elfenbenskysten vinner</div></div><div style="text-align:right"><div class="trow-odds" style="color:#eab308">2.00</div></div></div>
-      <div class="trow tn"><div><div class="trow-name">Over 9 cornere</div></div><div style="text-align:right"><div class="trow-odds" style="color:#64748b">~1.85</div></div></div>
-    </div>
-  </div>
-
-  <!-- UPCOMING: Sweden vs Tunisia -->
-  <div class="mc">
-    <div class="mc-head">
-      <span class="ai-label">⚡ AI PREDICTION · 15 JUN 04:00</span>
-      <span class="bb">GRUPPE F</span>
-    </div>
-    <div class="score-block">
-      <div class="score-team"><span class="score-flag">🇸🇪</span><div class="score-name">SVERIGE</div><div class="score-rank">FIFA #22</div></div>
-      <div class="score-center"><div class="score-num">2<span class="score-sep"> : </span>0</div><div class="score-sub">Forutsagt resultat</div><div class="score-time">Seattle</div></div>
-      <div class="score-team"><span class="score-flag">🇹🇳</span><div class="score-name">TUNISIA</div><div class="score-rank">FIFA #29</div></div>
-    </div>
-    <div class="win-btn">🇸🇪 SVERIGE VINNER · 62% KONFIDENS</div>
-    <div class="prob-wrap">
-      <div class="prob-lbl">SANNSYNLIGHET</div>
-      <div class="prob-bar"><div class="pb-h" style="width:52%"></div><div class="pb-d" style="width:26%"></div><div class="pb-a" style="width:22%"></div></div>
-      <div class="prob-pcts"><span style="color:#22c55e">52% Sverige</span><span style="color:#eab308">26% Uavgjort</span><span style="color:#ef4444">22% Tunisia</span></div>
-    </div>
-    <div class="psb-wrap">
-      <div class="prob-lbl">FORUTSAGT STILLINGSKART</div>
-      <table class="psb">
-        <tr><th>Lag</th><th>1. OMGANG</th><th>2. OMGANG</th><th>FULLTID</th></tr>
-        <tr><td>🇸🇪 SWE</td><td>1</td><td>1</td><td style="color:#22c55e;font-size:14px">2</td></tr>
-        <tr><td>🇹🇳 TUN</td><td>0</td><td>0</td><td style="color:#ef4444;font-size:14px">0</td></tr>
-      </table>
-    </div>
-    <div class="props-wrap">
-      <div class="prob-lbl">MATCH PROPS</div>
-      <div class="props-grid">
-        <div class="prop-c"><div class="prop-l">Over 2.5</div><div class="prop-v pv-y">45%</div></div>
-        <div class="prop-c"><div class="prop-l">BTTS</div><div class="prop-v pv-r">Nei</div></div>
-        <div class="prop-c"><div class="prop-l">Første mål</div><div class="prop-v pv-b">SWE</div></div>
-        <div class="prop-c"><div class="prop-l">Clean sheet</div><div class="prop-v pv-g">SWE</div></div>
-        <div class="prop-c"><div class="prop-l">Cornere</div><div class="prop-v">~9</div></div>
-        <div class="prop-c"><div class="prop-l">Gule kort</div><div class="prop-v">~3</div></div>
-      </div>
-    </div>
-    <button class="exbtn" id="btn-swe-tun" onclick="toggleExpand('swe-tun')">🔍 Skader + alle markets ▼</button>
-    <div class="exsec" id="exp-swe-tun">
-      <div class="sl">🏥 SKADER &amp; TROPP</div>
-      <div class="inj-row"><span class="inj-ok">KLAR</span><span style="color:#e2e8f0;font-weight:600">Alexander Isak</span><span style="color:#475569;font-size:11px;margin-left:auto">🇸🇪 Newcastle</span></div>
-      <div class="inj-row"><span class="inj-ok">KLAR</span><span style="color:#e2e8f0;font-weight:600">Viktor Gyökeres</span><span style="color:#475569;font-size:11px;margin-left:auto">🇸🇪 Sporting</span></div>
-      <div class="inj-row"><span class="inj-doubt">TVIL</span><span style="color:#eab308;font-weight:600">Emil Forsberg</span><span style="color:#475569;font-size:11px;margin-left:auto">🇸🇪 Kne</span></div>
-      <div class="inj-row"><span class="inj-ok">KLAR</span><span style="color:#e2e8f0;font-weight:600">Wahbi Khazri</span><span style="color:#475569;font-size:11px;margin-left:auto">🇹🇳 Viktigst</span></div>
-      <div class="inj-row"><span class="inj-out">UTE</span><span style="color:#ef4444;font-weight:600">Youssef Msakni</span><span style="color:#475569;font-size:11px;margin-left:auto">🇹🇳 Ankel</span></div>
-      <div class="sl" style="margin-top:10px">🎯 MARKETS</div>
-      <div class="trow tg"><div><div class="trow-name">Sverige vinner ⭐</div><div class="trow-sub">Isak + Gyökeres · Msakni ute</div></div><div style="text-align:right"><div class="trow-odds" style="color:#22c55e">1.85</div><div style="font-size:10px;color:#22c55e">62%</div></div></div>
-      <div class="trow ty"><div><div class="trow-name">Under 2.5 mål</div><div class="trow-sub">Tunisia defensivt uten Msakni</div></div><div style="text-align:right"><div class="trow-odds" style="color:#eab308">~1.65</div></div></div>
-      <div class="trow tn"><div><div class="trow-name">Isak scorer</div></div><div style="text-align:right"><div class="trow-odds" style="color:#64748b">~2.20</div></div></div>
     </div>
   </div>
 
 </div><!-- /today -->
 
-<!-- ======== IGÅR ======== -->
+<!-- IGÅR -->
 <div id="pane-yesterday" class="pane">
-  <div class="card">
-    <div class="cp">
-      <div style="font-size:9px;font-weight:700;color:#475569;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">📊 AI Tips Resultat — 13. Juni</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;margin-bottom:10px">
-        <div style="background:#0d2010;border-radius:8px;padding:10px"><div style="font-size:22px;font-weight:800;color:#22c55e">4</div><div style="font-size:10px;color:#16a34a">TREFF</div></div>
-        <div style="background:#1a0808;border-radius:8px;padding:10px"><div style="font-size:22px;font-weight:800;color:#ef4444">4</div><div style="font-size:10px;color:#dc2626">BOMMER</div></div>
-        <div style="background:#1a1200;border-radius:8px;padding:10px"><div style="font-size:22px;font-weight:800;color:#eab308">50%</div><div style="font-size:10px;color:#d97706">RATE</div></div>
-      </div>
-      <div style="font-size:11px;color:#64748b;line-height:1.7">Begge unders traff ✅. Vinnerene ble uavgjort ❌. BTTS Nei bommet ❌. Qatar heading 90+4!</div>
+  <div class="card"><div class="cp">
+    <div style="font-size:9px;font-weight:700;color:#475569;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">📊 AI Tips Resultat — 14. Juni (natt)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;margin-bottom:10px">
+      <div style="background:#0d2010;border-radius:8px;padding:10px"><div style="font-size:22px;font-weight:800;color:#22c55e">6</div><div style="font-size:10px;color:#16a34a">TREFF</div></div>
+      <div style="background:#1a0808;border-radius:8px;padding:10px"><div style="font-size:22px;font-weight:800;color:#ef4444">5</div><div style="font-size:10px;color:#dc2626">BOMMER</div></div>
+      <div style="background:#1a1200;border-radius:8px;padding:10px"><div style="font-size:22px;font-weight:800;color:#eab308">55%</div><div style="font-size:10px;color:#d97706">RATE</div></div>
     </div>
+    <div style="font-size:11px;color:#64748b;line-height:1.7">Sverige 5-1 ✅✅ Ger. 7-1 ✅ Aus 2-0 ✅ CIV 1-0 ✅. Ned/Jap uavgjort ❌.</div>
+  </div></div>
+
+  <!-- Germany 7-1 Curacao -->
+  <div class="mc">
+    <div class="mc-head"><div style="display:flex;gap:6px"><span class="bn">✅ FULLTIME</span><span class="bo">GRUPPE E</span></div><span style="color:#475569;font-size:11px">19:00 · Houston</span></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px">
+      <div style="text-align:center;flex:1"><span style="font-size:2.2em">🇩🇪</span><div style="font-size:11px;font-weight:800;margin-top:5px">TYSKLAND</div><div style="font-size:10px;color:#475569">FIFA #3</div></div>
+      <div style="text-align:center;padding:0 10px"><div style="font-size:38px;font-weight:900;letter-spacing:3px"><span style="color:#22c55e">7</span><span style="color:#3b82f6"> : </span>1</div><div style="font-size:10px;color:#475569;margin-top:3px">FULLTIME</div></div>
+      <div style="text-align:center;flex:1"><span style="font-size:2.2em">🇨🇼</span><div style="font-size:11px;font-weight:800;margin-top:5px">CURAÇAO</div></div>
+    </div>
+    <div style="padding:0 14px 8px;font-size:11px;color:#94a3b8;text-align:center">🇩🇪 Nmecha · Schlotterbeck · Havertz (pen) · Musiala · N.Brown · Undav · Havertz<br>🇨🇼 Comenencia</div>
+    <div style="padding:4px 14px 12px"><div style="display:flex;gap:5px;flex-wrap:wrap"><span class="bg">✅ Ger. vinner</span><span class="bg">✅ Over 3.5</span><span class="bg">✅ Over 4.5</span><span class="br">❌ BTTS Nei</span><span class="br">❌ Wirtz scorer</span></div></div>
   </div>
 
-  <!-- USA 4-1 Paraguay -->
+  <!-- Australia 2-0 Turkey -->
+  <div class="mc" style="border-color:#7f1d1d">
+    <div class="mc-head"><div style="display:flex;gap:6px"><span class="bn">✅ FULLTIME</span><span class="br">⚠️ OVERRASKELSE</span></div><span style="color:#475569;font-size:11px">06:00 CET</span></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px">
+      <div style="text-align:center;flex:1"><span style="font-size:2.2em">🇦🇺</span><div style="font-size:11px;font-weight:800;margin-top:5px">AUSTRALIA</div></div>
+      <div style="text-align:center;padding:0 10px"><div style="font-size:38px;font-weight:900;letter-spacing:3px"><span style="color:#22c55e">2</span><span style="color:#3b82f6"> : </span>0</div><div style="font-size:10px;color:#475569;margin-top:3px">FULLTIME</div></div>
+      <div style="text-align:center;flex:1"><span style="font-size:2.2em">🇹🇷</span><div style="font-size:11px;font-weight:800;margin-top:5px">TYRKIA</div></div>
+    </div>
+    <div style="padding:0 14px 12px"><div style="font-size:11px;color:#94a3b8;text-align:center;margin-bottom:8px">⚽ Irankunda · Metcalfe</div><div style="display:flex;gap:5px;flex-wrap:wrap"><span class="br">❌ Tyrkia vinner</span><span class="bg">✅ Under 2.5</span></div></div>
+  </div>
+
+  <!-- Netherlands 2-2 Japan -->
+  <div class="mc" style="border-color:#713f12">
+    <div class="mc-head"><div style="display:flex;gap:6px"><span class="bb">GRUPPE F</span><span class="res-draw">2-2 UAVGJORT</span></div><span style="color:#475569;font-size:11px">22:00 · Dallas</span></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px">
+      <div style="text-align:center;flex:1"><span style="font-size:2.2em">🇳🇱</span><div style="font-size:11px;font-weight:800;margin-top:5px">NEDERLAND</div></div>
+      <div style="text-align:center;padding:0 10px"><div style="font-size:38px;font-weight:900;letter-spacing:3px">2<span style="color:#3b82f6"> : </span>2</div><div style="font-size:10px;color:#475569;margin-top:3px">FULLTIME</div></div>
+      <div style="text-align:center;flex:1"><span style="font-size:2.2em">🇯🇵</span><div style="font-size:11px;font-weight:800;margin-top:5px">JAPAN</div></div>
+    </div>
+    <div style="padding:0 14px 8px;font-size:11px;color:#94a3b8;text-align:center">🇳🇱 Van Dijk 50' · Summerville 64'<br>🇯🇵 Nakamura 57' · Kamada 89'</div>
+    <div style="padding:4px 14px 12px"><div style="display:flex;gap:5px;flex-wrap:wrap"><span class="br">❌ Nederland vinner</span><span class="bg">✅ Over 2.5</span><span class="bg">✅ BTTS Ja</span></div></div>
+  </div>
+
+  <!-- Ivory Coast 1-0 Ecuador -->
+  <div class="mc">
+    <div class="mc-head"><div style="display:flex;gap:6px"><span class="bo">GRUPPE E</span><span class="bg">1-0 CIV</span></div><span style="color:#475569;font-size:11px">01:00 CET</span></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px">
+      <div style="text-align:center;flex:1"><span style="font-size:2.2em">🇨🇮</span><div style="font-size:11px;font-weight:800;margin-top:5px">ELFENBENSKYSTEN</div></div>
+      <div style="text-align:center;padding:0 10px"><div style="font-size:38px;font-weight:900;letter-spacing:3px"><span style="color:#22c55e">1</span><span style="color:#3b82f6"> : </span>0</div><div style="font-size:10px;color:#475569;margin-top:3px">FULLTIME</div></div>
+      <div style="text-align:center;flex:1"><span style="font-size:2.2em">🇪🇨</span><div style="font-size:11px;font-weight:800;margin-top:5px">ECUADOR</div></div>
+    </div>
+    <div style="padding:0 14px 8px;font-size:11px;color:#94a3b8;text-align:center">⚽ Amad Diallo 90' (CIV) · Ecuador traff tverrliggeren 2x</div>
+    <div style="padding:4px 14px 12px"><div style="display:flex;gap:5px;flex-wrap:wrap"><span class="bg">✅ CIV vinner</span><span class="br">❌ BTTS Ja</span><span class="br">❌ Over 2.5</span></div></div>
+  </div>
+
+  <!-- Sweden 5-1 Tunisia -->
+  <div class="mc">
+    <div class="mc-head"><div style="display:flex;gap:6px"><span class="bb">GRUPPE F</span><span class="bg">5-1 SVERIGE</span></div><span style="color:#475569;font-size:11px">04:00 CET · Monterrey</span></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px">
+      <div style="text-align:center;flex:1"><span style="font-size:2.2em">🇸🇪</span><div style="font-size:11px;font-weight:800;margin-top:5px">SVERIGE</div></div>
+      <div style="text-align:center;padding:0 10px"><div style="font-size:38px;font-weight:900;letter-spacing:3px"><span style="color:#22c55e">5</span><span style="color:#3b82f6"> : </span>1</div><div style="font-size:10px;color:#475569;margin-top:3px">FULLTIME</div></div>
+      <div style="text-align:center;flex:1"><span style="font-size:2.2em">🇹🇳</span><div style="font-size:11px;font-weight:800;margin-top:5px">TUNISIA</div></div>
+    </div>
+    <div style="padding:0 14px 8px;font-size:11px;color:#94a3b8;text-align:center">🇸🇪 Ayari 7' · Isak 30' · Gyökeres · Svanberg · Ayari 90+'<br>🇹🇳 Rekik</div>
+    <div style="padding:4px 14px 12px"><div style="display:flex;gap:5px;flex-wrap:wrap"><span class="bg">✅ Sverige vinner</span><span class="br">❌ Under 2.5</span><span class="bg">✅ Isak scorer</span></div></div>
+  </div>
+
+  <!-- 13. Juni (eldre) -->
+  <div style="color:#475569;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin:12px 0 8px">📅 13. JUNI</div>
+
   <div class="mc">
     <div class="mc-head"><span class="bn">✅ GRUPPE D</span><span style="color:#475569;font-size:11px">18:00 CET</span></div>
     <div style="display:flex;align-items:center;justify-content:space-between;padding:14px">
@@ -410,27 +428,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <div style="padding:0 14px 12px;display:flex;gap:5px;flex-wrap:wrap"><span class="bg">✅ USA vinner</span><span class="bg">✅ Over 2.5</span><span class="bg">✅ BTTS Ja</span></div>
   </div>
 
-  <!-- Qatar 1-1 Switzerland -->
   <div class="mc" style="border-color:#713f12">
     <div class="mc-head"><div style="display:flex;gap:6px"><span class="bb">GRUPPE B</span><span class="res-draw">1-1 UAVGJORT</span></div><span style="color:#475569;font-size:11px">21:00 CET</span></div>
     <div style="display:flex;align-items:center;justify-content:space-between;padding:14px">
       <div style="text-align:center;flex:1"><span style="font-size:2.2em">🇶🇦</span><div style="font-size:11px;font-weight:800;margin-top:5px">QATAR</div></div>
-      <div style="text-align:center;padding:0 10px"><div style="font-size:38px;font-weight:900;letter-spacing:3px">1<span style="color:#3b82f6"> : </span>1</div><div style="font-size:10px;color:#475569;margin-top:3px">FULLTIME</div></div>
+      <div style="text-align:center;padding:0 10px"><div style="font-size:38px;font-weight:900;letter-spacing:3px">1<span style="color:#3b82f6"> : </span>1</div></div>
       <div style="text-align:center;flex:1"><span style="font-size:2.2em">🇨🇭</span><div style="font-size:11px;font-weight:800;margin-top:5px">SVEITS</div></div>
     </div>
     <div style="padding:0 14px 8px;font-size:11px;color:#94a3b8;text-align:center">⚽ Embolo pen. 17' (SUI) · Khoukhi 90+4' (QAT)</div>
-    <div style="padding:0 14px 12px">
-      <div class="tip-result-row tip-miss"><span style="font-size:12px;color:#ef4444">❌ Sveits vinner</span><span style="color:#ef4444;font-size:12px;font-weight:700">BOMMER</span></div>
-      <div class="tip-result-row tip-hit"><span style="font-size:12px;color:#22c55e">✅ Under 2.5 mål</span><span style="color:#22c55e;font-size:12px;font-weight:700">TREFF</span></div>
-      <div class="tip-result-row tip-miss"><span style="font-size:12px;color:#ef4444">❌ BTTS Nei</span><span style="color:#ef4444;font-size:12px;font-weight:700">BOMMER</span></div>
-      <div class="tip-result-row tip-miss"><span style="font-size:12px;color:#ef4444">❌ Sveits over 6.5 cornere</span><span style="color:#ef4444;font-size:12px;font-weight:700">BOMMER</span></div>
-    </div>
-    <div style="background:#1a1200;border:1px solid #713f12;border-radius:8px;padding:10px;margin:0 14px 14px">
-      <div style="font-size:11px;color:#94a3b8;line-height:1.7">⚠️ Sveits 3.24 xG vs Qatar 0.76. Khoukhi heading 90+4 — Qatars første VM-poeng noensinne!</div>
-    </div>
+    <div style="padding:0 14px 12px"><div style="display:flex;gap:5px;flex-wrap:wrap"><span class="br">❌ Sveits vinner</span><span class="bg">✅ Under 2.5</span><span class="br">❌ BTTS Nei</span></div></div>
   </div>
 
-  <!-- Brazil 1-1 Morocco -->
   <div class="mc" style="border-color:#713f12">
     <div class="mc-head"><div style="display:flex;gap:6px"><span class="bp">GRUPPE C</span><span class="res-draw">1-1 UAVGJORT</span></div><span style="color:#475569;font-size:11px">00:00 CET</span></div>
     <div style="display:flex;align-items:center;justify-content:space-between;padding:14px">
@@ -439,39 +447,33 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <div style="text-align:center;flex:1"><span style="font-size:2.2em">🇲🇦</span><div style="font-size:11px;font-weight:800;margin-top:5px">MAROKKO</div></div>
     </div>
     <div style="padding:0 14px 8px;font-size:11px;color:#94a3b8;text-align:center">⚽ Saibari 21' (MAR) · Vinicius Jr. 32' (BRA)</div>
-    <div style="padding:0 14px 12px">
-      <div class="tip-result-row tip-miss"><span style="font-size:12px;color:#ef4444">❌ Brasil vinner</span><span style="color:#ef4444;font-size:12px;font-weight:700">BOMMER</span></div>
-      <div class="tip-result-row tip-hit"><span style="font-size:12px;color:#22c55e">✅ Under 2.5 mål</span><span style="color:#22c55e;font-size:12px;font-weight:700">TREFF</span></div>
-      <div class="tip-result-row tip-miss"><span style="font-size:12px;color:#ef4444">❌ BTTS Nei</span><span style="color:#ef4444;font-size:12px;font-weight:700">BOMMER</span></div>
-      <div class="tip-result-row tip-hit"><span style="font-size:12px;color:#22c55e">✅ Vinicius Jr scorer</span><span style="color:#22c55e;font-size:12px;font-weight:700">TREFF</span></div>
-    </div>
+    <div style="padding:0 14px 12px"><div style="display:flex;gap:5px;flex-wrap:wrap"><span class="br">❌ Brasil vinner</span><span class="bg">✅ Under 2.5</span><span class="bg">✅ Vinicius scorer</span></div></div>
   </div>
 
-  <!-- Scotland 1-0 Haiti -->
   <div class="mc">
     <div class="mc-head"><div style="display:flex;gap:6px"><span class="bp">GRUPPE C</span><span class="bg">1-0 SKOTTLAND</span></div><span style="color:#475569;font-size:11px">19:00 CET · Vancouver</span></div>
     <div style="display:flex;align-items:center;justify-content:space-between;padding:14px">
       <div style="text-align:center;flex:1"><span style="font-size:2.2em">🏴󠁧󠁢󠁳󠁣󠁴󠁿</span><div style="font-size:11px;font-weight:800;margin-top:5px">SKOTTLAND</div></div>
-      <div style="text-align:center;padding:0 10px"><div style="font-size:38px;font-weight:900;letter-spacing:3px"><span style="color:#22c55e">1</span><span style="color:#3b82f6"> : </span>0</div><div style="font-size:10px;color:#475569;margin-top:3px">FULLTIME</div></div>
+      <div style="text-align:center;padding:0 10px"><div style="font-size:38px;font-weight:900;letter-spacing:3px"><span style="color:#22c55e">1</span><span style="color:#3b82f6"> : </span>0</div></div>
       <div style="text-align:center;flex:1"><span style="font-size:2.2em">🇭🇹</span><div style="font-size:11px;font-weight:800;margin-top:5px">HAITI</div></div>
     </div>
     <div style="padding:0 14px 8px;font-size:11px;color:#94a3b8;text-align:center">⚽ Shankland 62' (SCO)</div>
-    <div style="padding:0 14px 12px;display:flex;gap:5px;flex-wrap:wrap"><span class="bn">Ingen forhåndstips</span><span class="bg">✅ Skottland vinner</span></div>
+    <div style="padding:0 14px 12px;display:flex;gap:5px;flex-wrap:wrap"><span class="bg">✅ Skottland vinner</span></div>
   </div>
 </div><!-- /yesterday -->
 
-<!-- ======== GRUPPER ======== -->
+<!-- GRUPPER -->
 <div id="pane-groups" class="pane">
-  <div style="color:#475569;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">📊 Tabeller — VM 2026 · Dag 2</div>
+  <div style="color:#475569;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">📊 Tabeller — VM 2026 · Dag 3 (15. juni)</div>
   <div class="mc" style="margin-bottom:8px"><div class="mc-head"><span style="color:#22c55e;font-size:12px;font-weight:700">GRUPPE B 🔥</span><span style="color:#475569;font-size:10px">1 kamp spilt</span></div><div style="padding:10px 14px"><table class="stand-t"><tr><th class="tdn">Team</th><th>S</th><th>V</th><th>U</th><th>T</th><th>Mål</th><th>P</th></tr><tr class="qrow"><td class="tdn">🇶🇦 Qatar</td><td>1</td><td>0</td><td>1</td><td>0</td><td>1:1</td><td class="pts-col">1</td></tr><tr class="qrow"><td class="tdn">🇨🇭 Sveits</td><td>1</td><td>0</td><td>1</td><td>0</td><td>1:1</td><td class="pts-col">1</td></tr><tr><td class="tdn">🇨🇦 Canada</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0:0</td><td class="pts-col">0</td></tr><tr><td class="tdn">🇧🇦 Bosnia</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0:0</td><td class="pts-col">0</td></tr></table></div></div>
   <div class="mc" style="margin-bottom:8px;border-color:#4c1d95"><div class="mc-head"><span style="color:#c4b5fd;font-size:12px;font-weight:700">GRUPPE C 🔥</span><span style="color:#475569;font-size:10px">2 kamper spilt</span></div><div style="padding:10px 14px"><table class="stand-t"><tr><th class="tdn">Team</th><th>S</th><th>V</th><th>U</th><th>T</th><th>Mål</th><th>P</th></tr><tr class="qrow"><td class="tdn">🏴󠁧󠁢󠁳󠁣󠁴󠁿 Skottland</td><td>1</td><td>1</td><td>0</td><td>0</td><td>1:0</td><td class="pts-col">3</td></tr><tr class="qrow"><td class="tdn">🇧🇷 Brasil</td><td>1</td><td>0</td><td>1</td><td>0</td><td>1:1</td><td class="pts-col">1</td></tr><tr class="qrow"><td class="tdn">🇲🇦 Marokko</td><td>1</td><td>0</td><td>1</td><td>0</td><td>1:1</td><td class="pts-col">1</td></tr><tr><td class="tdn">🇭🇹 Haiti</td><td>1</td><td>0</td><td>0</td><td>1</td><td>0:1</td><td class="pts-col">0</td></tr></table></div></div>
   <div class="mc" style="margin-bottom:8px"><div class="mc-head"><span style="color:#eab308;font-size:12px;font-weight:700">GRUPPE D</span><span style="color:#475569;font-size:10px">2 kamper spilt</span></div><div style="padding:10px 14px"><table class="stand-t"><tr><th class="tdn">Team</th><th>S</th><th>V</th><th>U</th><th>T</th><th>Mål</th><th>P</th></tr><tr class="qrow"><td class="tdn">🇺🇸 USA</td><td>1</td><td>1</td><td>0</td><td>0</td><td>4:1</td><td class="pts-col">3</td></tr><tr class="qrow"><td class="tdn">🇦🇺 Australia</td><td>1</td><td>1</td><td>0</td><td>0</td><td>2:0</td><td class="pts-col">3</td></tr><tr><td class="tdn">🇵🇾 Paraguay</td><td>1</td><td>0</td><td>0</td><td>1</td><td>1:4</td><td class="pts-col">0</td></tr><tr><td class="tdn">🇹🇷 Tyrkia</td><td>1</td><td>0</td><td>0</td><td>1</td><td>0:2</td><td class="pts-col">0</td></tr></table></div></div>
-  <div class="mc" style="margin-bottom:8px"><div class="mc-head"><span style="color:#eab308;font-size:12px;font-weight:700">GRUPPE E</span><span style="color:#475569;font-size:10px">1 kamp spilt</span></div><div style="padding:10px 14px"><table class="stand-t"><tr><th class="tdn">Team</th><th>S</th><th>V</th><th>U</th><th>T</th><th>Mål</th><th>P</th></tr><tr class="qrow"><td class="tdn">🇩🇪 Tyskland</td><td>1</td><td>1</td><td>0</td><td>0</td><td>7:1</td><td class="pts-col">3</td></tr><tr><td class="tdn">🇨🇮 Elfenb.*</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0:0</td><td class="pts-col">0</td></tr><tr><td class="tdn">🇪🇨 Ecuador*</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0:0</td><td class="pts-col">0</td></tr><tr><td class="tdn">🇨🇼 Curaçao</td><td>1</td><td>0</td><td>0</td><td>1</td><td>1:7</td><td class="pts-col">0</td></tr></table><div style="font-size:10px;color:#475569;margin-top:4px">* spiller i natt 01:00 CET</div></div></div>
-  <div class="mc" style="margin-bottom:8px;border-color:#1e3a6e"><div class="mc-head"><span style="color:#3b82f6;font-size:12px;font-weight:700">GRUPPE F ⚡ I KVELD</span><span style="color:#475569;font-size:10px">0 kamper</span></div><div style="padding:10px 14px"><table class="stand-t"><tr><th class="tdn">Team</th><th>S</th><th>V</th><th>U</th><th>T</th><th>Mål</th><th>P</th></tr><tr><td class="tdn">🇳🇱 Nederland*</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0:0</td><td class="pts-col">0</td></tr><tr><td class="tdn">🇯🇵 Japan*</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0:0</td><td class="pts-col">0</td></tr><tr><td class="tdn">🇸🇪 Sverige**</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0:0</td><td class="pts-col">0</td></tr><tr><td class="tdn">🇹🇳 Tunisia**</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0:0</td><td class="pts-col">0</td></tr></table><div style="font-size:10px;color:#475569;margin-top:4px">* 22:00 CET · ** 04:00 CET</div></div></div>
+  <div class="mc" style="margin-bottom:8px"><div class="mc-head"><span style="color:#eab308;font-size:12px;font-weight:700">GRUPPE E</span><span style="color:#475569;font-size:10px">2 kamper spilt</span></div><div style="padding:10px 14px"><table class="stand-t"><tr><th class="tdn">Team</th><th>S</th><th>V</th><th>U</th><th>T</th><th>Mål</th><th>P</th></tr><tr class="qrow"><td class="tdn">🇩🇪 Tyskland</td><td>1</td><td>1</td><td>0</td><td>0</td><td>7:1</td><td class="pts-col">3</td></tr><tr class="qrow"><td class="tdn">🇨🇮 Elfenbenskysten</td><td>1</td><td>1</td><td>0</td><td>0</td><td>1:0</td><td class="pts-col">3</td></tr><tr><td class="tdn">🇪🇨 Ecuador</td><td>1</td><td>0</td><td>0</td><td>1</td><td>0:1</td><td class="pts-col">0</td></tr><tr><td class="tdn">🇨🇼 Curaçao</td><td>1</td><td>0</td><td>0</td><td>1</td><td>1:7</td><td class="pts-col">0</td></tr></table></div></div>
+  <div class="mc" style="margin-bottom:8px;border-color:#1e3a6e"><div class="mc-head"><span style="color:#3b82f6;font-size:12px;font-weight:700">GRUPPE F 🔥</span><span style="color:#475569;font-size:10px">2 kamper spilt</span></div><div style="padding:10px 14px"><table class="stand-t"><tr><th class="tdn">Team</th><th>S</th><th>V</th><th>U</th><th>T</th><th>Mål</th><th>P</th></tr><tr class="qrow"><td class="tdn">🇸🇪 Sverige</td><td>1</td><td>1</td><td>0</td><td>0</td><td>5:1</td><td class="pts-col">3</td></tr><tr class="qrow"><td class="tdn">🇳🇱 Nederland</td><td>1</td><td>0</td><td>1</td><td>0</td><td>2:2</td><td class="pts-col">1</td></tr><tr class="qrow"><td class="tdn">🇯🇵 Japan</td><td>1</td><td>0</td><td>1</td><td>0</td><td>2:2</td><td class="pts-col">1</td></tr><tr><td class="tdn">🇹🇳 Tunisia</td><td>1</td><td>0</td><td>0</td><td>1</td><td>1:5</td><td class="pts-col">0</td></tr></table></div></div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
     <div style="background:#0e0e1c;border:1px solid #1c1c2e;border-radius:10px;padding:10px"><div style="font-size:11px;font-weight:700;color:#eab308;margin-bottom:6px">GRUPPE A</div><div style="font-size:12px;color:#94a3b8;line-height:1.9">🇲🇽 Mexico<br>🇿🇦 Sør-Afrika<br>🇰🇷 Sør-Korea<br>🇨🇿 Tsjekkia</div></div>
-    <div style="background:#0e0e1c;border:1px solid #1c1c2e;border-radius:10px;padding:10px"><div style="font-size:11px;font-weight:700;color:#eab308;margin-bottom:6px">GRUPPE G</div><div style="font-size:12px;color:#94a3b8;line-height:1.9">🇧🇪 Belgia<br>🇪🇬 Egypt<br>🇮🇷 Iran<br>🇳🇿 New Zealand</div></div>
-    <div style="background:#0e0e1c;border:1px solid #1c1c2e;border-radius:10px;padding:10px"><div style="font-size:11px;font-weight:700;color:#eab308;margin-bottom:6px">GRUPPE H</div><div style="font-size:12px;color:#94a3b8;line-height:1.9">🇪🇸 Spania<br>🇨🇻 Kapp Verde<br>🇸🇦 Saudi-Arabia<br>🇺🇾 Uruguay</div></div>
+    <div style="background:#0e0e1c;border:1px solid #1c1c2e;border-radius:10px;padding:10px"><div style="font-size:11px;font-weight:700;color:#eab308;margin-bottom:6px">GRUPPE G ⚡ I KVELD</div><div style="font-size:12px;color:#94a3b8;line-height:1.9">🇧🇪 Belgia<br>🇪🇬 Egypt<br>🇮🇷 Iran<br>🇳🇿 New Zealand</div></div>
+    <div style="background:#0e0e1c;border:1px solid #1c1c2e;border-radius:10px;padding:10px"><div style="font-size:11px;font-weight:700;color:#eab308;margin-bottom:6px">GRUPPE H ⚡ I KVELD</div><div style="font-size:12px;color:#94a3b8;line-height:1.9">🇪🇸 Spania<br>🇨🇻 Kapp Verde<br>🇸🇦 Saudi-Arabia<br>🇺🇾 Uruguay</div></div>
     <div style="background:#0e0e1c;border:1px solid #1c1c2e;border-radius:10px;padding:10px"><div style="font-size:11px;font-weight:700;color:#eab308;margin-bottom:6px">GRUPPE I</div><div style="font-size:12px;color:#94a3b8;line-height:1.9">🇫🇷 Frankrike<br>🇸🇳 Senegal<br>🇮🇶 Irak<br>🇳🇴 <b style="color:#fff">Norge</b></div></div>
     <div style="background:#0e0e1c;border:1px solid #1c1c2e;border-radius:10px;padding:10px"><div style="font-size:11px;font-weight:700;color:#eab308;margin-bottom:6px">GRUPPE J</div><div style="font-size:12px;color:#94a3b8;line-height:1.9">🇦🇷 Argentina 🏆<br>🇩🇿 Algerie<br>🇦🇹 Østerrike<br>🇯🇴 Jordan</div></div>
     <div style="background:#0e0e1c;border:1px solid #1c1c2e;border-radius:10px;padding:10px"><div style="font-size:11px;font-weight:700;color:#eab308;margin-bottom:6px">GRUPPE K</div><div style="font-size:12px;color:#94a3b8;line-height:1.9">🇵🇹 Portugal<br>🇨🇩 DR Kongo<br>🇺🇿 Usbekistan<br>🇨🇴 Colombia</div></div>
@@ -489,7 +491,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   </div></div>
 </div><!-- /groups -->
 
-<!-- ======== MINE TIPS ======== -->
+<!-- MINE TIPS -->
 <div id="pane-mytips" class="pane">
   <div class="sbox3">
     <div class="st-box"><div class="st-val" id="stat-won" style="color:#22c55e">0</div><div class="st-label">VINNER</div></div>
@@ -503,11 +505,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <div class="card"><div class="cp">
     <div style="font-size:12px;font-weight:700;color:#94a3b8;margin-bottom:8px">➕ REGISTRER TIP</div>
     <span class="inp-label">Kamp</span>
-    <input class="inp" id="b-match" type="text" placeholder="f.eks. Nederland vs Japan">
+    <input class="inp" id="b-match" type="text" placeholder="f.eks. Spania vs Kapp Verde">
     <span class="inp-label">Market / Tips</span>
-    <input class="inp" id="b-market" type="text" placeholder="f.eks. Nederland vinner">
+    <input class="inp" id="b-market" type="text" placeholder="f.eks. Spania vinner">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <div><span class="inp-label">Odds</span><input class="inp" id="b-odds" type="number" step="0.01" min="1.01" placeholder="1.70"></div>
+      <div><span class="inp-label">Odds</span><input class="inp" id="b-odds" type="number" step="0.01" min="1.01" placeholder="1.40"></div>
       <div><span class="inp-label">Innsats (kr)</span><input class="inp" id="b-stake" type="number" step="1" min="1" placeholder="100"></div>
     </div>
     <button class="btn-add" onclick="addBet()">➕ Legg til tip</button>
@@ -518,10 +520,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <div style="font-size:11px;color:#78350f;line-height:1.6">AI-analyse kun for underholdning. Ingen garanti. 18+. Sjekk alltid odds på ComeOn.com.</div>
   </div>
 </div>
-
 </div><!-- /wrap -->
 <div style="text-align:center;padding:14px;border-top:1px solid #1c1c2e;font-size:11px;color:#374151">VM 2026 AI Betting · Kun underholdning · 18+ · Spill ansvarlig</div>
-
 <script>
 function switchTab(n){var t=['today','yesterday','groups','mytips'];for(var i=0;i<t.length;i++){var p=document.getElementById('pane-'+t[i]);var b=document.getElementById('t-'+t[i]);if(t[i]===n){p.style.display='block';b.className='tab active';}else{p.style.display='none';b.className='tab inactive';}}}
 function toggleExpand(id){var s=document.getElementById('exp-'+id);var b=document.getElementById('btn-'+id);if(s.style.display==='block'){s.style.display='none';b.innerHTML=b.innerHTML.replace('▲','▼');}else{s.style.display='block';b.innerHTML=b.innerHTML.replace('▼','▲');}}
